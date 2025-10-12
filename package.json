@@ -1,0 +1,65 @@
+{
+  "name": "skyteklokke",
+  "version": "0.1.0",
+  "description": "A precision timer app for competitive shooters and range officers",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios",
+    "test": "jest",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "expo": "~54.0.0",
+    "expo-speech": "~12.0.0",
+    "expo-localization": "~16.0.0",
+    "expo-constants": "~17.0.0",
+    "expo-status-bar": "~2.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.1",
+    "react-navigation": "^6.0.0",
+    "@react-navigation/native": "^6.0.0",
+    "@react-navigation/stack": "^6.0.0",
+    "i18next": "^23.7.0",
+    "react-i18next": "^13.5.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@types/react": "~18.3.0",
+    "@types/react-native": "~0.76.0",
+    "typescript": "^5.3.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
+    "@typescript-eslint/parser": "^6.18.0",
+    "jest": "^29.7.0",
+    "@testing-library/react-native": "^12.4.0"
+  },
+  "keywords": [
+    "shooting",
+    "timer", 
+    "competition",
+    "react-native",
+    "expo",
+    "norway",
+    "skytesport"
+  ],
+  "author": {
+    "name": "Sigurd Nes",
+    "email": "sigurdne@gmail.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sigurdne/skyteklokke.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sigurdne/skyteklokke/issues"
+  },
+  "homepage": "https://github.com/sigurdne/skyteklokke#readme",
+  "private": false
+}
