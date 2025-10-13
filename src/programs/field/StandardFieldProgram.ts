@@ -68,19 +68,18 @@ export class StandardFieldProgram extends BaseProgram {
       });
     }
 
-    // Phase 3: Countdown reaches 0, go to GREEN and start counting up
+    // Phase 3: Show shootingDuration and start, go to GREEN
     steps.push({
       id: 'fire_start',
       delay: 1000,
       state: states.FIRE,
-      countdown: 0,
+      countdown: shootingDuration,
       command: 'go',
       audioEnabled,
     });
 
-    // Phase 4: Count up from 1 to (shootingDuration - warningTime) in GREEN
-    const greenTime = shootingDuration - warningTime;
-    for (let i = 1; i <= greenTime; i++) {
+    // Phase 4: Count DOWN from (shootingDuration - 1) to (warningTime + 1) in GREEN
+    for (let i = shootingDuration - 1; i > warningTime; i--) {
       steps.push({
         id: `fire_${i}`,
         delay: 1000,
@@ -90,8 +89,8 @@ export class StandardFieldProgram extends BaseProgram {
       });
     }
 
-    // Phase 5: Last 2 seconds in YELLOW (warning)
-    for (let i = greenTime + 1; i < shootingDuration; i++) {
+    // Phase 5: Last seconds in YELLOW (warning) - count down to 1
+    for (let i = warningTime; i >= 1; i--) {
       steps.push({
         id: `fire_warning_${i}`,
         delay: 1000,
@@ -101,12 +100,12 @@ export class StandardFieldProgram extends BaseProgram {
       });
     }
 
-    // Phase 6: Time's up - RED background
+    // Phase 6: Time's up at 0 - RED background
     steps.push({
       id: 'finished',
       delay: 1000,
       state: states.FINISHED,
-      countdown: shootingDuration,
+      countdown: 0,
       audioEnabled: false,
     });
 
