@@ -168,36 +168,47 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const backgroundColor = uiConfig?.backgroundColor || colors.background;
   const textColor = uiConfig?.textColor || colors.text;
 
-  // For duel program, show fullscreen light display
+  // For field and duel programs, show fullscreen display
+  const isFieldProgram = programId === 'standard-field';
   const isDuelProgram = programId === 'standard-duel';
-  const showLightDisplay = isDuelProgram && isRunning;
+  const showFullscreenDisplay = (isFieldProgram || isDuelProgram) && isRunning;
 
-  const getLightColor = (): string => {
-    if (currentState.includes('red')) return colors.redLight;
-    if (currentState.includes('green')) return colors.greenLight;
+  const getDisplayColor = (): string => {
+    // Field shooting colors based on state
+    if (isFieldProgram) {
+      if (currentState === 'prepare') return '#FFFFFF'; // White
+      if (currentState === 'prepare_warning') return '#FFC107'; // Yellow
+      if (currentState === 'fire') return '#4CAF50'; // Green
+      if (currentState === 'fire_warning') return '#FFC107'; // Yellow
+      if (currentState === 'finished') return '#F44336'; // Red
+    }
+    
+    // Duel shooting colors
+    if (isDuelProgram) {
+      if (currentState.includes('red')) return colors.redLight;
+      if (currentState.includes('green')) return colors.greenLight;
+    }
+    
     return backgroundColor;
   };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.primary }]}>
       <View style={styles.container}>
-        {!showLightDisplay && (
+        {!showFullscreenDisplay && (
           <Header
             title={program?.name || 'Timer'}
             onBackPress={handleBack}
           />
         )}
         
-        {showLightDisplay ? (
-          <View style={[styles.lightDisplay, { backgroundColor: getLightColor() }]}>
-            <Text style={[styles.lightTimer, { color: '#FFFFFF' }]}>
-              {Math.floor(elapsedTime / 1000)}s
+        {showFullscreenDisplay ? (
+          <View style={[styles.fullscreenDisplay, { backgroundColor: getDisplayColor() }]}>
+            <Text style={[styles.fullscreenTimer, { 
+              color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' 
+            }]}>
+              {countdown !== null ? countdown : Math.floor(elapsedTime / 1000)}
             </Text>
-            {currentState && (
-              <Text style={[styles.lightState, { color: '#FFFFFF' }]}>
-                {t(`states.${currentState}`)}
-              </Text>
-            )}
           </View>
         ) : (
           <TimerDisplay
@@ -288,5 +299,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: spacing.xl,
     textTransform: 'uppercase',
+  },
+  fullscreenDisplay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullscreenTimer: {
+    fontSize: 240,
+    fontWeight: '900',
+    fontFamily: 'monospace',
   },
 });

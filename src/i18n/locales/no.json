@@ -18,13 +18,16 @@
     "prepare": "Last",
     "fire": "Ild",
     "cease_fire": "Stans",
-    "start": "Start"
+    "start": "Start",
+    "go": "Ild"
   },
   "states": {
     "idle": "Klar til start",
     "ready_check": "Skytterne klargjøres",
     "prepare": "Forbered deg",
+    "prepare_warning": "Forbered deg",
     "fire": "Aktiv skyting",
+    "fire_warning": "Snart slutt",
     "cease_fire": "Skyting avsluttet",
     "finished": "Ferdig",
     "countdown": "Nedtelling",

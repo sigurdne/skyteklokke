@@ -18,13 +18,16 @@
     "prepare": "Load",
     "fire": "Fire",
     "cease_fire": "Stop",
-    "start": "Start"
+    "start": "Start",
+    "go": "Fire"
   },
   "states": {
     "idle": "Ready to start",
     "ready_check": "Preparing shooters",
     "prepare": "Prepare",
+    "prepare_warning": "Prepare",
     "fire": "Active shooting",
+    "fire_warning": "Almost done",
     "cease_fire": "Shooting completed",
     "finished": "Finished",
     "countdown": "Countdown",
