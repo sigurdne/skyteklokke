@@ -128,11 +128,13 @@ export class TimerEngine {
         type: 'complete',
         timestamp: Date.now(),
       });
-      this.stop();
+      // Don't stop automatically - let the screen stay on final state (red 0)
       return;
     }
 
     const step = this.sequence[this.currentStepIndex];
+
+    console.log(`⏱️ Step ${this.currentStepIndex}: ${step.id} countdown=${step.countdown} delay=${step.delay}ms`);
 
     // Emit state change event
     this.emit({
@@ -166,14 +168,11 @@ export class TimerEngine {
     this.currentStepIndex++;
 
     // Schedule next step
-    if (step.delay > 0) {
-      this.timeoutId = setTimeout(() => {
-        this.executeStep();
-      }, step.delay);
-    } else {
-      // Execute immediately if no delay
+    // Use at least 1000ms delay to ensure UI updates and proper timing
+    const nextDelay = step.delay > 0 ? step.delay : 1000;
+    this.timeoutId = setTimeout(() => {
       this.executeStep();
-    }
+    }, nextDelay);
   }
 
   getCurrentState(): string | null {

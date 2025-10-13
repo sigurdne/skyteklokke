@@ -122,14 +122,20 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     if (event.type === 'command' && event.command) {
       const translatedCommand = t(`commands.${event.command}`);
       setCurrentCommand(translatedCommand);
-      setCountdown(null); // Clear countdown when command is issued
-      AudioService.speak(translatedCommand);
+      // Don't clear countdown - we want to keep showing it during shooting phase
+      // Only speak in non-competition mode
+      const program = ProgramManager.getProgram(programId);
+      const settings = program?.getSettings();
+      const isCompetitionMode = settings?.competitionMode || false;
+      if (!isCompetitionMode) {
+        AudioService.speak(translatedCommand);
+      }
     }
     
     if (event.type === 'complete') {
-      setIsRunning(false);
+      // Don't stop - keep showing the final state (red screen with 0)
+      // User can tap screen to return
       setIsPaused(false);
-      setCountdown(null);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
@@ -202,6 +208,18 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     }
   };
 
+  const handleStop = () => {
+    if (timerEngineRef.current) {
+      timerEngineRef.current.stop();
+      setIsRunning(false);
+      setIsPaused(false);
+      setCountdown(null);
+      setCurrentState('idle');
+      setCurrentCommand('');
+      setElapsedTime(0);
+    }
+  };
+
   const handleBack = () => {
     if (isRunning) {
       handleReset();
@@ -249,13 +267,17 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         )}
         
         {showFullscreenDisplay ? (
-          <View style={[styles.fullscreenDisplay, { backgroundColor: getDisplayColor() }]}>
+          <TouchableOpacity 
+            style={[styles.fullscreenDisplay, { backgroundColor: getDisplayColor() }]}
+            onPress={handleStop}
+            activeOpacity={0.9}
+          >
             <Text style={[styles.fullscreenTimer, { 
               color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' 
             }]}>
-              {countdown !== null ? countdown : Math.floor(elapsedTime / 1000)}
+              {countdown !== null ? countdown : 0}
             </Text>
-          </View>
+          </TouchableOpacity>
         ) : (
           <TimerDisplay
             time={elapsedTime}
@@ -279,21 +301,6 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
           {!isRunning && (
             <TouchableOpacity style={styles.button} onPress={handleStart}>
               <Text style={styles.buttonText}>{t('controls.start')}</Text>
-            </TouchableOpacity>
-          )}
-          {isRunning && !isPaused && (
-            <TouchableOpacity style={[styles.button, styles.pauseButton]} onPress={handlePause}>
-              <Text style={styles.buttonText}>{t('controls.pause')}</Text>
-            </TouchableOpacity>
-          )}
-          {isRunning && isPaused && (
-            <TouchableOpacity style={[styles.button, styles.resumeButton]} onPress={handleResume}>
-              <Text style={styles.buttonText}>{t('controls.resume')}</Text>
-            </TouchableOpacity>
-          )}
-          {isRunning && (
-            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
-              <Text style={styles.buttonText}>{t('controls.reset')}</Text>
             </TouchableOpacity>
           )}
         </View>
