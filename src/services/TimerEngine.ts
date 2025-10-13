@@ -134,27 +134,8 @@ export class TimerEngine {
 
     const step = this.sequence[this.currentStepIndex];
 
-    console.log(`⏱️ Step ${this.currentStepIndex}: ${step.id} countdown=${step.countdown} delay=${step.delay}ms`);
-
-    // Emit state change event
-    this.emit({
-      type: 'state_change',
-      state: step.state,
-      command: step.command,
-      timestamp: Date.now(),
-    });
-
-    // Emit countdown event if present
-    if (step.countdown !== undefined) {
-      this.emit({
-        type: 'countdown',
-        countdown: step.countdown,
-        state: step.state,
-        timestamp: Date.now(),
-      });
-    }
-
-    // Emit command event if present
+    // Emit command event FIRST if present (350ms before screen change)
+    // This ensures audio plays before visual change
     if (step.command && step.audioEnabled) {
       this.emit({
         type: 'command',
@@ -162,6 +143,45 @@ export class TimerEngine {
         state: step.state,
         timestamp: Date.now(),
       });
+      
+      // Wait 350ms before showing screen change
+      setTimeout(() => {
+        // Emit state change event
+        this.emit({
+          type: 'state_change',
+          state: step.state,
+          command: step.command,
+          timestamp: Date.now(),
+        });
+
+        // Emit countdown event if present
+        if (step.countdown !== undefined) {
+          this.emit({
+            type: 'countdown',
+            countdown: step.countdown,
+            state: step.state,
+            timestamp: Date.now(),
+          });
+        }
+      }, 350);
+    } else {
+      // No audio command, emit state change immediately
+      this.emit({
+        type: 'state_change',
+        state: step.state,
+        command: step.command,
+        timestamp: Date.now(),
+      });
+
+      // Emit countdown event if present
+      if (step.countdown !== undefined) {
+        this.emit({
+          type: 'countdown',
+          countdown: step.countdown,
+          state: step.state,
+          timestamp: Date.now(),
+        });
+      }
     }
 
     // Move to next step

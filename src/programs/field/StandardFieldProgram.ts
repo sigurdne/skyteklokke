@@ -20,6 +20,7 @@ export class StandardFieldProgram extends BaseProgram {
         prepareWarning: 5,       // yellow warning at 5 seconds remaining
         audioEnabled: true,
         competitionMode: true,   // no audio in competition mode (default ON)
+        trainingMode: false,     // training mode with 3s delay and system sounds
       },
     });
   }
@@ -41,43 +42,56 @@ export class StandardFieldProgram extends BaseProgram {
 
   getTimingSequence(): TimingStep[] {
     const states = this.getStates();
-    const { prepareTime, prepareWarning, shootingDuration, warningTime, competitionMode } = this.settings;
-    const audioEnabled = !competitionMode;
-
-    console.log('🎯 Generating sequence with settings:', { prepareTime, prepareWarning, shootingDuration, warningTime });
+    const { prepareTime, prepareWarning, shootingDuration, warningTime, competitionMode, trainingMode } = this.settings;
+    const audioEnabled = trainingMode; // Audio only in training mode
+    const initialDelay = trainingMode ? 3000 : 0; // 3 second delay in training mode
 
     const steps: TimingStep[] = [];
 
+    // Add initial delay step in training mode (3 seconds of blank screen)
+    if (trainingMode) {
+      steps.push({
+        id: 'initial_delay',
+        delay: initialDelay,
+        state: states.PREPARE,
+        audioEnabled: false,
+      });
+    }
+
         // Phase 1: Prepare countdown (white)
+    // First step (10) has beep to signal start
     for (let i = prepareTime; i > prepareWarning; i--) {
       steps.push({
         id: `prepare_${i}`,
         delay: i === prepareTime ? 0 : 1000, // First step shown immediately, then 1s between steps
         state: states.PREPARE,
         countdown: i,
-        audioEnabled: false,
+        command: i === prepareTime ? 'beep' : undefined,
+        audioEnabled: i === prepareTime ? audioEnabled : false,
       });
     }
 
     // Phase 2: Countdown from 5 to 1 (YELLOW background)
+    // First step (5) has beep for phase transition
     for (let i = prepareWarning; i >= 1; i--) {
       steps.push({
         id: `prepare_warning_${i}`,
         delay: 1000,
         state: states.PREPARE_WARNING,
         countdown: i,
-        audioEnabled: false,
+        command: i === prepareWarning ? 'beep' : undefined,
+        audioEnabled: i === prepareWarning ? audioEnabled : false,
       });
     }
 
-    // Phase 3: Shooting starts - show duration and "Ild!" command
+    // Phase 3: Shooting starts - show duration with beep sound (not "Ild!" voice)
     // Start at shootingDuration, will count down each second
     steps.push({
       id: 'fire_start',
       delay: 1000,
       state: states.FIRE,
       countdown: shootingDuration,
-      command: 'go',
+      command: 'beep',
       audioEnabled,
     });
 
@@ -98,17 +112,19 @@ export class StandardFieldProgram extends BaseProgram {
 
     // Phase 5: Warning phase in YELLOW - count down to 1
     // warningTime is typically 2, so: 2, 1
+    // Continuous beep starts at first warning step only
     for (let i = warningTime; i >= 1; i--) {
       steps.push({
         id: `fire_warning_${i}`,
         delay: 1000,
         state: states.FIRE_WARNING,
         countdown: i,
-        audioEnabled: false,
+        command: i === warningTime ? 'continuous_beep' : undefined,
+        audioEnabled: i === warningTime ? audioEnabled : false,
       });
     }
 
-    // Phase 6: Time's up at 0 - RED background
+    // Phase 6: Time's up at 0 - RED background (no sound)
     steps.push({
       id: 'finished',
       delay: 1000,
@@ -116,8 +132,6 @@ export class StandardFieldProgram extends BaseProgram {
       countdown: 0,
       audioEnabled: false,
     });
-
-    console.log('🎯 Generated sequence:', steps.map(s => `${s.id}:${s.countdown}`).join(' → '));
 
     return steps;
   }

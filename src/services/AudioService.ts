@@ -9,11 +9,14 @@ export class AudioService {
   private currentLanguage: Language;
   private isEnabled: boolean;
   private volume: number;
+  private isWarmedUp: boolean = false;
 
   private constructor() {
     this.currentLanguage = 'no';
     this.isEnabled = true;
     this.volume = 1.0;
+    // Warm up TTS system immediately to avoid delay on first beep
+    this.warmUpTTS();
   }
 
   static getInstance(): AudioService {
@@ -21,6 +24,30 @@ export class AudioService {
       AudioService.instance = new AudioService();
     }
     return AudioService.instance;
+  }
+
+  /**
+   * Warm up the TTS system by playing a silent beep
+   * This prevents the delay on the first real beep after app start
+   */
+  private async warmUpTTS(): Promise<void> {
+    if (this.isWarmedUp) return;
+    
+    try {
+      console.log('🔥 Warming up TTS system...');
+      // Play a very short, nearly inaudible sound to initialize the TTS engine
+      // Using space character and very fast rate to make it imperceptible
+      await Speech.speak(' ', {
+        language: 'en-US',
+        pitch: 0.5,
+        rate: 4.0, // Maximum speed
+        volume: 0.001, // Nearly zero volume
+      });
+      this.isWarmedUp = true;
+      console.log('✅ TTS system warmed up');
+    } catch (error) {
+      console.error('❌ Error warming up TTS:', error);
+    }
   }
 
   setLanguage(language: Language): void {
@@ -92,6 +119,34 @@ export class AudioService {
     } catch (error) {
       console.error('Error getting available voices:', error);
       return [];
+    }
+  }
+
+  /**
+   * Play system beep sound for training mode
+   * Uses a synthesized beep sound with TTS
+   */
+  playBeep(continuous: boolean = false): void {
+    console.log('🔊 playBeep called, continuous:', continuous);
+    
+    try {
+      // Use a very short, high-pitched vowel sound that sounds like a beep
+      // Continuous beep is longer with 11 bips and slower rate to cover full 2 seconds
+      const beepSound = continuous ? 'bip bip bip bip bip bip bip bip bip bip bip' : 'bip';
+      
+      console.log('🔊 Playing beep:', beepSound);
+      
+      // Speech.speak doesn't return a promise, just call it
+      Speech.speak(beepSound, {
+        language: 'en-US',
+        pitch: 2.0,  // Very high pitch
+        rate: continuous ? 1.3 : 3.0,  // Even slower for continuous to make it last 2 seconds
+        volume: this.volume,
+      });
+      
+      console.log('🔊 Beep started');
+    } catch (error) {
+      console.error('❌ Error in playBeep:', error);
     }
   }
 }

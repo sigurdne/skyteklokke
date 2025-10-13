@@ -21,6 +21,8 @@
     "@react-navigation/native-stack": "^7.3.28",
     "@react-navigation/stack": "^7.0.0",
     "expo": "^54.0.13",
+    "expo-audio": "^1.0.13",
+    "expo-av": "^16.0.7",
     "expo-constants": "~18.0.9",
     "expo-localization": "~17.0.7",
     "expo-speech": "~14.0.7",

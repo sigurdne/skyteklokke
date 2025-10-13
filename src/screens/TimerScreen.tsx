@@ -39,6 +39,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [shootingDuration, setShootingDuration] = useState<number>(10);
+  const [trainingMode, setTrainingMode] = useState<boolean>(false);
   
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -51,8 +52,12 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         if (savedDuration !== null) {
           setShootingDuration(parseInt(savedDuration, 10));
         }
+        const savedTrainingMode = await AsyncStorage.getItem('trainingMode');
+        if (savedTrainingMode !== null) {
+          setTrainingMode(savedTrainingMode === 'true');
+        }
       } catch (error) {
-        console.error('Failed to load shooting duration:', error);
+        console.error('Failed to load settings:', error);
       }
     };
     loadSettings();
@@ -68,15 +73,29 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     }
   };
 
+  // Save training mode when it changes
+  const updateTrainingMode = async (enabled: boolean) => {
+    setTrainingMode(enabled);
+    try {
+      await AsyncStorage.setItem('trainingMode', enabled.toString());
+    } catch (error) {
+      console.error('Failed to save training mode:', error);
+    }
+  };
+
   const initializeTimer = () => {
     const program = ProgramManager.getProgram(programId);
     if (!program) {
       return null;
     }
 
-    // Update program settings with custom shooting duration for field program
+    // Update program settings with custom shooting duration and training mode for field program
     if (programId === 'standard-field') {
-      program.updateSettings({ shootingDuration });
+      program.updateSettings({ 
+        shootingDuration,
+        trainingMode,
+        competitionMode: !trainingMode  // Competition mode is opposite of training mode
+      });
     }
 
     const sequence = program.getTimingSequence();
@@ -120,15 +139,25 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     }
     
     if (event.type === 'command' && event.command) {
-      const translatedCommand = t(`commands.${event.command}`);
-      setCurrentCommand(translatedCommand);
-      // Don't clear countdown - we want to keep showing it during shooting phase
-      // Only speak in non-competition mode
-      const program = ProgramManager.getProgram(programId);
-      const settings = program?.getSettings();
-      const isCompetitionMode = settings?.competitionMode || false;
-      if (!isCompetitionMode) {
-        AudioService.speak(translatedCommand);
+      // Handle system beeps for training mode
+      if (event.command === 'beep') {
+        AudioService.playBeep(false);
+        setCurrentCommand('');
+      } else if (event.command === 'continuous_beep') {
+        AudioService.playBeep(true);
+        setCurrentCommand('');
+      } else {
+        // Handle voice commands (like "go")
+        const translatedCommand = t(`commands.${event.command}`);
+        setCurrentCommand(translatedCommand);
+        // Don't clear countdown - we want to keep showing it during shooting phase
+        // Only speak in non-competition mode
+        const program = ProgramManager.getProgram(programId);
+        const settings = program?.getSettings();
+        const isTrainingMode = settings?.trainingMode || false;
+        if (isTrainingMode) {
+          AudioService.speak(translatedCommand);
+        }
       }
     }
     
@@ -314,9 +343,27 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Skytingens varighet</Text>
+              <Text style={styles.modalTitle}>Innstillinger</Text>
+              
+              {/* Training Mode Toggle */}
+              <View style={styles.settingRow}>
+                <Text style={styles.settingLabel}>Treningsmodus</Text>
+                <TouchableOpacity
+                  style={[styles.toggle, trainingMode && styles.toggleActive]}
+                  onPress={() => updateTrainingMode(!trainingMode)}
+                >
+                  <View style={[styles.toggleThumb, trainingMode && styles.toggleThumbActive]} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.settingDescription}>
+                {trainingMode 
+                  ? '3 sek delay, systemlyder ved skifte' 
+                  : 'Ingen delay, ingen lyd (konkurranse)'}
+              </Text>
+
+              {/* Duration Picker */}
               <Text style={styles.modalSubtitle}>
-                (etter 10 sekunders forberedelse)
+                Skytingens varighet (etter forberedelse)
               </Text>
               
               <View style={styles.pickerContainer}>
@@ -433,7 +480,43 @@ const styles = StyleSheet.create({
   modalTitle: {
     ...typography.h2,
     textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.sm,
+  },
+  settingLabel: {
+    ...typography.h3,
+    color: colors.text,
+  },
+  settingDescription: {
+    ...typography.body,
+    color: colors.secondary,
+    marginBottom: spacing.lg,
+    fontSize: 14,
+  },
+  toggle: {
+    width: 60,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.secondary,
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleActive: {
+    backgroundColor: colors.primary,
+  },
+  toggleThumb: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.background,
+  },
+  toggleThumbActive: {
+    alignSelf: 'flex-end',
   },
   modalSubtitle: {
     ...typography.body,
