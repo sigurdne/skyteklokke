@@ -6,6 +6,7 @@ interface TimerDisplayProps {
   time: number; // milliseconds
   state: string;
   command?: string;
+  countdown?: number | null;
   backgroundColor?: string;
   textColor?: string;
 }
@@ -14,6 +15,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
   time,
   state,
   command,
+  countdown,
   backgroundColor = colors.background,
   textColor = colors.text,
 }) => {
@@ -39,24 +41,35 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <View style={styles.timerSection}>
-        <Text style={[styles.timer, { color: textColor }]}>
-          {formatTime(time)}
-        </Text>
-      </View>
-      {command && (
-        <View style={styles.commandSection}>
-          <Text style={[styles.command, { color: getStateColor(state) }]}>
-            {command}
+      {countdown !== null && countdown !== undefined ? (
+        // Show large countdown during prepare phase
+        <View style={styles.countdownSection}>
+          <Text style={[styles.countdown, { color: colors.warning }]}>
+            {countdown}
           </Text>
         </View>
+      ) : (
+        <>
+          <View style={styles.timerSection}>
+            <Text style={[styles.timer, { color: textColor }]}>
+              {formatTime(time)}
+            </Text>
+          </View>
+          {command && (
+            <View style={styles.commandSection}>
+              <Text style={[styles.command, { color: getStateColor(state) }]}>
+                {command}
+              </Text>
+            </View>
+          )}
+          <View style={styles.stateSection}>
+            <View style={[styles.stateIndicator, { backgroundColor: getStateColor(state) }]} />
+            <Text style={[styles.state, { color: textColor }]}>
+              {state}
+            </Text>
+          </View>
+        </>
       )}
-      <View style={styles.stateSection}>
-        <View style={[styles.stateIndicator, { backgroundColor: getStateColor(state) }]} />
-        <Text style={[styles.state, { color: textColor }]}>
-          {state}
-        </Text>
-      </View>
     </View>
   );
 };
@@ -67,6 +80,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.xl,
+  },
+  countdownSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  countdown: {
+    fontSize: 200,
+    fontWeight: '900',
+    fontFamily: 'monospace',
+    textAlign: 'center',
   },
   timerSection: {
     marginBottom: spacing.xl,

@@ -17,8 +17,9 @@ export class StandardFieldProgram extends BaseProgram {
         shootingDuration: 10,    // seconds
         ceaseWarning: 2,         // seconds before cease fire
         readyTime: 10,           // seconds
-        prepareTime: 5,          // seconds
+        prepareTime: 10,         // seconds (changed to 10 for countdown)
         audioEnabled: true,
+        competitionMode: false,  // no audio in competition mode
       },
     });
   }
@@ -40,15 +41,16 @@ export class StandardFieldProgram extends BaseProgram {
 
   getTimingSequence(): TimingStep[] {
     const states = this.getStates();
-    const { readyTime, prepareTime, shootingDuration, ceaseWarning } = this.settings;
+    const { readyTime, prepareTime, shootingDuration, ceaseWarning, competitionMode } = this.settings;
+    const audioEnabled = !competitionMode;
 
-    return [
+    const steps: TimingStep[] = [
       {
         id: 'ready_check',
         delay: 0,
         state: states.READY_CHECK,
         command: 'ready_check',
-        audioEnabled: true,
+        audioEnabled,
       },
       {
         id: 'ready_wait',
@@ -60,19 +62,28 @@ export class StandardFieldProgram extends BaseProgram {
         delay: 0,
         state: states.PREPARE,
         command: 'prepare',
-        audioEnabled: true,
+        audioEnabled,
       },
-      {
-        id: 'prepare_wait',
-        delay: prepareTime * 1000, // 5 seconds
+    ];
+
+    // Add countdown from 10 to 1 before "fire"
+    for (let i = 10; i >= 1; i--) {
+      steps.push({
+        id: `countdown_${i}`,
+        delay: i === 10 ? 0 : 1000, // First countdown immediate, rest after 1 second
         state: states.PREPARE,
-      },
+        countdown: i,
+        audioEnabled: false, // Visual only, no audio countdown
+      });
+    }
+
+    steps.push(
       {
         id: 'fire',
-        delay: 0,
+        delay: 1000, // 1 second after countdown reaches 1
         state: states.FIRE,
         command: 'fire',
-        audioEnabled: true,
+        audioEnabled,
       },
       {
         id: 'shooting',
@@ -84,7 +95,7 @@ export class StandardFieldProgram extends BaseProgram {
         delay: 0,
         state: states.CEASE_FIRE,
         command: 'cease_fire',
-        audioEnabled: true,
+        audioEnabled,
       },
       {
         id: 'cease_wait',
@@ -95,12 +106,14 @@ export class StandardFieldProgram extends BaseProgram {
         id: 'finished',
         delay: 0,
         state: states.FINISHED,
-      },
-    ];
+      }
+    );
+
+    return steps;
   }
 
   validateSettings(settings: ProgramSettings): boolean {
-    const { shootingDuration, ceaseWarning, readyTime, prepareTime } = settings;
+    const { shootingDuration, ceaseWarning, readyTime, prepareTime, competitionMode } = settings;
 
     // Validate that all required settings exist and are positive numbers
     if (
@@ -109,6 +122,11 @@ export class StandardFieldProgram extends BaseProgram {
       typeof readyTime !== 'number' ||
       typeof prepareTime !== 'number'
     ) {
+      return false;
+    }
+
+    // Validate competitionMode is boolean if provided
+    if (competitionMode !== undefined && typeof competitionMode !== 'boolean') {
       return false;
     }
 

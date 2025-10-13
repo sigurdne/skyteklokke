@@ -33,6 +33,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
   
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,16 +58,22 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       if (event.type === 'state_change') {
         setCurrentState(event.state || 'idle');
       }
+
+      if (event.type === 'countdown') {
+        setCountdown(event.countdown || null);
+      }
       
       if (event.type === 'command' && event.command) {
         const translatedCommand = t(`commands.${event.command}`);
         setCurrentCommand(translatedCommand);
+        setCountdown(null); // Clear countdown when command is issued
         AudioService.speak(translatedCommand);
       }
       
       if (event.type === 'complete') {
         setIsRunning(false);
         setIsPaused(false);
+        setCountdown(null);
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
         }
@@ -86,6 +93,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         setElapsedTime(0);
         setIsRunning(false);
         setIsPaused(false);
+        setCountdown(null);
       }
     };
 
@@ -195,6 +203,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
             time={elapsedTime}
             state={currentState ? t(`states.${currentState}`) : t('states.idle')}
             command={currentCommand}
+            countdown={countdown}
             backgroundColor={backgroundColor}
             textColor={textColor}
           />

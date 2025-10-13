@@ -13,6 +13,7 @@ export interface TimingStep {
   state: TimerState;
   command?: string;
   audioEnabled?: boolean;
+  countdown?: number; // For visual countdown display (e.g., 10, 9, 8...)
 }
 
 export interface UIConfig {
@@ -49,9 +50,10 @@ export interface ProgramCardProps {
 }
 
 export interface TimerEvent {
-  type: 'state_change' | 'command' | 'complete' | 'pause' | 'resume' | 'reset';
+  type: 'state_change' | 'command' | 'complete' | 'pause' | 'resume' | 'reset' | 'countdown';
   state?: TimerState;
   command?: string;
+  countdown?: number;
   timestamp: number;
 }
 

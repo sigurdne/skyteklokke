@@ -142,6 +142,16 @@ export class TimerEngine {
       timestamp: Date.now(),
     });
 
+    // Emit countdown event if present
+    if (step.countdown !== undefined) {
+      this.emit({
+        type: 'countdown',
+        countdown: step.countdown,
+        state: step.state,
+        timestamp: Date.now(),
+      });
+    }
+
     // Emit command event if present
     if (step.command && step.audioEnabled) {
       this.emit({
