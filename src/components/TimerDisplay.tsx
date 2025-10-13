@@ -25,6 +25,11 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
     const seconds = totalSeconds % 60;
     const ms = Math.floor((milliseconds % 1000) / 10);
 
+    // If time is 0, just show "0"
+    if (milliseconds === 0) {
+      return '0';
+    }
+
     if (minutes > 0) {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
