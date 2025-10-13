@@ -1,0 +1,41 @@
+{
+  "navigation": {
+    "home_title": "SkyteKlokke",
+    "home_subtitle": "Præcisionstimer for skytter",
+    "field_shooting": "Feltskytte",
+    "duel_shooting": "Duelskytte",
+    "settings": "Indstillinger"
+  },
+  "programs": {
+    "field_title": "Feltskytte",
+    "field_description": "Standard konkurrence med 10s skydning",
+    "duel_title": "Duelskytte",
+    "duel_description": "Tørtræning simulator med lys",
+    "start_program": "Start program"
+  },
+  "commands": {
+    "ready_check": "Er skytterne klar",
+    "prepare": "Lad",
+    "fire": "Ild",
+    "cease_fire": "Stop",
+    "start": "Start"
+  },
+  "states": {
+    "idle": "Klar til start",
+    "ready_check": "Forbereder skytter",
+    "prepare": "Forbered",
+    "fire": "Aktiv skydning",
+    "cease_fire": "Skydning afsluttet",
+    "finished": "Færdig",
+    "countdown": "Nedtælling",
+    "red_light": "Rødt lys",
+    "green_light": "Grønt lys"
+  },
+  "controls": {
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Genoptag",
+    "reset": "Nulstil",
+    "back": "Tilbage"
+  }
+}

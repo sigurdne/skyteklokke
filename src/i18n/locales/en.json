@@ -1,0 +1,41 @@
+{
+  "navigation": {
+    "home_title": "SkyteKlokke",
+    "home_subtitle": "Precision Timer for Shooters",
+    "field_shooting": "Field Shooting",
+    "duel_shooting": "Duel Shooting",
+    "settings": "Settings"
+  },
+  "programs": {
+    "field_title": "Field Shooting",
+    "field_description": "Standard competition with 10s shooting",
+    "duel_title": "Duel Shooting",
+    "duel_description": "Dry training simulator with lights",
+    "start_program": "Start program"
+  },
+  "commands": {
+    "ready_check": "Are the shooters ready",
+    "prepare": "Load",
+    "fire": "Fire",
+    "cease_fire": "Stop",
+    "start": "Start"
+  },
+  "states": {
+    "idle": "Ready to start",
+    "ready_check": "Preparing shooters",
+    "prepare": "Prepare",
+    "fire": "Active shooting",
+    "cease_fire": "Shooting completed",
+    "finished": "Finished",
+    "countdown": "Countdown",
+    "red_light": "Red light",
+    "green_light": "Green light"
+  },
+  "controls": {
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Resume",
+    "reset": "Reset",
+    "back": "Back"
+  }
+}
