@@ -157,6 +157,56 @@ const supportedLanguage = mapToSupported(language);
 - **Fallback** - Grasiøs håndtering av manglende oversettelser
 - **Sync** - Konsistent opplevelse på tvers av skjermer
 
+### Navigasjon og UI-tekster
+
+#### Norsk (Standard)
+```json
+{
+  "navigation": {
+    "home_title": "SkyteKlokke",
+    "home_subtitle": "Presis timer for skyttere",
+    "field_shooting": "Feltskyting",
+    "field_description": "Standard konkurranse med 10s skyting",
+    "duel_shooting": "Duellskyting", 
+    "duel_description": "Tørrtrening med lyssekvenser",
+    "silhouette_shooting": "Silhuettskyting",
+    "silhouette_description": "Rytmetrening med audio-assistanse",
+    "settings": "Innstillinger",
+    "settings_description": "Språk, lyd og preferanser",
+    "start_program": "Start program",
+    "back": "Tilbake",
+    "pause": "Pause",
+    "resume": "Fortsett",
+    "reset": "Nullstill",
+    "stop": "Stopp"
+  }
+}
+```
+
+#### Engelsk
+```json
+{
+  "navigation": {
+    "home_title": "SkyteKlokke",
+    "home_subtitle": "Precision timer for shooters",
+    "field_shooting": "Field Shooting",
+    "field_description": "Standard competition with 10s shooting",
+    "duel_shooting": "Duel Shooting",
+    "duel_description": "Dry training with light sequences", 
+    "silhouette_shooting": "Silhouette Shooting",
+    "silhouette_description": "Rhythm training with audio assistance",
+    "settings": "Settings",
+    "settings_description": "Language, audio and preferences",
+    "start_program": "Start program",
+    "back": "Back",
+    "pause": "Pause", 
+    "resume": "Resume",
+    "reset": "Reset",
+    "stop": "Stop"
+  }
+}
+```
+
 ### Kommandoer for Silhuettskyting
 
 #### Norsk (Standard)

@@ -74,14 +74,39 @@ abstract class BaseProgram {
 ### File Structure (from TEKNISK_DESIGN.md):
 ```
 src/
+├── screens/
+│   ├── HomeScreen.js        # Hovedmeny med program-navigasjon
+│   ├── TimerScreen.js       # Timer-visning for aktive programmer
+│   └── SettingsScreen.js    # App-innstillinger
 ├── programs/
 │   ├── base/         # BaseProgram abstract class
 │   ├── field/        # Field shooting programs
 │   ├── duel/         # Duel shooting programs
 │   └── silhouette/   # Silhouette shooting programs
 ├── services/         # Timer, Audio, I18n services
-├── components/       # Reusable UI components
+├── components/       # Reusable UI components og navigasjon
 └── i18n/            # Translation files
+```
+
+### Home Screen Navigation Design:
+```
+┌─────────────────────────────┐
+│        SkyteKlokke 🎯      │
+├─────────────────────────────┤
+│                             │
+│  🏹 FELTSKYTING            │
+│  Standard konkurranse       │
+│                             │
+│  ⚔️  DUELLSKYTING          │
+│  Tørrtrening simulator      │
+│                             │
+│  🎯 SILHUETTSKYTING        │
+│  Rytmetrening               │
+│                             │
+│  ⚙️  INNSTILLINGER         │
+│  Språk og lydinnstillinger  │
+│                             │
+└─────────────────────────────┘
 ```
 
 ## 🎮 User Journey (Context for Features):

@@ -854,13 +854,128 @@ const useCommands = () => {
 - **Regional Variations:** Commands may vary between shooting federations
 - **Accessibility:** Consider dyslexia-friendly fonts and high contrast modes
 
+## Brukergrensesnitt Design
+
+### Home Screen (Hovedmeny)
+```typescript
+interface HomeScreenProps {
+  navigation: NavigationProp<any>;
+  availablePrograms: ProgramInfo[];
+}
+
+interface ProgramCard {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: 'field' | 'duel' | 'silhouette' | 'training';
+  difficulty: 'beginner' | 'intermediate' | 'expert';
+}
+```
+
+### Navigation Structure
+```
+HomeScreen (/)
+├── FieldShootingScreen (/field)
+│   ├── StandardFieldTimer
+│   └── CustomFieldTimer
+├── DuelShootingScreen (/duel)
+│   ├── StandardDuelSimulator
+│   └── CustomDuelSimulator
+├── SilhouetteScreen (/silhouette)
+│   ├── SilhouetteTraining
+│   └── RhythmTraining
+└── SettingsScreen (/settings)
+    ├── Language Settings
+    ├── Audio Settings
+    └── Timer Preferences
+```
+
+### Main Menu Layout (Mobile-First)
+```jsx
+// HomeScreen.tsx
+const HomeScreen = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Header title="SkyteKlokke" subtitle="Precision Timer for Shooters" />
+      
+      <ScrollView style={styles.menuContainer}>
+        <ProgramCard
+          icon="🏹"
+          title="Feltskyting"
+          description="Standard konkurranse med 10s skyting"
+          onPress={() => navigate('FieldShooting')}
+          category="field"
+        />
+        
+        <ProgramCard
+          icon="⚔️"
+          title="Duellskyting"
+          description="Tørrtrening med lyssekvenser"
+          onPress={() => navigate('DuelShooting')}
+          category="duel"
+        />
+        
+        <ProgramCard
+          icon="🎯"
+          title="Silhuettskyting"
+          description="Rytmetrening med audio-assistanse"
+          onPress={() => navigate('Silhouette')}
+          category="silhouette"
+        />
+        
+        <SettingsCard
+          icon="⚙️"
+          title="Innstillinger"
+          description="Språk, lyd og preferanser"
+          onPress={() => navigate('Settings')}
+        />
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+```
+
+### Design System
+```typescript
+// Theme.ts
+export const theme = {
+  colors: {
+    primary: '#2C3E50',      // Mørk blå (profesjonell)
+    secondary: '#E74C3C',    // Rød (stopp/varsel)
+    success: '#27AE60',      // Grønn (start/ok)
+    warning: '#F39C12',      // Orange (vent)
+    background: '#FFFFFF',   // Hvit bakgrunn
+    surface: '#F8F9FA',      // Lys grå kort
+    text: '#2C3E50',         // Mørk tekst
+    textSecondary: '#7F8C8D' // Grå beskrivelse
+  },
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32
+  },
+  typography: {
+    h1: { fontSize: 28, fontWeight: '700' },
+    h2: { fontSize: 24, fontWeight: '600' },
+    h3: { fontSize: 20, fontWeight: '600' },
+    body: { fontSize: 16, fontWeight: '400' },
+    caption: { fontSize: 14, fontWeight: '400' }
+  }
+};
+```
+
 ## Implementeringsstrategi
 
-### Fase 1: Core Foundation
+### Fase 1: Core Foundation & Navigation
 1. **Expo Setup**: Initialisere React Native prosjekt med Expo SDK 54
-2. **BaseProgram**: Implementere abstract class og plugin arkitektur
-3. **Timer Engine**: Bygge grunnleggende timer system
-4. **Program Manager**: Registrering og håndtering av skyteprogrammer
+2. **Navigation**: React Navigation 6 med stack navigator
+3. **HomeScreen**: Hovedmeny med program-kort design
+4. **BaseProgram**: Implementere abstract class og plugin arkitektur
+5. **Timer Engine**: Bygge grunnleggende timer system
+6. **Program Manager**: Registrering og håndtering av skyteprogrammer
 
 ### Fase 2: Basic Programs
 1. **StandardFieldProgram**: Implementere standard feltskyting

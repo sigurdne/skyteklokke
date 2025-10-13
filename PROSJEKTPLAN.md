@@ -134,6 +134,9 @@ skyteklokke/
 
 **Funksjoner:**
 - [x] Prosjektoppsett med Expo
+- [ ] **Hovedmeny navigasjon** (ProgramCard komponenter)
+- [ ] **React Navigation** setup med stack navigator
+- [ ] **HomeScreen** med program-kort design
 - [ ] Grunnleggende timer-logikk (feltskyting)
 - [ ] Kommandosekvens implementasjon
 - [ ] Visuell nedtelling/opptelling
