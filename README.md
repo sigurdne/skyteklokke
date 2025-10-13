@@ -62,10 +62,17 @@ SkyteKlokke er designet for å støtte standplass-ledere med korrekte tidskomman
    - 🔊 Rytmisk "Skyt" signal for optimal skuddtempo
    - 🔊 "Våpen ned" ved rødt lys
 
-## Dokumentasjon
+## 📚 Dokumentasjon
 
-- [📋 Prosjektplan](./PROSJEKTPLAN.md) - Detaljert prosjektplanlegging
-- [⚡ Teknisk Design](./TEKNISK_DESIGN.md) - Arkitektur og implementasjonsdetaljer
+### 🎯 For Utviklere - Les FØRST:
+- [� DOCS.md](./DOCS.md) - **AI-Agent kontekst og dokumentasjons-indeks**
+- [📋 PROSJEKTPLAN.md](./PROSJEKTPLAN.md) - Detaljert prosjektplanlegging og krav
+- [⚡ TEKNISK_DESIGN.md](./TEKNISK_DESIGN.md) - Arkitektur og implementasjonsdetaljer
+- [🌍 I18N_PLAN.md](./I18N_PLAN.md) - Flerspråklig støtte strategi
+
+### 🤖 AI-Agent Setup:
+- [🔧 .copilot-instructions.md](./.copilot-instructions.md) - GitHub Copilot kontekst
+- [⚙️ .vscode/settings.json](./.vscode/settings.json) - VS Code konfigurasjon
 
 ## Kom i gang
 
