@@ -278,8 +278,10 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     
     // Duel shooting colors
     if (isDuelProgram) {
-      if (currentState.includes('red')) return colors.redLight;
-      if (currentState.includes('green')) return colors.greenLight;
+      if (currentState === 'countdown') return '#000000'; // Black background during countdown
+      if (currentState === 'red_light') return colors.redLight; // Red light
+      if (currentState === 'green_light') return colors.greenLight; // Green light
+      if (currentState === 'finished') return colors.redLight; // Permanent red at finish
     }
     
     return backgroundColor;

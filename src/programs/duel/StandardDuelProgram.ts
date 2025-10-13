@@ -46,56 +46,54 @@ export class StandardDuelProgram extends BaseProgram {
       numberOfCycles 
     } = this.settings;
 
-    const sequence: TimingStep[] = [
-      {
-        id: 'start',
-        delay: 0,
-        state: states.COUNTDOWN,
-        command: 'start',
-        audioEnabled: true,
-      },
-      {
-        id: 'countdown',
-        delay: countdownDuration * 1000, // 60 seconds
-        state: states.COUNTDOWN,
-      },
-    ];
+    const steps: TimingStep[] = [];
 
-    // Add light cycles
-    for (let i = 0; i < numberOfCycles; i++) {
-      // Red light
-      sequence.push({
-        id: `red_light_${i + 1}`,
-        delay: 0,
-        state: states.RED_LIGHT,
-      });
-      sequence.push({
-        id: `red_wait_${i + 1}`,
-        delay: redLightDuration * 1000, // 7 seconds
-        state: states.RED_LIGHT,
-      });
-
-      // Green light
-      sequence.push({
-        id: `green_light_${i + 1}`,
-        delay: 0,
-        state: states.GREEN_LIGHT,
-      });
-      sequence.push({
-        id: `green_wait_${i + 1}`,
-        delay: greenLightDuration * 1000, // 3 seconds
-        state: states.GREEN_LIGHT,
+    // 60 second countdown (count DOWN from 60 to 1)
+    for (let i = countdownDuration; i >= 1; i--) {
+      steps.push({
+        id: `countdown_${i}`,
+        delay: i === countdownDuration ? 0 : 1000, // First step immediate, then 1s between
+        state: states.COUNTDOWN,
+        countdown: i,
+        audioEnabled: false, // No audio in duel mode
       });
     }
 
-    // Finished
-    sequence.push({
+    // Light sequence (5 cycles)
+    for (let cycle = 0; cycle < numberOfCycles; cycle++) {
+      // Red light phase (7 seconds)
+      for (let i = redLightDuration; i >= 1; i--) {
+        steps.push({
+          id: `red_light_${cycle + 1}_${i}`,
+          delay: 1000,
+          state: states.RED_LIGHT,
+          countdown: i,
+          audioEnabled: false,
+        });
+      }
+
+      // Green light phase (3 seconds)
+      for (let i = greenLightDuration; i >= 1; i--) {
+        steps.push({
+          id: `green_light_${cycle + 1}_${i}`,
+          delay: 1000,
+          state: states.GREEN_LIGHT,
+          countdown: i,
+          audioEnabled: false,
+        });
+      }
+    }
+
+    // Finished - permanent red light
+    steps.push({
       id: 'finished',
-      delay: 0,
+      delay: 1000,
       state: states.FINISHED,
+      countdown: 0,
+      audioEnabled: false,
     });
 
-    return sequence;
+    return steps;
   }
 
   validateSettings(settings: ProgramSettings): boolean {
