@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -35,12 +35,29 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [shootingDuration, setShootingDuration] = useState<number>(25);
   
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const initializeTimer = () => {
+    const program = ProgramManager.getProgram(programId);
+    if (!program) {
+      return null;
+    }
+
+    // Update program settings with custom shooting duration for field program
+    if (programId === 'standard-field') {
+      program.updateSettings({ shootingDuration });
+    }
+
+    const sequence = program.getTimingSequence();
+    return new TimerEngine(sequence);
+  };
+
   useEffect(() => {
-    // Initialize program and timer engine
+    // Initialize program
     const program = ProgramManager.getProgram(programId);
     if (!program) {
       navigation.goBack();
@@ -48,57 +65,9 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     }
 
     ProgramManager.setActiveProgram(programId);
-    const sequence = program.getTimingSequence();
-    timerEngineRef.current = new TimerEngine(sequence);
 
     // Setup audio service
     AudioService.setLanguage(i18n.language as any);
-
-    // Add event listener
-    const handleTimerEvent = (event: TimerEvent) => {
-      if (event.type === 'state_change') {
-        setCurrentState(event.state || 'idle');
-      }
-
-      if (event.type === 'countdown') {
-        setCountdown(event.countdown || null);
-      }
-      
-      if (event.type === 'command' && event.command) {
-        const translatedCommand = t(`commands.${event.command}`);
-        setCurrentCommand(translatedCommand);
-        setCountdown(null); // Clear countdown when command is issued
-        AudioService.speak(translatedCommand);
-      }
-      
-      if (event.type === 'complete') {
-        setIsRunning(false);
-        setIsPaused(false);
-        setCountdown(null);
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      }
-
-      if (event.type === 'pause') {
-        setIsPaused(true);
-      }
-
-      if (event.type === 'resume') {
-        setIsPaused(false);
-      }
-
-      if (event.type === 'reset') {
-        setCurrentState('idle');
-        setCurrentCommand('');
-        setElapsedTime(0);
-        setIsRunning(false);
-        setIsPaused(false);
-        setCountdown(null);
-      }
-    };
-
-    timerEngineRef.current.addEventListener(handleTimerEvent);
 
     // Cleanup
     return () => {
@@ -111,7 +80,51 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       AudioService.stop();
       ProgramManager.clearActiveProgram();
     };
-  }, [programId, navigation, t, i18n.language]);
+  }, [programId, navigation, i18n.language]);
+
+  // Event handler for timer events
+  const handleTimerEvent = (event: TimerEvent) => {
+    if (event.type === 'state_change') {
+      setCurrentState(event.state || 'idle');
+    }
+
+    if (event.type === 'countdown') {
+      setCountdown(event.countdown || null);
+    }
+    
+    if (event.type === 'command' && event.command) {
+      const translatedCommand = t(`commands.${event.command}`);
+      setCurrentCommand(translatedCommand);
+      setCountdown(null); // Clear countdown when command is issued
+      AudioService.speak(translatedCommand);
+    }
+    
+    if (event.type === 'complete') {
+      setIsRunning(false);
+      setIsPaused(false);
+      setCountdown(null);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+
+    if (event.type === 'pause') {
+      setIsPaused(true);
+    }
+
+    if (event.type === 'resume') {
+      setIsPaused(false);
+    }
+
+    if (event.type === 'reset') {
+      setCurrentState('idle');
+      setCurrentCommand('');
+      setElapsedTime(0);
+      setIsRunning(false);
+      setIsPaused(false);
+      setCountdown(null);
+    }
+  };
 
   // Update elapsed time display
   useEffect(() => {
@@ -131,9 +144,15 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   }, [isRunning, isPaused]);
 
   const handleStart = () => {
-    if (timerEngineRef.current && !isRunning) {
-      timerEngineRef.current.start();
-      setIsRunning(true);
+    if (!isRunning) {
+      // Initialize timer engine with current settings
+      const engine = initializeTimer();
+      if (engine) {
+        timerEngineRef.current = engine;
+        timerEngineRef.current.addEventListener(handleTimerEvent);
+        timerEngineRef.current.start();
+        setIsRunning(true);
+      }
     }
   };
 
@@ -222,6 +241,14 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         )}
 
         <View style={styles.controls}>
+          {!isRunning && isFieldProgram && (
+            <TouchableOpacity 
+              style={[styles.button, styles.settingsButton]} 
+              onPress={() => setShowSettings(true)}
+            >
+              <Text style={styles.buttonText}>⚙️ {shootingDuration}s</Text>
+            </TouchableOpacity>
+          )}
           {!isRunning && (
             <TouchableOpacity style={styles.button} onPress={handleStart}>
               <Text style={styles.buttonText}>{t('controls.start')}</Text>
@@ -243,6 +270,52 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
             </TouchableOpacity>
           )}
         </View>
+
+        {/* Settings Modal for Field Shooting */}
+        <Modal
+          visible={showSettings}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowSettings(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Skytingens varighet</Text>
+              <Text style={styles.modalSubtitle}>
+                (etter 10 sekunders forberedelse)
+              </Text>
+              
+              <View style={styles.durationSelector}>
+                {[10, 15, 20, 25, 30, 45, 60].map((duration) => (
+                  <TouchableOpacity
+                    key={duration}
+                    style={[
+                      styles.durationButton,
+                      shootingDuration === duration && styles.durationButtonActive
+                    ]}
+                    onPress={() => setShootingDuration(duration)}
+                  >
+                    <Text style={[
+                      styles.durationButtonText,
+                      shootingDuration === duration && styles.durationButtonTextActive
+                    ]}>
+                      {duration}s
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.button, styles.modalButton]}
+                  onPress={() => setShowSettings(false)}
+                >
+                  <Text style={styles.buttonText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -309,5 +382,67 @@ const styles = StyleSheet.create({
     fontSize: 240,
     fontWeight: '900',
     fontFamily: 'monospace',
+  },
+  settingsButton: {
+    backgroundColor: colors.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    padding: spacing.xl,
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    ...typography.h2,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  modalSubtitle: {
+    ...typography.body,
+    textAlign: 'center',
+    color: colors.secondary,
+    marginBottom: spacing.lg,
+  },
+  durationSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  durationButton: {
+    backgroundColor: colors.background,
+    borderWidth: 2,
+    borderColor: colors.secondary,
+    borderRadius: 8,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    minWidth: 80,
+  },
+  durationButtonActive: {
+    backgroundColor: colors.success,
+    borderColor: colors.success,
+  },
+  durationButtonText: {
+    ...typography.button,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  durationButtonTextActive: {
+    color: colors.background,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  modalButton: {
+    minWidth: 150,
   },
 });
