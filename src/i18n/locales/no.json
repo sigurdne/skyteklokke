@@ -1,0 +1,41 @@
+{
+  "navigation": {
+    "home_title": "SkyteKlokke",
+    "home_subtitle": "Presis timer for skyttere",
+    "field_shooting": "Feltskyting",
+    "duel_shooting": "Duellskyting",
+    "settings": "Innstillinger"
+  },
+  "programs": {
+    "field_title": "Feltskyting",
+    "field_description": "Standard konkurranse med 10s skyting",
+    "duel_title": "Duellskyting",
+    "duel_description": "Tørrtrening simulator med lys",
+    "start_program": "Start program"
+  },
+  "commands": {
+    "ready_check": "Er skytterne klare",
+    "prepare": "Last",
+    "fire": "Ild",
+    "cease_fire": "Stans",
+    "start": "Start"
+  },
+  "states": {
+    "idle": "Klar til start",
+    "ready_check": "Skytterne klargjøres",
+    "prepare": "Forbered deg",
+    "fire": "Aktiv skyting",
+    "cease_fire": "Skyting avsluttet",
+    "finished": "Ferdig",
+    "countdown": "Nedtelling",
+    "red_light": "Rød lys",
+    "green_light": "Grønn lys"
+  },
+  "controls": {
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Fortsett",
+    "reset": "Reset",
+    "back": "Tilbake"
+  }
+}
