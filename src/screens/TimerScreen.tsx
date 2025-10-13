@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -36,10 +38,35 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [shootingDuration, setShootingDuration] = useState<number>(25);
+  const [shootingDuration, setShootingDuration] = useState<number>(10);
   
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load saved shooting duration on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const savedDuration = await AsyncStorage.getItem('shootingDuration');
+        if (savedDuration !== null) {
+          setShootingDuration(parseInt(savedDuration, 10));
+        }
+      } catch (error) {
+        console.error('Failed to load shooting duration:', error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  // Save shooting duration when it changes
+  const updateShootingDuration = async (duration: number) => {
+    setShootingDuration(duration);
+    try {
+      await AsyncStorage.setItem('shootingDuration', duration.toString());
+    } catch (error) {
+      console.error('Failed to save shooting duration:', error);
+    }
+  };
 
   const initializeTimer = () => {
     const program = ProgramManager.getProgram(programId);
@@ -285,24 +312,21 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
                 (etter 10 sekunders forberedelse)
               </Text>
               
-              <View style={styles.durationSelector}>
-                {[10, 15, 20, 25, 30, 45, 60].map((duration) => (
-                  <TouchableOpacity
-                    key={duration}
-                    style={[
-                      styles.durationButton,
-                      shootingDuration === duration && styles.durationButtonActive
-                    ]}
-                    onPress={() => setShootingDuration(duration)}
-                  >
-                    <Text style={[
-                      styles.durationButtonText,
-                      shootingDuration === duration && styles.durationButtonTextActive
-                    ]}>
-                      {duration}s
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={shootingDuration}
+                  onValueChange={(value) => updateShootingDuration(value)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {Array.from({ length: 11 }, (_, i) => 4 + i * 2).map((duration) => (
+                    <Picker.Item 
+                      key={duration} 
+                      label={`${duration} sekunder`} 
+                      value={duration} 
+                    />
+                  ))}
+                </Picker>
               </View>
 
               <View style={styles.modalButtons}>
@@ -410,33 +434,20 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     marginBottom: spacing.lg,
   },
-  durationSelector: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  durationButton: {
-    backgroundColor: colors.background,
-    borderWidth: 2,
+  pickerContainer: {
+    borderWidth: 1,
     borderColor: colors.secondary,
     borderRadius: 8,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    minWidth: 80,
+    marginBottom: spacing.lg,
+    overflow: 'hidden',
   },
-  durationButtonActive: {
-    backgroundColor: colors.success,
-    borderColor: colors.success,
+  picker: {
+    width: '100%',
+    height: Platform.OS === 'ios' ? 180 : 50,
   },
-  durationButtonText: {
-    ...typography.button,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  durationButtonTextActive: {
-    color: colors.background,
+  pickerItem: {
+    fontSize: 20,
+    height: Platform.OS === 'ios' ? 180 : 50,
   },
   modalButtons: {
     flexDirection: 'row',
