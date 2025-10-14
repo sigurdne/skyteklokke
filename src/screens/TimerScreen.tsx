@@ -171,8 +171,8 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
           setCurrentCommand('');
         }
-        // FIRE_WARNING phase (yellow, 2-1): show "STAANS"
-        else if (state === 'fire_warning' && (newCountdown === 2 || newCountdown === 1)) {
+        // FIRE_WARNING phase (yellow): show "STAANS"
+        else if (state === 'fire_warning') {
           setCurrentCommand(t('commands.cease_command'));
         }
         // FINISHED phase (red, 0): no text
@@ -347,6 +347,13 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
             onPress={handleStop}
             activeOpacity={0.9}
           >
+            {currentCommand && (
+              <Text style={[styles.fullscreenCommand, { 
+                color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' 
+              }]}>
+                {currentCommand}
+              </Text>
+            )}
             <Text style={[styles.fullscreenTimer, { 
               color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' 
             }]}>
@@ -506,6 +513,13 @@ const styles = StyleSheet.create({
     fontSize: 240,
     fontWeight: '900',
     fontFamily: 'monospace',
+  },
+  fullscreenCommand: {
+    fontSize: 56,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: spacing.xl,
+    textAlign: 'center',
   },
   settingsButton: {
     backgroundColor: colors.primary,
