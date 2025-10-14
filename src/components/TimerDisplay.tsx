@@ -47,8 +47,13 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {countdown !== null && countdown !== undefined ? (
-        // Show large countdown during prepare phase
+        // Show large countdown during prepare/fire phase with optional command text above
         <View style={styles.countdownSection}>
+          {command && (
+            <Text style={[styles.countdownCommand, { color: colors.warning }]}>
+              {command}
+            </Text>
+          )}
           <Text style={[styles.countdown, { color: colors.warning }]}>
             {countdown}
           </Text>
@@ -96,6 +101,13 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontFamily: 'monospace',
     textAlign: 'center',
+  },
+  countdownCommand: {
+    fontSize: 48,
+    fontWeight: '700',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    marginBottom: spacing.lg,
   },
   timerSection: {
     marginBottom: spacing.xl,

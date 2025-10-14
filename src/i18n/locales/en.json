@@ -15,6 +15,10 @@
   },
   "commands": {
     "ready_check": "Are the shooters ready",
+    "ready_question": "Are the shooters ready?",
+    "ready_command": "READY!",
+    "fire_command": "FIRE!",
+    "cease_command": "CEASE FIRE",
     "prepare": "Load",
     "fire": "Fire",
     "cease_fire": "Stop",

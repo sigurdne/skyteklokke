@@ -15,6 +15,10 @@
   },
   "commands": {
     "ready_check": "Är skyttarna klara",
+    "ready_question": "Är skyttarna klara?",
+    "ready_command": "KLAR!",
+    "fire_command": "ELD!",
+    "cease_command": "ELDUPPHÖR",
     "prepare": "Ladda",
     "fire": "Eld",
     "cease_fire": "Stopp",

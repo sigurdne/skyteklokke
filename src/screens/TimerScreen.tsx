@@ -132,20 +132,64 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const handleTimerEvent = (event: TimerEvent) => {
     if (event.type === 'state_change') {
       setCurrentState(event.state || 'idle');
+      // Handle command display text from state_change event
+      // Skip system commands like 'beep' and 'continuous_beep'
+      if (event.command && event.command !== 'beep' && event.command !== 'continuous_beep') {
+        const translatedCommand = t(`commands.${event.command}`);
+        setCurrentCommand(translatedCommand);
+      } else if (!event.command || event.command === 'beep' || event.command === 'continuous_beep') {
+        // Clear command text if no command or beep command
+        setCurrentCommand('');
+      }
     }
 
     if (event.type === 'countdown') {
-      setCountdown(event.countdown || null);
+      const newCountdown = event.countdown || null;
+      setCountdown(newCountdown);
+      
+      // Derive display text based on state and countdown for field shooting
+      if (programId === 'standard-field' && newCountdown !== null) {
+        const state = event.state || currentState;
+        
+        // PREPARE phase (white, 10-6): show "Er skytterene klare?"
+        if (state === 'prepare' && newCountdown > 5) {
+          setCurrentCommand(t('commands.ready_question'));
+        }
+        // PREPARE_WARNING phase (yellow, 5): show "KLAR!"
+        else if (state === 'prepare_warning' && newCountdown === 5) {
+          setCurrentCommand(t('commands.ready_command'));
+        }
+        // PREPARE_WARNING phase (yellow, 4-1): no text
+        else if (state === 'prepare_warning' && newCountdown < 5 && newCountdown >= 1) {
+          setCurrentCommand('');
+        }
+        // FIRE phase start (green, at shootingDuration): show "ILD!"
+        else if (state === 'fire' && newCountdown === shootingDuration) {
+          setCurrentCommand(t('commands.fire_command'));
+        }
+        // FIRE phase (green, countdown < shootingDuration): no text
+        else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
+          setCurrentCommand('');
+        }
+        // FIRE_WARNING phase (yellow, 2-1): show "STAANS"
+        else if (state === 'fire_warning' && (newCountdown === 2 || newCountdown === 1)) {
+          setCurrentCommand(t('commands.cease_command'));
+        }
+        // FINISHED phase (red, 0): no text
+        else if (state === 'finished' && newCountdown === 0) {
+          setCurrentCommand('');
+        }
+      }
     }
     
     if (event.type === 'command' && event.command) {
       // Handle system beeps for training mode
       if (event.command === 'beep') {
         AudioService.playBeep(false);
-        setCurrentCommand('');
+        // Don't clear command - keep showing the current display text
       } else if (event.command === 'continuous_beep') {
         AudioService.playBeep(true);
-        setCurrentCommand('');
+        // Don't clear command - keep showing the current display text
       } else {
         // Handle voice commands (like "go")
         const translatedCommand = t(`commands.${event.command}`);
