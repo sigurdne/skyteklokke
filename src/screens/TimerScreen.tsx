@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import logger from '../utils/logger';
 import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -74,6 +75,17 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       }
     };
     loadSettings();
+  }, []);
+
+  // Cleanup: deactivate keep awake when component unmounts
+  useEffect(() => {
+    return () => {
+      try {
+        deactivateKeepAwake('timer-active');
+      } catch (e) {
+        // Ignore errors on unmount
+      }
+    };
   }, []);
 
   // Save shooting duration when it changes
@@ -289,6 +301,12 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
+      // Deactivate keep awake when timer completes
+      try {
+        deactivateKeepAwake('timer-active');
+      } catch (e) {
+        logger.log('Failed to deactivate keep awake on complete:', e);
+      }
     }
 
     if (event.type === 'pause') {
@@ -326,7 +344,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     }
   }, [isRunning, isPaused]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!isRunning) {
       // Initialize timer engine with current settings
       const engine = initializeTimer();
@@ -337,6 +355,12 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         timerEngineRef.current.addEventListener(handleTimerEvent);
         timerEngineRef.current.start();
         setIsRunning(true);
+        // Keep screen awake while timer is running
+        try {
+          await activateKeepAwakeAsync('timer-active');
+        } catch (e) {
+          logger.log('Failed to activate keep awake:', e);
+        }
       }
     }
   };
@@ -377,6 +401,12 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       setIsPaused(false);
       setCountdown(null);
       setCurrentState('idle');
+      // Allow screen to sleep again
+      try {
+        deactivateKeepAwake('timer-active');
+      } catch (e) {
+        logger.log('Failed to deactivate keep awake:', e);
+      }
       setCurrentCommand('');
       setElapsedTime(0);
     }
