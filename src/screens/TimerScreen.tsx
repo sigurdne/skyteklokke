@@ -361,17 +361,35 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
             </Text>
           </TouchableOpacity>
         ) : (
-          <TimerDisplay
-            time={elapsedTime}
-            state={currentState ? t(`states.${currentState}`) : t('states.idle')}
-            command={currentCommand}
-            countdown={countdown}
-            backgroundColor={backgroundColor}
-            textColor={textColor}
-          />
+          // Show a large, uppercase idle label across 90% width on the main screen
+          (currentState === 'idle') ? (
+            <View style={styles.idleContainer}>
+              <Text
+                accessible
+                accessibilityRole="text"
+                style={{
+                  ...typography.h2,
+                  textTransform: 'uppercase',
+                  textAlign: 'center',
+                  color: textColor,
+                }}
+              >
+                {t('states.idle')}
+              </Text>
+            </View>
+          ) : (
+            <TimerDisplay
+              time={elapsedTime}
+              state={currentState ? t(`states.${currentState}`) : t('states.idle')}
+              command={currentCommand}
+              countdown={countdown}
+              backgroundColor={backgroundColor}
+              textColor={textColor}
+            />
+          )
         )}
 
-        <View style={styles.controls}>
+  <View style={[styles.controls, styles.controlsBottom]}>
           {!isRunning && isFieldProgram && (
             <TouchableOpacity 
               style={[styles.button, styles.settingsButton]} 
@@ -466,6 +484,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.xl,
     gap: spacing.md,
+  },
+  controlsBottom: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: '33%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  idleContainer: {
+    flex: 1,
+    width: '90%',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: '33%', // keep text above the controls
   },
   button: {
     backgroundColor: colors.success,
