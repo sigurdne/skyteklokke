@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech';
+import logger from '../utils/logger';
 import { Language } from '../types';
 
 /**
@@ -34,7 +35,7 @@ export class AudioService {
     if (this.isWarmedUp) return;
     
     try {
-      console.log('🔥 Warming up TTS system...');
+      logger.log('🔥 Warming up TTS system...');
       // Play a very short, nearly inaudible sound to initialize the TTS engine
       // Using space character and very fast rate to make it imperceptible
       await Speech.speak(' ', {
@@ -44,9 +45,9 @@ export class AudioService {
         volume: 0.001, // Nearly zero volume
       });
       this.isWarmedUp = true;
-      console.log('✅ TTS system warmed up');
+      logger.log('✅ TTS system warmed up');
     } catch (error) {
-      console.error('❌ Error warming up TTS:', error);
+      logger.error('❌ Error warming up TTS:', error);
     }
   }
 
@@ -87,7 +88,7 @@ export class AudioService {
     try {
       await Speech.speak(text, speechOptions);
     } catch (error) {
-      console.error('Error playing speech:', error);
+      logger.error('Error playing speech:', error);
     }
   }
 
@@ -98,7 +99,7 @@ export class AudioService {
         await Speech.stop();
       }
     } catch (error) {
-      console.error('Error stopping speech:', error);
+      logger.error('Error stopping speech:', error);
     }
   }
 
@@ -117,7 +118,7 @@ export class AudioService {
       const voices = await Speech.getAvailableVoicesAsync();
       return voices;
     } catch (error) {
-      console.error('Error getting available voices:', error);
+      logger.error('Error getting available voices:', error);
       return [];
     }
   }
@@ -127,14 +128,14 @@ export class AudioService {
    * Uses a synthesized beep sound with TTS
    */
   playBeep(continuous: boolean = false): void {
-    console.log('🔊 playBeep called, continuous:', continuous);
+  logger.log('🔊 playBeep called, continuous:', continuous);
     
     try {
       // Use a very short, high-pitched vowel sound that sounds like a beep
       // Continuous beep is longer with 11 bips and slower rate to cover full 2 seconds
       const beepSound = continuous ? 'bip bip bip bip bip bip bip bip bip bip bip' : 'bip';
       
-      console.log('🔊 Playing beep:', beepSound);
+  logger.log('🔊 Playing beep:', beepSound);
       
       // Speech.speak doesn't return a promise, just call it
       Speech.speak(beepSound, {
@@ -144,9 +145,9 @@ export class AudioService {
         volume: this.volume,
       });
       
-      console.log('🔊 Beep started');
+      logger.log('🔊 Beep started');
     } catch (error) {
-      console.error('❌ Error in playBeep:', error);
+      logger.error('❌ Error in playBeep:', error);
     }
   }
 }

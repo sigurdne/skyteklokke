@@ -54,6 +54,7 @@ export interface TimerEvent {
   state?: TimerState;
   command?: string;
   countdown?: number;
+  stepId?: string;
   timestamp: number;
 }
 

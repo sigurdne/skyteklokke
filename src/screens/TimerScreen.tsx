@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import logger from '../utils/logger';
 import { useTranslation } from 'react-i18next';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -38,11 +39,14 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showDiagnostics, setShowDiagnostics] = useState<boolean>(false);
+  const [diagnosticsText, setDiagnosticsText] = useState<string>('');
   const [shootingDuration, setShootingDuration] = useState<number>(10);
   const [trainingMode, setTrainingMode] = useState<boolean>(false);
   // Duel countdown (20,30,60)
   const [duelCountdownDuration, setDuelCountdownDuration] = useState<number>(60);
   const [duelSeries, setDuelSeries] = useState<number>(6);
+  const [currentSeriesIndex, setCurrentSeriesIndex] = useState<number | null>(null);
   
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,7 +72,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
           setDuelSeries(parseInt(savedDuelSeries, 10));
         }
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        logger.error('Failed to load settings:', error);
       }
     };
     loadSettings();
@@ -80,7 +84,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     try {
       await AsyncStorage.setItem('shootingDuration', duration.toString());
     } catch (error) {
-      console.error('Failed to save shooting duration:', error);
+      logger.error('Failed to save shooting duration:', error);
     }
   };
 
@@ -89,7 +93,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     try {
       await AsyncStorage.setItem('duelCountdownDuration', duration.toString());
     } catch (error) {
-      console.error('Failed to save duel countdown duration:', error);
+      logger.error('Failed to save duel countdown duration:', error);
     }
   };
 
@@ -98,7 +102,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     try {
       await AsyncStorage.setItem('duelSeries', series.toString());
     } catch (error) {
-      console.error('Failed to save duel series:', error);
+      logger.error('Failed to save duel series:', error);
     }
   };
 
@@ -108,7 +112,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     try {
       await AsyncStorage.setItem('trainingMode', enabled.toString());
     } catch (error) {
-      console.error('Failed to save training mode:', error);
+      logger.error('Failed to save training mode:', error);
     }
   };
 
@@ -155,6 +159,11 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     // Cleanup
     return () => {
       if (timerEngineRef.current) {
+        try {
+          timerEngineRef.current.removeEventListener(handleTimerEvent);
+        } catch (e) {
+          // ignore
+        }
         timerEngineRef.current.stop();
       }
       if (intervalRef.current) {
@@ -167,12 +176,31 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
 
   // Event handler for timer events
   const handleTimerEvent = (event: TimerEvent) => {
+    try {
+    // main handler
+    
+    // If event includes stepId and we're in duel, parse series
+    if (event.stepId && programId === 'standard-duel') {
+      // stepId format: series_{seriesIndex}_rest... or finished
+      const m = event.stepId.match(/^series_(\d+)_/);
+      if (m) {
+        const seriesNum = parseInt(m[1], 10);
+        setCurrentSeriesIndex(seriesNum);
+      } else {
+        setCurrentSeriesIndex(null);
+      }
+    }
     if (event.type === 'state_change') {
       setCurrentState(event.state || 'idle');
       // Handle command display text from state_change event
       // Skip system commands like 'beep' and 'continuous_beep'
       if (event.command && event.command !== 'beep' && event.command !== 'continuous_beep') {
-        const translatedCommand = t(`commands.${event.command}`);
+        let translatedCommand = '';
+        try {
+          translatedCommand = t(`commands.${event.command}`);
+        } catch (e) {
+          translatedCommand = String(event.command);
+        }
         setCurrentCommand(translatedCommand);
       } else if (!event.command || event.command === 'beep' || event.command === 'continuous_beep') {
         // Clear command text if no command or beep command
@@ -229,7 +257,12 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         // Don't clear command - keep showing the current display text
       } else {
         // Handle voice commands (like "go")
-        const translatedCommand = t(`commands.${event.command}`);
+        let translatedCommand = '';
+        try {
+          translatedCommand = t(`commands.${event.command}`);
+        } catch (e) {
+          translatedCommand = String(event.command);
+        }
         setCurrentCommand(translatedCommand);
         // Don't clear countdown - we want to keep showing it during shooting phase
         // Only speak in non-competition mode
@@ -237,8 +270,17 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         const settings = program?.getSettings();
         const isTrainingMode = settings?.trainingMode || false;
         if (isTrainingMode) {
-          AudioService.speak(translatedCommand);
+          try { AudioService.speak(translatedCommand); } catch (e) { logger.error('AudioService.speak failed', e); }
         }
+      }
+    }
+    } catch (err) {
+      // Log and persist diagnostics but don't crash
+      logger.error('TimerScreen.handleTimerEvent error:', err, 'event=', event);
+      try {
+        (timerEngineRef.current as any)?.pushDiagnostic?.({ timestamp: Date.now(), note: 'handle_event_error', event });
+      } catch (e) {
+        // ignore
       }
     }
     
@@ -292,9 +334,13 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       const engine = initializeTimer();
       if (engine) {
         timerEngineRef.current = engine;
+        // ensure we don't double-register
+        timerEngineRef.current.removeEventListener(handleTimerEvent);
         timerEngineRef.current.addEventListener(handleTimerEvent);
         timerEngineRef.current.start();
         setIsRunning(true);
+        // clear previous diagnostics when starting new run
+        setDiagnosticsText('');
       }
     }
   };
@@ -313,6 +359,11 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
 
   const handleReset = () => {
     if (timerEngineRef.current) {
+      try {
+        timerEngineRef.current.removeEventListener(handleTimerEvent);
+      } catch (e) {
+        // ignore
+      }
       timerEngineRef.current.reset();
       setElapsedTime(0);
     }
@@ -320,6 +371,11 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
 
   const handleStop = () => {
     if (timerEngineRef.current) {
+      try {
+        timerEngineRef.current.removeEventListener(handleTimerEvent);
+      } catch (e) {
+        // ignore
+      }
       timerEngineRef.current.stop();
       setIsRunning(false);
       setIsPaused(false);
@@ -328,6 +384,26 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       setCurrentCommand('');
       setElapsedTime(0);
     }
+  };
+
+  const fetchDiagnostics = async () => {
+    if (timerEngineRef.current && typeof (timerEngineRef.current as any).getDiagnostics === 'function') {
+      try {
+        const d = await (timerEngineRef.current as any).getDiagnostics();
+        setDiagnosticsText(d);
+      } catch (e) {
+        setDiagnosticsText(`Failed to fetch diagnostics: ${String(e)}`);
+      }
+    } else {
+      // try to read persisted diagnostics
+      try {
+        const stored = await AsyncStorage.getItem('timerEngineDiagnostics');
+        setDiagnosticsText(stored || 'No diagnostics stored');
+      } catch (e) {
+        setDiagnosticsText(`Failed to read stored diagnostics: ${String(e)}`);
+      }
+    }
+    setShowDiagnostics(true);
   };
 
   const handleBack = () => {
@@ -384,6 +460,11 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
             onPress={handleStop}
             activeOpacity={0.9}
           >
+            {isDuelProgram && currentSeriesIndex !== null && (
+              <Text style={[styles.fullscreenCommand, { color: '#FFFFFF', fontSize: 28 }]}> 
+                {`Serie ${currentSeriesIndex}/${duelSeries}`}
+              </Text>
+            )}
             {currentCommand && (
               <Text style={[styles.fullscreenCommand, { 
                 color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' 
@@ -535,9 +616,27 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
                   <Text style={styles.buttonText}>OK</Text>
                 </TouchableOpacity>
               </View>
+              <View style={{ marginTop: spacing.md, alignItems: 'center' }}>
+                <TouchableOpacity style={[styles.secondaryButton || {}, { paddingVertical: 10, paddingHorizontal: 16 }]} onPress={fetchDiagnostics}>
+                  <Text style={[styles.buttonText, { color: colors.background }]}>Hent diagnostikk</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
+        {showDiagnostics && (
+          <View style={styles.diagnosticsOverlay} pointerEvents="box-none">
+            <View style={styles.diagnosticsBox}>
+              <Text style={styles.diagnosticsTitle}>Diagnostics (siste hendelser)</Text>
+              <Text style={styles.diagnosticsText} numberOfLines={40} ellipsizeMode="tail">{diagnosticsText}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: spacing.sm }}>
+                <TouchableOpacity style={[styles.button, { minWidth: 120 }]} onPress={() => setShowDiagnostics(false)}>
+                  <Text style={styles.buttonText}>Lukk</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -712,5 +811,39 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     minWidth: 150,
+  },
+  secondaryButton: {
+    backgroundColor: colors.secondary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: 8,
+  },
+  diagnosticsOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  diagnosticsBox: {
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: spacing.md,
+  },
+  diagnosticsTitle: {
+    ...typography.h3,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  diagnosticsText: {
+    ...typography.body,
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: colors.text,
   },
 });

@@ -4,7 +4,7 @@ import { colors, typography, spacing } from '../theme';
 
 interface TimerDisplayProps {
   time: number; // milliseconds
-  state: string;
+  state?: string;
   command?: string;
   countdown?: number | null;
   backgroundColor?: string;
@@ -74,14 +74,14 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
             </View>
           )}
           <View style={styles.stateSection}>
-            {!state.toLowerCase().includes('idle') && (
+            {!(state || '').toLowerCase().includes('idle') && (
               <View style={[styles.stateIndicator, { backgroundColor: getStateColor(state) }]} />
             )}
             <Text style={[
-              state.toLowerCase().includes('idle') ? styles.stateIdle : styles.state, 
+              (state || '').toLowerCase().includes('idle') ? styles.stateIdle : styles.state,
               { color: textColor }
             ]}>
-              {state}
+              {state || ''}
             </Text>
           </View>
         </>

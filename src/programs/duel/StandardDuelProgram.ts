@@ -1,5 +1,6 @@
 import { BaseProgram } from '../base/BaseProgram';
 import { ProgramSettings, TimingStep, UIConfig } from '../../types';
+import logger from '../../utils/logger';
 
 /**
  * Standard Duel Shooting Program
@@ -62,26 +63,29 @@ export class StandardDuelProgram extends BaseProgram {
           });
         }
 
-        // Red light phase for this series (count up 1..redLightDuration)
-        for (let i = 1; i <= redLightDuration; i++) {
-          steps.push({
-            id: `series_${series + 1}_red_${i}`,
-            delay: 1000,
-            state: states.RED_LIGHT,
-            countdown: i,
-            audioEnabled: false,
-          });
-        }
+        // Repeat red/green pair 5 times per series
+        for (let seq = 0; seq < 5; seq++) {
+          // Red light phase for this sequence (count up 1..redLightDuration)
+          for (let i = 1; i <= redLightDuration; i++) {
+            steps.push({
+              id: `series_${series + 1}_seq_${seq + 1}_red_${i}`,
+              delay: 1000,
+              state: states.RED_LIGHT,
+              countdown: i,
+              audioEnabled: false,
+            });
+          }
 
-        // Green light phase for this series (count up 1..greenLightDuration)
-        for (let i = 1; i <= greenLightDuration; i++) {
-          steps.push({
-            id: `series_${series + 1}_green_${i}`,
-            delay: 1000,
-            state: states.GREEN_LIGHT,
-            countdown: i,
-            audioEnabled: false,
-          });
+          // Green light phase for this sequence (count up 1..greenLightDuration)
+          for (let i = 1; i <= greenLightDuration; i++) {
+            steps.push({
+              id: `series_${series + 1}_seq_${seq + 1}_green_${i}`,
+              delay: 1000,
+              state: states.GREEN_LIGHT,
+              countdown: i,
+              audioEnabled: false,
+            });
+          }
         }
       }
 
@@ -94,7 +98,18 @@ export class StandardDuelProgram extends BaseProgram {
         audioEnabled: false,
       });
 
-      return steps;
+      // Validate steps - ensure well-formedness
+      const validSteps: TimingStep[] = [];
+      for (const s of steps) {
+        const ok = s && typeof s.id === 'string' && s.id.length > 0 && typeof s.state === 'string' && typeof s.delay === 'number' && !Number.isNaN(s.delay) && s.delay >= 0;
+        if (!ok) {
+          logger.error('StandardDuelProgram: generated invalid step, skipping', s);
+          continue;
+        }
+        validSteps.push(s);
+      }
+
+      return validSteps;
 
     // Light sequence (5 cycles)
     for (let cycle = 0; cycle < numberOfCycles; cycle++) {
