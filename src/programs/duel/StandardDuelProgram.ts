@@ -47,18 +47,54 @@ export class StandardDuelProgram extends BaseProgram {
       numberOfCycles 
     } = this.settings;
 
-    const steps: TimingStep[] = [];
+      const steps: TimingStep[] = [];
 
-    // Countdown (count DOWN from chosen duration to 1)
-    for (let i = countdownDuration; i >= 1; i--) {
+      // numberOfCycles is interpreted here as number of full series (repeats)
+      for (let series = 0; series < numberOfCycles; series++) {
+        // Countdown before each series (count DOWN from countdownDuration to 1)
+        for (let i = countdownDuration; i >= 1; i--) {
+          steps.push({
+            id: `series_${series + 1}_countdown_${i}`,
+            delay: i === countdownDuration && series === 0 ? 0 : 1000,
+            state: states.COUNTDOWN,
+            countdown: i,
+            audioEnabled: false,
+          });
+        }
+
+        // Red light phase for this series (count up 1..redLightDuration)
+        for (let i = 1; i <= redLightDuration; i++) {
+          steps.push({
+            id: `series_${series + 1}_red_${i}`,
+            delay: 1000,
+            state: states.RED_LIGHT,
+            countdown: i,
+            audioEnabled: false,
+          });
+        }
+
+        // Green light phase for this series (count up 1..greenLightDuration)
+        for (let i = 1; i <= greenLightDuration; i++) {
+          steps.push({
+            id: `series_${series + 1}_green_${i}`,
+            delay: 1000,
+            state: states.GREEN_LIGHT,
+            countdown: i,
+            audioEnabled: false,
+          });
+        }
+      }
+
+      // Finished - permanent red light after all series
       steps.push({
-        id: `countdown_${i}`,
-        delay: i === countdownDuration ? 0 : 1000, // First step immediate, then 1s between
-        state: states.COUNTDOWN,
-        countdown: i,
-        audioEnabled: false, // No audio in duel mode
+        id: 'finished',
+        delay: 1000,
+        state: states.FINISHED,
+        countdown: 0,
+        audioEnabled: false,
       });
-    }
+
+      return steps;
 
     // Light sequence (5 cycles)
     for (let cycle = 0; cycle < numberOfCycles; cycle++) {
