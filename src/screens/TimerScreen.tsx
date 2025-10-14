@@ -40,6 +40,9 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [shootingDuration, setShootingDuration] = useState<number>(10);
   const [trainingMode, setTrainingMode] = useState<boolean>(false);
+  // Duel countdown (20,30,60)
+  const [duelCountdownDuration, setDuelCountdownDuration] = useState<number>(60);
+  const [duelSeries, setDuelSeries] = useState<number>(6);
   
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,6 +59,14 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         if (savedTrainingMode !== null) {
           setTrainingMode(savedTrainingMode === 'true');
         }
+        const savedDuelCountdown = await AsyncStorage.getItem('duelCountdownDuration');
+        if (savedDuelCountdown !== null) {
+          setDuelCountdownDuration(parseInt(savedDuelCountdown, 10));
+        }
+        const savedDuelSeries = await AsyncStorage.getItem('duelSeries');
+        if (savedDuelSeries !== null) {
+          setDuelSeries(parseInt(savedDuelSeries, 10));
+        }
       } catch (error) {
         console.error('Failed to load settings:', error);
       }
@@ -70,6 +81,24 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       await AsyncStorage.setItem('shootingDuration', duration.toString());
     } catch (error) {
       console.error('Failed to save shooting duration:', error);
+    }
+  };
+
+  const updateDuelCountdownDuration = async (duration: number) => {
+    setDuelCountdownDuration(duration);
+    try {
+      await AsyncStorage.setItem('duelCountdownDuration', duration.toString());
+    } catch (error) {
+      console.error('Failed to save duel countdown duration:', error);
+    }
+  };
+
+  const updateDuelSeries = async (series: number) => {
+    setDuelSeries(series);
+    try {
+      await AsyncStorage.setItem('duelSeries', series.toString());
+    } catch (error) {
+      console.error('Failed to save duel series:', error);
     }
   };
 
@@ -95,6 +124,14 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         shootingDuration,
         trainingMode,
         competitionMode: !trainingMode  // Competition mode is opposite of training mode
+      });
+    }
+
+    // Pass duel-specific countdownDuration to program
+    if (programId === 'standard-duel') {
+      program.updateSettings({
+        countdownDuration: duelCountdownDuration,
+        numberOfCycles: duelSeries,
       });
     }
 
@@ -389,13 +426,13 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
           )
         )}
 
-  <View style={[styles.controls, styles.controlsBottom]}>
-          {!isRunning && isFieldProgram && (
+        <View style={[styles.controls, styles.controlsBottom]}>
+          {!isRunning && (isFieldProgram || isDuelProgram) && (
             <TouchableOpacity 
               style={[styles.button, styles.settingsButton]} 
               onPress={() => setShowSettings(true)}
             >
-              <Text style={styles.buttonText}>⚙️ {shootingDuration}s</Text>
+              <Text style={styles.buttonText}>{isFieldProgram ? `⚙️ ${shootingDuration}s` : '⚙️ Innstillinger'}</Text>
             </TouchableOpacity>
           )}
           {!isRunning && (
@@ -416,43 +453,79 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Innstillinger</Text>
               
-              {/* Training Mode Toggle */}
-              <View style={styles.settingRow}>
-                <Text style={styles.settingLabel}>Treningsmodus</Text>
-                <TouchableOpacity
-                  style={[styles.toggle, trainingMode && styles.toggleActive]}
-                  onPress={() => updateTrainingMode(!trainingMode)}
-                >
-                  <View style={[styles.toggleThumb, trainingMode && styles.toggleThumbActive]} />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.settingDescription}>
-                {trainingMode 
-                  ? '3 sek delay, systemlyder ved skifte' 
-                  : 'Ingen delay, ingen lyd (konkurranse)'}
-              </Text>
+              {isFieldProgram && (
+                <>
+                  {/* Training Mode Toggle */}
+                  <View style={styles.settingRow}>
+                    <Text style={styles.settingLabel}>Treningsmodus</Text>
+                    <TouchableOpacity
+                      style={[styles.toggle, trainingMode && styles.toggleActive]}
+                      onPress={() => updateTrainingMode(!trainingMode)}
+                    >
+                      <View style={[styles.toggleThumb, trainingMode && styles.toggleThumbActive]} />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.settingDescription}>
+                    {trainingMode 
+                      ? '3 sek delay, systemlyder ved skifte' 
+                      : 'Ingen delay, ingen lyd (konkurranse)'}
+                  </Text>
 
-              {/* Duration Picker */}
-              <Text style={styles.modalSubtitle}>
-                Skytetid
-              </Text>
-              
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={shootingDuration}
-                  onValueChange={(value) => updateShootingDuration(value)}
-                  style={styles.picker}
-                  itemStyle={styles.pickerItem}
-                >
-                  {Array.from({ length: 11 }, (_, i) => 4 + i * 2).map((duration) => (
-                    <Picker.Item 
-                      key={duration} 
-                      label={`${duration} sekunder`} 
-                      value={duration} 
-                    />
-                  ))}
-                </Picker>
-              </View>
+                  {/* Duration Picker */}
+                  <Text style={styles.modalSubtitle}>
+                    Skytetid
+                  </Text>
+                  
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={shootingDuration}
+                      onValueChange={(value) => updateShootingDuration(value)}
+                      style={styles.picker}
+                      itemStyle={styles.pickerItem}
+                    >
+                      {Array.from({ length: 11 }, (_, i) => 4 + i * 2).map((duration) => (
+                        <Picker.Item 
+                          key={duration} 
+                          label={`${duration} sekunder`} 
+                          value={duration} 
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                </>
+              )}
+
+              {isDuelProgram && (
+                <>
+                  <Text style={styles.modalSubtitle}>Antall serier (duell)</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={duelSeries}
+                      onValueChange={(value) => updateDuelSeries(value)}
+                      style={styles.picker}
+                      itemStyle={styles.pickerItem}
+                    >
+                      {[1, 6, 12].map((s) => (
+                        <Picker.Item key={s} label={`${s}`} value={s} />
+                      ))}
+                    </Picker>
+                  </View>
+
+                  <Text style={styles.modalSubtitle}>Nedtelling mellom serier (sek)</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={duelCountdownDuration}
+                      onValueChange={(value) => updateDuelCountdownDuration(value)}
+                      style={styles.picker}
+                      itemStyle={styles.pickerItem}
+                    >
+                      {[20, 30, 60].map((v) => (
+                        <Picker.Item key={v} label={`${v} sek`} value={v} />
+                      ))}
+                    </Picker>
+                  </View>
+                </>
+              )}
 
               <View style={styles.modalButtons}>
                 <TouchableOpacity

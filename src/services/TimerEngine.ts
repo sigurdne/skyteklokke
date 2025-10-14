@@ -37,7 +37,16 @@ export class TimerEngine {
   }
 
   private emit(event: TimerEvent): void {
-    this.listeners.forEach(listener => listener(event));
+    this.listeners.forEach(listener => {
+      try {
+        listener(event);
+      } catch (err) {
+        // Prevent listener errors from crashing the timer engine
+        // Log so we can investigate without breaking the sequence
+        // eslint-disable-next-line no-console
+        console.error('TimerEngine listener error:', err);
+      }
+    });
   }
 
   start(): void {

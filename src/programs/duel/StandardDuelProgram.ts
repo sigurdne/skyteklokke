@@ -14,6 +14,7 @@ export class StandardDuelProgram extends BaseProgram {
       type: 'light',
       supportedLanguages: ['no', 'en', 'sv', 'da'],
       defaultSettings: {
+        // Allowed countdown durations for duel: 20, 30 or 60 seconds. Default 60.
         countdownDuration: 60,   // seconds
         redLightDuration: 7,     // seconds
         greenLightDuration: 3,   // seconds
@@ -48,7 +49,7 @@ export class StandardDuelProgram extends BaseProgram {
 
     const steps: TimingStep[] = [];
 
-    // 60 second countdown (count DOWN from 60 to 1)
+    // Countdown (count DOWN from chosen duration to 1)
     for (let i = countdownDuration; i >= 1; i--) {
       steps.push({
         id: `countdown_${i}`,
@@ -61,8 +62,8 @@ export class StandardDuelProgram extends BaseProgram {
 
     // Light sequence (5 cycles)
     for (let cycle = 0; cycle < numberOfCycles; cycle++) {
-      // Red light phase (7 seconds)
-      for (let i = redLightDuration; i >= 1; i--) {
+      // Red light phase (count up from 1 to redLightDuration)
+      for (let i = 1; i <= redLightDuration; i++) {
         steps.push({
           id: `red_light_${cycle + 1}_${i}`,
           delay: 1000,
@@ -72,8 +73,8 @@ export class StandardDuelProgram extends BaseProgram {
         });
       }
 
-      // Green light phase (3 seconds)
-      for (let i = greenLightDuration; i >= 1; i--) {
+      // Green light phase (count up from 1 to greenLightDuration)
+      for (let i = 1; i <= greenLightDuration; i++) {
         steps.push({
           id: `green_light_${cycle + 1}_${i}`,
           delay: 1000,
@@ -114,8 +115,9 @@ export class StandardDuelProgram extends BaseProgram {
       return false;
     }
 
-    // Validate ranges
-    if (countdownDuration < 10 || countdownDuration > 300) return false;
+  // Validate allowed countdown durations for duel mode
+  const allowedDurations = [20, 30, 60];
+  if (!allowedDurations.includes(countdownDuration)) return false;
     if (redLightDuration < 1 || redLightDuration > 60) return false;
     if (greenLightDuration < 1 || greenLightDuration > 60) return false;
     if (numberOfCycles < 1 || numberOfCycles > 20) return false;

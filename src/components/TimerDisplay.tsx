@@ -36,11 +36,12 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
     return `${seconds}.${ms.toString().padStart(2, '0')}`;
   };
 
-  const getStateColor = (currentState: string): string => {
-    if (currentState.includes('idle')) return colors.idle;
-    if (currentState.includes('ready') || currentState.includes('prepare')) return colors.ready;
-    if (currentState.includes('fire') || currentState.includes('green')) return colors.active;
-    if (currentState.includes('cease') || currentState.includes('red')) return colors.cease;
+  const getStateColor = (currentState?: string): string => {
+    const s = (currentState || '').toLowerCase();
+    if (s.includes('idle')) return colors.idle;
+    if (s.includes('ready') || s.includes('prepare')) return colors.ready;
+    if (s.includes('fire') || s.includes('green')) return colors.active;
+    if (s.includes('cease') || s.includes('red')) return colors.cease;
     return colors.text;
   };
 
