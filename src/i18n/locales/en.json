@@ -8,7 +8,7 @@
   },
   "programs": {
     "field_title": "Field Shooting",
-    "field_description": "Standard competition with 10s shooting",
+    "field_description": "Standard competition with 10s preparation time",
     "duel_title": "Duel Shooting",
     "duel_description": "Dry training simulator with lights",
     "start_program": "Start program"

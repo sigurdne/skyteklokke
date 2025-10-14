@@ -8,7 +8,7 @@
   },
   "programs": {
     "field_title": "Feltskyting",
-    "field_description": "Standard konkurranse med 10s skyting",
+    "field_description": "Standard konkurranse med 10s valgbar skytetid og 10s kommandotid",
     "duel_title": "Duellskyting",
     "duel_description": "Tørrtrening simulator med lys",
     "start_program": "Start program"

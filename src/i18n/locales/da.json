@@ -8,7 +8,7 @@
   },
   "programs": {
     "field_title": "Feltskytte",
-    "field_description": "Standard konkurrence med 10s skydning",
+    "field_description": "Standard konkurrence med valgbar skytetid og 10s kommandotid",
     "duel_title": "Duelskytte",
     "duel_description": "Tørtræning simulator med lys",
     "start_program": "Start program"

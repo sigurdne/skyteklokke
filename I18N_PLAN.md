@@ -166,7 +166,7 @@ const supportedLanguage = mapToSupported(language);
     "home_title": "SkyteKlokke",
     "home_subtitle": "Presis timer for skyttere",
     "field_shooting": "Feltskyting",
-    "field_description": "Standard konkurranse med 10s skyting",
+    "field_description": "Standard konkurranse med valgbar skytetid og 10s kommandotid",
     "duel_shooting": "Duellskyting", 
     "duel_description": "Tørrtrening med lyssekvenser",
     "silhouette_shooting": "Silhuettskyting",

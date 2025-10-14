@@ -8,7 +8,7 @@
   },
   "programs": {
     "field_title": "Fältskytte",
-    "field_description": "Standard tävling med 10s skytte",
+    "field_description": "Standard tävling med valbar skjutning och 10s kommandotid",
     "duel_title": "Duellskytte",
     "duel_description": "Torrträning simulator med ljus",
     "start_program": "Starta program"
