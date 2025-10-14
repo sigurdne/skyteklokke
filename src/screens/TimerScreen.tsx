@@ -39,8 +39,6 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [showDiagnostics, setShowDiagnostics] = useState<boolean>(false);
-  const [diagnosticsText, setDiagnosticsText] = useState<string>('');
   const [shootingDuration, setShootingDuration] = useState<number>(10);
   const [trainingMode, setTrainingMode] = useState<boolean>(false);
   // Duel countdown (20,30,60)
@@ -339,8 +337,6 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
         timerEngineRef.current.addEventListener(handleTimerEvent);
         timerEngineRef.current.start();
         setIsRunning(true);
-        // clear previous diagnostics when starting new run
-        setDiagnosticsText('');
       }
     }
   };
@@ -384,26 +380,6 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       setCurrentCommand('');
       setElapsedTime(0);
     }
-  };
-
-  const fetchDiagnostics = async () => {
-    if (timerEngineRef.current && typeof (timerEngineRef.current as any).getDiagnostics === 'function') {
-      try {
-        const d = await (timerEngineRef.current as any).getDiagnostics();
-        setDiagnosticsText(d);
-      } catch (e) {
-        setDiagnosticsText(`Failed to fetch diagnostics: ${String(e)}`);
-      }
-    } else {
-      // try to read persisted diagnostics
-      try {
-        const stored = await AsyncStorage.getItem('timerEngineDiagnostics');
-        setDiagnosticsText(stored || 'No diagnostics stored');
-      } catch (e) {
-        setDiagnosticsText(`Failed to read stored diagnostics: ${String(e)}`);
-      }
-    }
-    setShowDiagnostics(true);
   };
 
   const handleBack = () => {
@@ -616,27 +592,9 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
                   <Text style={styles.buttonText}>OK</Text>
                 </TouchableOpacity>
               </View>
-              <View style={{ marginTop: spacing.md, alignItems: 'center' }}>
-                <TouchableOpacity style={[styles.secondaryButton || {}, { paddingVertical: 10, paddingHorizontal: 16 }]} onPress={fetchDiagnostics}>
-                  <Text style={[styles.buttonText, { color: colors.background }]}>Hent diagnostikk</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           </View>
         </Modal>
-        {showDiagnostics && (
-          <View style={styles.diagnosticsOverlay} pointerEvents="box-none">
-            <View style={styles.diagnosticsBox}>
-              <Text style={styles.diagnosticsTitle}>Diagnostics (siste hendelser)</Text>
-              <Text style={styles.diagnosticsText} numberOfLines={40} ellipsizeMode="tail">{diagnosticsText}</Text>
-              <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: spacing.sm }}>
-                <TouchableOpacity style={[styles.button, { minWidth: 120 }]} onPress={() => setShowDiagnostics(false)}>
-                  <Text style={styles.buttonText}>Lukk</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -817,33 +775,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: 8,
-  },
-  diagnosticsOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.lg,
-  },
-  diagnosticsBox: {
-    width: '90%',
-    maxHeight: '80%',
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    padding: spacing.md,
-  },
-  diagnosticsTitle: {
-    ...typography.h3,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  diagnosticsText: {
-    ...typography.body,
-    fontFamily: 'monospace',
-    fontSize: 12,
-    color: colors.text,
   },
 });
