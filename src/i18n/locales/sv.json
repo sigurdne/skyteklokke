@@ -25,7 +25,7 @@
     "start": "Start"
   },
   "states": {
-    "idle": "Redo att starta",
+    "idle": "Är skyttarna klara?",
     "ready_check": "Förbereder skyttar",
     "prepare": "Förbered",
     "fire": "Aktiv skytte",

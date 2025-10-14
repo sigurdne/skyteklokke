@@ -74,7 +74,10 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
           )}
           <View style={styles.stateSection}>
             <View style={[styles.stateIndicator, { backgroundColor: getStateColor(state) }]} />
-            <Text style={[styles.state, { color: textColor }]}>
+            <Text style={[
+              state.toLowerCase().includes('idle') ? styles.stateIdle : styles.state, 
+              { color: textColor }
+            ]}>
               {state}
             </Text>
           </View>
@@ -139,5 +142,9 @@ const styles = StyleSheet.create({
   state: {
     ...typography.body,
     textTransform: 'capitalize',
+  },
+  stateIdle: {
+    ...typography.h2,
+    textTransform: 'none',
   },
 });
