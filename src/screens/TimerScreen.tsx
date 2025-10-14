@@ -434,7 +434,7 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
 
               {/* Duration Picker */}
               <Text style={styles.modalSubtitle}>
-                Skytingens varighet (etter forberedelse)
+                Skytetid
               </Text>
               
               <View style={styles.pickerContainer}>
