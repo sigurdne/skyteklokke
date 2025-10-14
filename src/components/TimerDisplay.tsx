@@ -73,7 +73,9 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
             </View>
           )}
           <View style={styles.stateSection}>
-            <View style={[styles.stateIndicator, { backgroundColor: getStateColor(state) }]} />
+            {!state.toLowerCase().includes('idle') && (
+              <View style={[styles.stateIndicator, { backgroundColor: getStateColor(state) }]} />
+            )}
             <Text style={[
               state.toLowerCase().includes('idle') ? styles.stateIdle : styles.state, 
               { color: textColor }
@@ -131,7 +133,9 @@ const styles = StyleSheet.create({
   stateSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: spacing.lg,
+    width: '100%',
   },
   stateIndicator: {
     width: 16,
@@ -146,5 +150,7 @@ const styles = StyleSheet.create({
   stateIdle: {
     ...typography.h2,
     textTransform: 'none',
+    width: '90%',
+    textAlign: 'center',
   },
 });

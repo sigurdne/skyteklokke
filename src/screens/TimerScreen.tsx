@@ -151,9 +151,9 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
       if (programId === 'standard-field' && newCountdown !== null) {
         const state = event.state || currentState;
         
-        // PREPARE phase (white, 10-6): show "Er skytterene klare?"
+        // PREPARE phase (white, 10-6): no text for first 5 seconds (countdown 10-6)
         if (state === 'prepare' && newCountdown > 5) {
-          setCurrentCommand(t('commands.ready_question'));
+          setCurrentCommand('');
         }
         // PREPARE_WARNING phase (yellow, 5): show "KLAR!"
         else if (state === 'prepare_warning' && newCountdown === 5) {
