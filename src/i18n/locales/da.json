@@ -15,13 +15,17 @@
   },
   "commands": {
     "ready_check": "Er skytterne klar",
+    "ready_question": "Er skytterne klar?",
+    "ready_command": "KLAR!",
+    "fire_command": "ILD!",
+    "cease_command": "STOP",
     "prepare": "Lad",
     "fire": "Ild",
     "cease_fire": "Stop",
     "start": "Start"
   },
   "states": {
-    "idle": "Klar til start",
+    "idle": "Er skytterne klar?",
     "ready_check": "Forbereder skytter",
     "prepare": "Forbered",
     "fire": "Aktiv skydning",

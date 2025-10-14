@@ -15,6 +15,10 @@
   },
   "commands": {
     "ready_check": "Are the shooters ready",
+    "ready_question": "Are the shooters ready?",
+    "ready_command": "READY!",
+    "fire_command": "FIRE!",
+    "cease_command": "CEASE FIRE",
     "prepare": "Load",
     "fire": "Fire",
     "cease_fire": "Stop",
@@ -22,7 +26,7 @@
     "go": "Fire"
   },
   "states": {
-    "idle": "Ready to start",
+    "idle": "Are the shooters ready?",
     "ready_check": "Preparing shooters",
     "prepare": "Prepare",
     "prepare_warning": "Prepare",
