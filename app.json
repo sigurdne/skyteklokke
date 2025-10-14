@@ -34,6 +34,11 @@
       [
         "expo-localization"
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "68784b4a-d5de-49c3-87ff-4708c64e3ebe"
+      }
+    }
   }
 }
