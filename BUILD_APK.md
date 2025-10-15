@@ -61,7 +61,7 @@ cd ..
 # Finn versjonsnummer i android/app/build.gradle
 # Kopier APK til prosjektets rot med beskrivende navn
 cp android/app/build/outputs/apk/release/app-release.apk \
-   skyteklokke-v0.1.0-beta.2-debug.apk
+   skyteklokke-v0.1.0-beta.3-debug.apk
 ```
 
 ## Komplett skript for rask bygging
@@ -139,7 +139,7 @@ Debug keystore-filen ligger i `android/app/debug.keystore` og har følgende deta
 ### Via ADB (Android Debug Bridge)
 
 ```bash
-adb install skyteklokke-v0.1.0-beta.2-debug.apk
+adb install skyteklokke-v0.1.0-beta.3-debug.apk
 ```
 
 ### Manuell overføring
@@ -180,7 +180,7 @@ Versjonsnummer og versjonskode defineres i `android/app/build.gradle`:
 defaultConfig {
     applicationId 'com.skyteklokke.app'
     versionCode 2
-    versionName "0.1.0-beta.2"
+    versionName "0.1.0-beta.3"
 }
 ```
 
@@ -203,8 +203,8 @@ For å laste opp til GitHub:
 
 ```bash
 # Opprett en tag
-git tag v0.1.0-beta.2
-git push origin v0.1.0-beta.2
+git tag v0.1.0-beta.3
+git push origin v0.1.0-beta.3
 
 # Gå til GitHub → Releases → Draft a new release
 # Velg tag, last opp APK-filen
@@ -213,9 +213,9 @@ git push origin v0.1.0-beta.2
 Eller via GitHub CLI:
 
 ```bash
-gh release create v0.1.0-beta.2 \
-  skyteklokke-v0.1.0-beta.2-debug.apk \
-  --title "v0.1.0-beta.2" \
+gh release create v0.1.0-beta.3 \
+  skyteklokke-v0.1.0-beta.3-debug.apk \
+  --title "v0.1.0-beta.3" \
   --notes "Test release for beta testing"
 ```
 
