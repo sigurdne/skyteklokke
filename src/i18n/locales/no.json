@@ -44,5 +44,15 @@
     "resume": "Fortsett",
     "reset": "Reset",
     "back": "Tilbake"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "description": "Språk og preferanser",
+    "language": "Språk",
+    "language_select": "Velg språk",
+    "norwegian": "Norsk",
+    "english": "Engelsk",
+    "swedish": "Svensk",
+    "danish": "Dansk"
   }
 }
