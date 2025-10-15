@@ -12,6 +12,7 @@ type RootStackParamList = {
   Home: undefined;
   Timer: { programId: string };
   Settings: undefined;
+  About: undefined;
 };
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -57,6 +58,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             description={t('settings.description')}
             category="training"
             onPress={() => navigation.navigate('Settings')}
+          />
+          <ProgramCard
+            icon="ℹ️"
+            title={t('about.title')}
+            description={t('about.description')}
+            category="training"
+            onPress={() => navigation.navigate('About')}
           />
         </ScrollView>
       </View>

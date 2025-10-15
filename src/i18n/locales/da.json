@@ -51,5 +51,18 @@
     "english": "Engelsk",
     "swedish": "Svensk",
     "danish": "Dansk"
+  },
+  "about": {
+    "title": "Om",
+    "description": "Information om appen",
+    "app_name": "SkyteKlokke",
+    "version": "Version",
+    "app_description": "En præcisionstimer for konkurrenceskytter og banefunktionærer",
+    "features_title": "Funktioner",
+    "feature_field": "Feltskytte - Standard konkurrence med 10s skydning og kommandotid",
+    "feature_duel": "Duelskytte - Tørtræning simulator med lys",
+    "feature_multilang": "Flersproget support - Norsk, engelsk, svensk og dansk",
+    "developer": "Udvikler",
+    "license": "Licens"
   }
 }
