@@ -54,5 +54,18 @@
     "english": "English",
     "swedish": "Swedish",
     "danish": "Danish"
+  },
+  "about": {
+    "title": "About",
+    "description": "Information about the app",
+    "app_name": "SkyteKlokke",
+    "version": "Version",
+    "app_description": "A precision timer for competitive shooters and range officers",
+    "features_title": "Features",
+    "feature_field": "Field Shooting - Standard competition with 10s shooting and command time",
+    "feature_duel": "Duel Shooting - Dry training simulator with lights",
+    "feature_multilang": "Multilingual support - Norwegian, English, Swedish and Danish",
+    "developer": "Developer",
+    "license": "License"
   }
 }

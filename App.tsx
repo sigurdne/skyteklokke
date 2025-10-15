@@ -8,6 +8,7 @@ import i18n from './src/i18n';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { TimerScreen } from './src/screens/TimerScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { AboutScreen } from './src/screens/AboutScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from './src/utils/logger';
 
@@ -15,6 +16,7 @@ export type RootStackParamList = {
   Home: undefined;
   Timer: { programId: string };
   Settings: undefined;
+  About: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -118,6 +120,7 @@ export default function App() {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Timer" component={TimerScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="About" component={AboutScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>
