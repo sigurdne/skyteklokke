@@ -44,5 +44,15 @@
     "resume": "Resume",
     "reset": "Reset",
     "back": "Back"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Language and preferences",
+    "language": "Language",
+    "language_select": "Select language",
+    "norwegian": "Norwegian",
+    "english": "English",
+    "swedish": "Swedish",
+    "danish": "Danish"
   }
 }

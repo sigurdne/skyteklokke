@@ -11,6 +11,7 @@ import ProgramManager from '../services/ProgramManager';
 type RootStackParamList = {
   Home: undefined;
   Timer: { programId: string };
+  Settings: undefined;
 };
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -49,6 +50,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             category="duel"
             difficulty="beginner"
             onPress={() => handleProgramSelect('standard-duel')}
+          />
+          <ProgramCard
+            icon="⚙️"
+            title={t('settings.title')}
+            description={t('settings.description')}
+            category="training"
+            onPress={() => navigation.navigate('Settings')}
           />
         </ScrollView>
       </View>

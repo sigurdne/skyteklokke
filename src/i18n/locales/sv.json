@@ -41,5 +41,15 @@
     "resume": "Fortsätt",
     "reset": "Återställ",
     "back": "Tillbaka"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "description": "Språk och preferenser",
+    "language": "Språk",
+    "language_select": "Välj språk",
+    "norwegian": "Norska",
+    "english": "Engelska",
+    "swedish": "Svenska",
+    "danish": "Danska"
   }
 }

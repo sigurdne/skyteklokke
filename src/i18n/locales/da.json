@@ -41,5 +41,15 @@
     "resume": "Genoptag",
     "reset": "Nulstil",
     "back": "Tilbage"
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "description": "Sprog og præferencer",
+    "language": "Sprog",
+    "language_select": "Vælg sprog",
+    "norwegian": "Norsk",
+    "english": "Engelsk",
+    "swedish": "Svensk",
+    "danish": "Dansk"
   }
 }
