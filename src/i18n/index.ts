@@ -20,7 +20,11 @@ const LANGUAGE_STORAGE_KEY = '@skyteklokke:language';
 
 // Auto-detect language, fallback to Norwegian
 const getDeviceLanguage = (): string => {
-  const deviceLocale = Localization.locale || 'no';
+  const locales = Localization.getLocales();
+  const deviceLocale = locales && locales.length > 0 ? locales[0].languageCode : null;
+  if (!deviceLocale) {
+    return 'no';
+  }
   const languageCode = deviceLocale.split('-')[0];
   const supportedLanguages = ['no', 'en', 'sv', 'da'];
   
