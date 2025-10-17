@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SkyteKlokke - timer for konkurranseskyttere og standplassleder">
+    <meta name="theme-color" content="#667eea">
+    <title>SkyteKlokke - Timer for Skyting</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --bg-light: #f8f9fa;
+            --text-dark: #1a202c;
+            --text-gray: #4a5568;
+            --text-light: #718096;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            --radius: 12px;
+            --radius-large: 20px;
+            --spacing-xs: 8px;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 32px;
+            --spacing-xl: 48px;
+            --spacing-2xl: 64px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+        h2 { font-size: clamp(2rem, 4vw, 3rem); }
+        h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-md);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: var(--spacing-2xl) var(--spacing-md);
+            color: var(--white);
+        }
+
+        .header-content h1 {
+            margin-bottom: var(--spacing-md);
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .tagline {
+            font-size: clamp(1.2rem, 2.5vw, 1.75rem);
+            opacity: 0.95;
+            margin-bottom: var(--spacing-lg);
+            font-weight: 300;
+        }
+
+        /* Badges */
+        .badges {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-lg);
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: var(--white);
+            border-radius: var(--radius-large);
+            padding: var(--spacing-xl);
+            margin-top: -40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Section Styling */
+        section {
+            margin: var(--spacing-2xl) 0;
+        }
+
+        .section-title {
+            color: var(--primary);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        .intro {
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .intro p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .feature {
+            padding: var(--spacing-lg);
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px var(--shadow-hover);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-sm);
+            display: block;
+        }
+
+        .feature h3 {
+            color: var(--primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .feature p {
+            font-size: 1rem;
+        }
+
+        /* Screenshots Section */
+        .screenshots {
+            padding: var(--spacing-2xl) 0;
+        }
+
+        .screenshots-intro {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+            color: var(--text-light);
+        }
+
+        /* Horizontal Scroll Container */
+        .screenshot-scroll-container {
+            position: relative;
+            margin: 0 calc(-1 * var(--spacing-md));
+            padding: var(--spacing-md) var(--spacing-md) var(--spacing-lg);
+        }
+
+        .screenshot-scroll {
+            display: flex;
+            gap: var(--spacing-md);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-padding: var(--spacing-md);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--bg-light);
+        }
+
+        /* Custom Scrollbar */
+        .screenshot-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .screenshot-scroll::-webkit-scrollbar-track {
+            background: var(--bg-light);
+            border-radius: 10px;
+        }
+
+        .screenshot-scroll::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .screenshot-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        .screenshot {
+            flex: 0 0 auto;
+            width: 280px;
+            scroll-snap-align: start;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--white);
+        }
+
+        .screenshot:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px var(--shadow-hover);
+        }
+
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Scroll Indicators */
+        .scroll-indicator {
+            text-align: center;
+            margin-top: var(--spacing-sm);
+            color: var(--text-light);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+        }
+
+        .scroll-indicator::before,
+        .scroll-indicator::after {
+            content: '←→';
+            font-size: 1.2rem;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            background: var(--bg-light);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius);
+        }
+
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            margin-top: var(--spacing-lg);
+        }
+
+        .tech-item {
+            background: var(--white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 24px;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Download Section */
+        .download-section {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--radius-large);
+            color: var(--white);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-section h2 {
+            color: var(--white);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .download-section p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .btn-outline:hover {
+            background: var(--white);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* Details Section */
+        .details {
+            display: grid;
+            gap: var(--spacing-lg);
+        }
+
+        .detail-item {
+            padding: var(--spacing-lg);
+            border-left: 4px solid var(--primary);
+            background: var(--bg-light);
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .detail-item h3 {
+            color: var(--secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: var(--spacing-xl) var(--spacing-md);
+            color: var(--white);
+        }
+
+        footer a {
+            color: var(--white);
+            text-decoration: underline;
+            transition: opacity 0.3s ease;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: var(--spacing-sm) 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: var(--spacing-md);
+            }
+
+            .screenshot {
+                width: 240px;
+            }
+
+            .download-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .screenshot {
+                width: 200px;
+            }
+        }
+
+        /* Accessibility */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Skip to main content link */
+        .skip-to-main {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--primary);
+            color: var(--white);
+            padding: var(--spacing-sm);
+            text-decoration: none;
+            z-index: 100;
+            font-weight: 600;
+            border-radius: 0 0 var(--radius) 0;
+        }
+
+        .skip-to-main:focus {
+            top: 0;
+            outline: 3px solid var(--white);
+            outline-offset: 2px;
+        }
+
+        /* Focus indicators for interactive elements */
+        a:focus,
+        button:focus {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .btn:focus {
+            outline: 3px solid var(--white);
+            outline-offset: 2px;
+        }
+
+        .btn-outline:focus {
+            outline-color: var(--white);
+        }
+
+        /* Ensure scrollable region is keyboard accessible */
+        .screenshot-scroll:focus {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Improve color contrast for text */
+        .intro p {
+            color: var(--text-dark); /* Changed from var(--text-gray) for better contrast */
+        }
+
+        .screenshots-intro {
+            color: var(--text-gray); /* Changed from var(--text-light) for better contrast */
+        }
+
+        .scroll-indicator {
+            color: var(--text-gray); /* Changed from var(--text-light) for better contrast */
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --text-gray: #2d3748;
+                --text-light: #4a5568;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to main content link for keyboard users -->
+    <a href="#main-content" class="skip-to-main">Hopp til hovedinnhold</a>
+
+    <header role="banner">
+        <div class="container">
+            <div class="header-content fade-in">
+                <h1>⏱️ SkyteKlokke</h1>
+                <p class="tagline">Timer for konkurranseskyttere og standplassleder</p>
+                <div class="badges" role="list" aria-label="Plattformer og teknologier">
+                    <span class="badge" role="listitem">🇳🇴 Norsk</span>
+                    <span class="badge" role="listitem">📱 Android</span>
+                    <span class="badge" role="listitem">⚡ React Native</span>
+                    <span class="badge" role="listitem">🆓 Open Source</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" role="main">
+        <div class="container">
+            <div class="main-content fade-in">
+                <section class="intro" aria-labelledby="intro-heading">
+                    <h2 id="intro-heading" class="visually-hidden">Introduksjon</h2>
+                    <p style="text-align: center;">
+                        En moderne og pålitelig timer-app utviklet spesielt for norske skyttere. 
+                        SkyteKlokke støtter alle offisielle skyteprogrammer med presis timing, 
+                        talefeedback og intuitiv betjening.
+                    </p>
+                </section>
+
+                <section class="download-section" aria-labelledby="download-heading">
+                    <h2 id="download-heading">📥 Last ned nå</h2>
+                    <p>Gratis og åpen kildekode</p>
+                    <nav aria-label="Nedlastingslenker">
+                        <div class="download-buttons">
+                            <a href="https://github.com/sigurdne/skyteklokke/releases" 
+                               class="btn btn-primary"
+                               aria-label="Last ned APK-fil fra GitHub Releases">
+                                📥 Last ned APK
+                            </a>
+                            <a href="https://github.com/sigurdne/skyteklokke" 
+                               class="btn btn-outline"
+                               aria-label="Se kildekode på GitHub">
+                                💻 Se kildekode
+                            </a>
+                        </div>
+                    </nav>
+                </section>
+
+                <section class="screenshots" aria-labelledby="screenshots-heading">
+                    <h2 id="screenshots-heading" class="section-title">📱 Skjermbilder</h2>
+                    <p class="screenshots-intro">Scroll horisontalt for å se flere</p>
+                    <div class="screenshot-scroll-container">
+                        <div class="screenshot-scroll" 
+                             role="region" 
+                             aria-label="Skjermbilder av appen - scroll horisontalt"
+                             tabindex="0">
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251014_084455_SkyteKlokke.webp" 
+                                     alt="SkyteKlokke hovedskjerm med meny som viser programmene Standard Duel, Feltmatch, Innstillinger og Om" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Hovedskjerm</figcaption>
+                            </figure>
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251014_084630_SkyteKlokke_felt_settings.webp" 
+                                     alt="Feltmatch innstillinger skjerm med valg for antall skudd og tidsbegrensninger" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Felt innstillinger</figcaption>
+                            </figure>
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251015_125152_SkyteKlokke_felt_start_1.webp" 
+                                     alt="Feltmatch timer viser fase 1 med nedtelling og start-knapp" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Feltmatch start fase 1</figcaption>
+                            </figure>
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251015_125215_SkyteKlokke_felt_start_2.webp" 
+                                     alt="Feltmatch timer viser fase 2 med aktiv nedtelling" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Feltmatch start fase 2</figcaption>
+                            </figure>
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251015_125250_SkyteKlokke_felt_start_3.webp" 
+                                     alt="Feltmatch timer viser fase 3 med fortsatt nedtelling" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Feltmatch start fase 3</figcaption>
+                            </figure>
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251015_125549_SkyteKlokke_felt_stans.webp" 
+                                     alt="Feltmatch timer i pause-modus med stans-indikator" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Feltmatch stans</figcaption>
+                            </figure>
+                            <figure class="screenshot">
+                                <img src="screenshots/Screenshot_20251015_125710_SkyteKlokke_felt_slutt.webp" 
+                                     alt="Feltmatch timer viser fullført økt med slutt-skjerm" 
+                                     loading="lazy">
+                                <figcaption class="visually-hidden">Feltmatch slutt</figcaption>
+                            </figure>
+                        </div>
+                        <div class="scroll-indicator" aria-hidden="true">Scroll for å se flere</div>
+                    </div>
+                </section>
+
+                <section class="features-section" aria-labelledby="features-heading">
+                    <h2 id="features-heading" class="section-title">✨ Funksjoner</h2>
+                    <div class="features" role="list">
+                        <article class="feature" role="listitem">
+                            <span class="feature-icon" aria-hidden="true">🎯</span>
+                            <h3>Offisielle programmer</h3>
+                            <p>Standard duel (10, 20, 30 skudd) og feltmatch med korrekte tidsintervaller og sekvenser.</p>
+                        </article>
+                        <article class="feature" role="listitem">
+                            <span class="feature-icon" aria-hidden="true">🔊</span>
+                            <h3>Talefeedback</h3>
+                            <p>Klar norsk talesyntese varsler om faseskift, slik at du kan fokusere på skytingen.</p>
+                        </article>
+                        <article class="feature" role="listitem">
+                            <span class="feature-icon" aria-hidden="true">⏱️</span>
+                            <h3>Presis timing</h3>
+                            <p>Nøyaktig tidsregistrering med millisekund-presisjon for profesjonell bruk.</p>
+                        </article>
+                        <article class="feature" role="listitem">
+                            <span class="feature-icon" aria-hidden="true">🌐</span>
+                            <h3>Flerspråklig</h3>
+                            <p>Støtte for norsk, svensk, dansk og engelsk med enkelt språkbytte.</p>
+                        </article>
+                        <article class="feature" role="listitem">
+                            <span class="feature-icon" aria-hidden="true">📱</span>
+                            <h3>Skjerm alltid på</h3>
+                            <p>Holder skjermen aktiv under skyteprogrammer, så du ikke mister oversikten.</p>
+                        </article>
+                        <article class="feature" role="listitem">
+                            <span class="feature-icon" aria-hidden="true">🎨</span>
+                            <h3>Moderne design</h3>
+                            <p>Ren og intuitiv grensesnitt med god lesbarhet i alle lysforhold.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="tech-stack" aria-labelledby="tech-heading">
+                    <h2 id="tech-heading" class="section-title">🛠️ Teknologi</h2>
+                    <div class="tech-list" role="list" aria-label="Teknologier brukt i appen">
+                        <span class="tech-item" role="listitem">React Native 0.81</span>
+                        <span class="tech-item" role="listitem">Expo SDK 54</span>
+                        <span class="tech-item" role="listitem">TypeScript</span>
+                        <span class="tech-item" role="listitem">React Navigation</span>
+                        <span class="tech-item" role="listitem">i18next</span>
+                        <span class="tech-item" role="listitem">Expo Audio</span>
+                        <span class="tech-item" role="listitem">Expo Speech</span>
+                    </div>
+                </section>
+
+                <section class="details" aria-labelledby="details-heading">
+                    <h2 id="details-heading" class="section-title">📋 Detaljer</h2>
+                    <article class="detail-item">
+                        <h3>🎯 For hvem?</h3>
+                        <p>SkyteKlokke er designet for norske konkurranseskyttere og standplassleder som trenger en pålitelig og regelrett timer for trening og konkurranser.</p>
+                    </article>
+                    <article class="detail-item">
+                        <h3>📜 Lisens</h3>
+                        <p>Åpen kildekode under MIT-lisens. Gratis å bruke, modifisere og distribuere.</p>
+                    </article>
+                    <article class="detail-item">
+                        <h3>🤝 Bidra</h3>
+                        <p>Prosjektet er åpent for bidrag! Se <a href="https://github.com/sigurdne/skyteklokke">GitHub-repositoryet</a> for hvordan du kan bidra med kode, oversettelser eller feilrapporter.</p>
+                    </article>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <p>&copy; 2024 SkyteKlokke. Åpen kildekode under MIT-lisens.</p>
+            <nav aria-label="Footer-lenker">
+                <p>
+                    <a href="https://github.com/sigurdne/skyteklokke">GitHub</a> • 
+                    <a href="https://github.com/sigurdne/skyteklokke/issues">Rapporter feil</a>
+                </p>
+            </nav>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for accessibility
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
