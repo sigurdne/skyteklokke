@@ -219,8 +219,53 @@ gh release create v0.1.0-beta.3 \
   --notes "Test release for beta testing"
 ```
 
+---
+
+## 🚀 Publisering til Google Play Store
+
+For produksjonspublisering til Google Play Store, se:
+
+### 📖 [GOOGLE_PLAY_PUBLISHING.md](GOOGLE_PLAY_PUBLISHING.md)
+
+Denne guiden dekker:
+- Oppretting av Google Play Developer-konto
+- Generering av upload keystore for Play App Signing
+- Bygging av Android App Bundle (AAB)
+- Konfigurasjon av Play Console
+- Innlevering for review
+- Fremtidige oppdateringer
+
+### Hurtigstart for Play Store
+
+1. **Generer upload keystore**:
+   ```bash
+   ./scripts/generate-upload-keystore.sh
+   ```
+
+2. **Konfigurer keystore.properties**:
+   ```properties
+   storePassword=DITT_KEYSTORE_PASSORD
+   keyPassword=DITT_KEY_PASSORD
+   keyAlias=skyteklokke-upload
+   storeFile=skyteklokke-upload.keystore
+   ```
+
+3. **Bygg App Bundle**:
+   ```bash
+   ./scripts/build-playstore-aab.sh
+   ```
+
+4. **Last opp** til Play Console:
+   - Fil: `android/app/build/outputs/bundle/release/app-release.aab`
+   - Logg inn på: https://play.google.com/console
+
+Se også: [PLAYSTORE_METADATA.md](PLAYSTORE_METADATA.md) for beskrivelser og grafisk materiale.
+
+---
+
 ## Ressurser
 
 - [Android App Signing](https://developer.android.com/studio/publish/app-signing)
 - [React Native Publishing](https://reactnative.dev/docs/signed-apk-android)
 - [Gradle Build Variants](https://developer.android.com/studio/build/build-variants)
+- [Google Play App Signing](https://support.google.com/googleplay/android-developer/answer/9842756)
