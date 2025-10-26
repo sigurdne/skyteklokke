@@ -13,14 +13,21 @@ Denne guiden tar deg gjennom alle steg for å publisere SkyteKlokke til Google P
 ## ✅ Fremdrift
 
 - [x] **Steg 1.1**: Registrert som Google Play Developer ($25 betalt)
-- [ ] **Steg 1.2**: Venter på godkjenning fra Google (kan ta opptil 48 timer)
+- [x] **Steg 1.2**: Godkjent av Google
 - [x] **Forberedelser**: Screenshots konvertert til PNG (8 stk)
 - [x] **Forberedelser**: App-ikon 512x512 opprettet
 - [x] **Forberedelser**: .gitignore oppdatert (keystore, keystore.properties)
-- [ ] **Steg 2**: Generer upload keystore (gjøres etter godkjenning)
-- [ ] **Steg 3**: Konfigurer signing
-- [ ] **Steg 4**: Bygg App Bundle (AAB)
-- [ ] **Steg 5-11**: Publisering i Play Console
+- [x] **Steg 2**: Upload keystore generert
+- [x] **Steg 3.1**: keystore.properties opprettet
+- [x] **Steg 3.2**: build.gradle oppdatert med signing-konfigurasjon
+- [x] **Steg 4**: App Bundle (AAB) bygget (46 MB, versjon 0.1.0-beta.3)
+- [x] **Steg 5.1**: Metadata forberedt (beskrivelser og screenshots)
+- [ ] **Steg 6**: Opprett app i Play Console
+- [ ] **Steg 7**: Fyll ut Store listing
+- [ ] **Steg 8**: App content (Privacy, Data safety, Ads, Rating)
+- [ ] **Steg 9**: Countries/regions
+- [ ] **Steg 10**: Upload AAB med Play App Signing
+- [ ] **Steg 11**: Send til review
 
 ## 🔐 Steg 1: Opprett Google Play Developer-konto
 
@@ -226,21 +233,20 @@ ls -lh app/build/outputs/bundle/release/app-release.aab
 
 **Kort beskrivelse** (maks 80 tegn):
 ```
-Presisjonstimer for konkurranseskyttere og standplassleder
+SkyteKlokke for konkurranseskyttere og standplassledere
 ```
 
 **Full beskrivelse** (maks 4000 tegn):
 ```
 ⏱️ SKYTEKLOKKE - TIMER FOR KONKURRANSESKYTTERE
 
-SkyteKlokke er en norsk timer-app utviklet spesielt for konkurranseskyttere og standplassledere. Appen gir deg presis timing for feltmatch og duellskyting i henhold til DFS-regler.
+SkyteKlokke er en timer-app utviklet for konkurranseskyttere og standplassledere. Appen gir deg enkel og presis timing for feltmatch, i tillegg til en simlator for trening for duellskyting i henhold til DFS-regler.
 
 🎯 HOVEDFUNKSJONER
 
 • FELTMATCH - Komplette tidssekvenser for feltskyting med automatisk faseskifte
 • DUELLMATCH - Simulator for duellskyting med konfigurerbare tidsintervaller  
 • NORSK GRENSESNITT - Utviklet av og for norske skyttere
-• TALEFEEDBACK - Klare norske kommandoer og varsler
 • VISUELL INDIKASJON - Tydelig fargekoding for hver fase
 • SKJERM ALLTID PÅ - Skjermen forblir aktiv under hele økten
 
@@ -252,9 +258,9 @@ SkyteKlokke er en norsk timer-app utviklet spesielt for konkurranseskyttere og s
 • Enkle kontroller - start, pause, tilbakestill
 • Konfigurerbare innstillinger per program
 
-🇳🇴 LAGET FOR NORSKE SKYTTERE
+🇳🇴 LAGET FOR PISTOL SKYTTERE
 
-SkyteKlokke er utviklet av Sigurd Nes, en norsk programvareutvikler og skytteentusiast. Appen er skapt for å dekke et reelt behov i det norske skyttemiljøet for en pålitelig, regelrett timer for både trening og konkurranser.
+SkyteKlokke er utviklet av Sigurd Nes, programvareutvikler og skytter. Appen er laget for å dekke et reelt behov for en enkel, pålitelig, timer for både trening og konkurranser.
 
 ⚡ 100% GRATIS & OPEN SOURCE
 
@@ -282,9 +288,8 @@ Prosjektet er åpent for bidrag! Besøk GitHub-repositoryet for å se kildekoden
 ---
 
 Perfekt for:
-✓ Standplassledere som trenger pålitelig timing
+✓ Standplassledere som trenger enkel, intuitiv og pålitelig timing
 ✓ Skyttere som vil trene med korrekte tidssekvenser
-✓ Skytterlag som trenger timer for trening og konkurranser
 ✓ Alle som ønsker en enkel, effektiv timer for pistolskyting
 
 Last ned SkyteKlokke i dag og opplev forskjellen!
