@@ -450,6 +450,23 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
     return backgroundColor;
   };
 
+  const getTimerFontSize = (): number => {
+    // Adjust font size based on number of digits in countdown
+    const displayValue = countdown !== null ? countdown : 0;
+    const numDigits = displayValue.toString().length;
+    
+    // For 3 digits (100+), use smaller font
+    if (numDigits >= 3) {
+      return 180;
+    }
+    // For 2 digits (10-99), use medium font
+    if (numDigits >= 2) {
+      return 240;
+    }
+    // For 1 digit (0-9), use large font
+    return 240;
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.primary }]}>
       <View style={styles.container}>
@@ -479,7 +496,8 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
               </Text>
             )}
             <Text style={[styles.fullscreenTimer, { 
-              color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' 
+              color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF',
+              fontSize: getTimerFontSize()
             }]}>
               {countdown !== null ? countdown : 0}
             </Text>
@@ -577,6 +595,11 @@ export const TimerScreen: React.FC<TimerScreenProps> = ({ navigation, route }) =
                           value={duration} 
                         />
                       ))}
+                      <Picker.Item 
+                        key={150} 
+                        label="150 sekunder" 
+                        value={150} 
+                      />
                     </Picker>
                   </View>
                 </>
