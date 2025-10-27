@@ -16,6 +16,7 @@ Denne guiden tar deg gjennom alle steg for å publisere SkyteKlokke til Google P
 - [x] **Steg 1.2**: Godkjent av Google
 - [x] **Forberedelser**: Screenshots konvertert til PNG (8 stk)
 - [x] **Forberedelser**: App-ikon 512x512 opprettet
+- [x] **Forberedelser**: Feature Graphic opprettet (1024x500)
 - [x] **Forberedelser**: .gitignore oppdatert (keystore, keystore.properties)
 - [x] **Steg 2**: Upload keystore generert
 - [x] **Steg 3.1**: keystore.properties opprettet
@@ -26,8 +27,11 @@ Denne guiden tar deg gjennom alle steg for å publisere SkyteKlokke til Google P
 - [ ] **Steg 7**: Fyll ut Store listing
 - [ ] **Steg 8**: App content (Privacy, Data safety, Ads, Rating)
 - [ ] **Steg 9**: Countries/regions
-- [ ] **Steg 10**: Upload AAB med Play App Signing
-- [ ] **Steg 11**: Send til review
+- [ ] **Steg 10**: Sett opp Closed Testing (NYE KONTOER - PÅKREVD!)
+- [ ] **Steg 11**: Rekrutter minimum 12 testere
+- [ ] **Steg 12**: Kjør test i 14 dager sammenhengende
+- [ ] **Steg 13**: Søk om produksjonstilgang
+- [ ] **Steg 14**: Send til production review (etter godkjenning)
 
 ## 🔐 Steg 1: Opprett Google Play Developer-konto
 
@@ -470,7 +474,327 @@ Naviger til: **Reach and devices** → **Countries/regions**
 
 ---
 
-## 🚀 Steg 10: Upload App Bundle med Play App Signing
+## 🚀 Steg 10: Sett opp Closed Testing (PÅKREVD FOR NYE KONTOER!)
+
+> ⚠️ **VIKTIG**: Nye personlige Google Play Developer-kontoer må kjøre en lukket test i minimum 14 dager med minst 12 testere før de kan publisere til Production.
+
+### 10.1 Hvorfor Closed Testing?
+
+Google krever dette for nye kontoer for å:
+- Sikre at appen er testet ordentlig
+- Beskytte brukere mot upolerte apper
+- Verifisere at utvikleren er legitim
+
+### 10.2 Opprett Closed Testing track
+
+1. Gå til Play Console → **Testing** → **Closed testing**
+2. Klikk **"Create new release"** eller **"Create track"**
+3. Gi tracken et navn: `Closed Beta` (standard)
+
+### 10.3 Aktiver Google Play App Signing
+
+- Du vil se en melding om Play App Signing
+- Klikk **"Continue"** for å aktivere det
+- Dette er det samme systemet som brukes for Production
+
+### 10.4 Last opp App Bundle
+
+1. Klikk **"Upload"**
+2. Velg filen: `android/app/build/outputs/bundle/release/app-release.aab`
+3. Vent på prosessering
+
+### 10.5 Skriv release notes for testere
+
+**Release notes** (norsk):
+
+```
+🧪 Closed Beta - Test av SkyteKlokke
+
+Takk for at du hjelper til med å teste SkyteKlokke!
+
+Dette er første testversjon av appen. Vennligst test følgende:
+• Start feltmatch-timer og se at faseskiftene fungerer
+• Start duellmatch-simulator og test innstillinger
+• Sjekk at lyd/vibrasjoner fungerer som forventet
+• Test pause og tilbakestill-funksjoner
+• Rapporter eventuelle bugs eller problemer
+
+Gi gjerne tilbakemelding på hva som fungerer bra og hva som kan forbedres!
+
+Versjon: 0.1.0-beta.3
+```
+
+### 10.6 Velg rollout (100% anbefalt for testing)
+
+- Velg **Full rollout** (100%)
+- Alle testere får tilgang med en gang
+
+### 10.7 Lagre release
+
+1. Klikk **"Save"**
+2. Klikk **"Review release"**
+3. Sjekk at alt ser riktig ut
+4. Klikk **"Start rollout to Closed testing"**
+
+---
+
+## 👥 Steg 11: Rekrutter minimum 12 testere
+
+### 11.1 Opprett testerliste
+
+1. I Closed testing → Klikk **"Testers"** tab
+2. Velg **"Email list"** (enklest)
+3. Opprett en liste med navn: `Beta Testers`
+
+### 11.2 Legg til e-postadresser
+
+Legg til minimum 12 e-postadresser (Gmail-kontoer anbefales):
+
+```
+tester1@gmail.com
+tester2@gmail.com
+...
+tester12@gmail.com
+```
+
+**Tips for å finne testere:**
+- Skytterklubben din (standplassledere, skyttere)
+- Venner og familie
+- Kollegaer
+- Post i norske skytte-forum/Facebook-grupper
+- Post på klubbens Discord/Slack
+
+### 11.3 Få invitasjonslenke
+
+1. Etter at du har lagt til testere, klikk **"Copy link"**
+2. Du får en lenke som ser slik ut:
+   ```
+   https://play.google.com/apps/testing/com.skyteklokke.app
+   ```
+
+### 11.4 Send invitasjon til testere
+
+**E-post mal:**
+
+```
+Emne: Test SkyteKlokke - Beta for Android
+
+Hei!
+
+Jeg har utviklet en timer-app for konkurranseskyttere og trenger din hjelp til å teste den!
+
+SkyteKlokke har funksjoner for feltmatch og duellskyting med automatiske tidssekvenser.
+
+For å bli med i beta-testen:
+
+1. Klikk på denne lenken: https://play.google.com/apps/testing/com.skyteklokke.app
+2. Klikk "Bli med i testen"
+3. Vent litt (kan ta noen minutter)
+4. Last ned appen fra Google Play Store
+5. Test appen og gi tilbakemelding!
+
+Beta-testen vil vare i minimum 14 dager, og jeg trenger minst 12 testere for å kunne publisere appen offisielt.
+
+Takk for hjelpen! 🎯
+
+Hilsen,
+Sigurd Nes
+```
+
+### 11.5 Verifiser testere
+
+- Testere må **aktivt opt-in** til testen via lenken
+- De må **laste ned og installere** appen fra Play Store
+- Sjekk i Play Console → Testing → Closed testing → **"Testers"** at de blir vist som aktive
+
+---
+
+## ⏳ Steg 12: Kjør test i 14 dager sammenhengende
+
+### 12.1 Overvåk testperioden
+
+- **Minimum varighet**: 14 dager sammenhengende
+- **Minimum aktive testere**: 12 testere som har opt-in til testen
+- Testere må **forbli opted-in** hele perioden
+
+### 12.2 Følg med på statistikk
+
+Gå til Play Console → Testing → Closed testing → **Statistics**:
+- Antall nedlastninger
+- Antall aktive testere
+- Crashes og ANRs
+- Brukerrapporter
+
+### 12.3 Samle tilbakemeldinger
+
+**Opprett et enkelt tilbakemeldingsskjema** (valgfritt men anbefalt):
+- Google Forms
+- E-post
+- Discord/Slack-kanal
+
+**Spørsmål til testere:**
+1. Hvilken Android-versjon bruker du?
+2. Fungerer timeren som forventet?
+3. Er lyden/vibrasjoner tydelige?
+4. Er appen enkel å bruke?
+5. Oppdaget du noen bugs?
+6. Forbedringsforslag?
+
+### 12.4 Fiks kritiske bugs
+
+- Hvis testere finner bugs, fiks dem og last opp ny versjon
+- Hver gang du laster opp ny versjon, må du øke `versionCode` i `build.gradle`
+- 14-dagers perioden **nulstilles IKKE** ved oppdateringer
+
+### 12.5 Vent til dag 14
+
+- **Ikke avbryt testingen før 14 dager har gått**
+- Sørg for at minst 12 testere har vært opted-in hele perioden
+- Sjekk at appen er stabil (få eller ingen crashes)
+
+---
+
+## 🎯 Steg 13: Søk om produksjonstilgang
+
+### 13.1 Sjekk at kravene er oppfylt
+
+Før du søker, verifiser at:
+- ✅ Closed testing har kjørt i minst 14 dager
+- ✅ Minst 12 testere har vært opted-in hele perioden
+- ✅ Appen har få eller ingen crashes
+- ✅ Store listing er fullført
+- ✅ App content (privacy, content rating) er fullført
+
+### 13.2 Gå til Dashboard
+
+1. I Play Console → **Dashboard** (forsiden)
+2. Du vil se en melding eller knapp: **"Apply for production access"**
+3. Klikk på den
+
+### 13.3 Svar på Googles spørsmål
+
+Du vil bli bedt om å svare på spørsmål som:
+
+**1. Beskriv appen din:**
+```
+SkyteKlokke er en timer-app utviklet spesielt for konkurranseskyttere 
+og standplassledere i Norge. Appen gir presis timing for feltmatch 
+og duellskyting i henhold til DFS-regler.
+```
+
+**2. Hvordan har du testet appen?**
+```
+Appen har gjennomgått 14 dagers lukket beta-testing med 12+ aktive testere, 
+inkludert standplassledere og aktive skyttere. Vi har testet på ulike 
+Android-enheter og versjoner, og fikset bugs basert på tilbakemeldinger.
+```
+
+**3. Hvorfor er appen klar for produksjon?**
+```
+Appen er stabil uten kritiske bugs, har gjennomført grundig testing, 
+og dekker et reelt behov i skyttermiljøet. Testere har gitt positive 
+tilbakemeldinger på funksjonalitet og brukervennlighet.
+```
+
+**4. Målgruppe og bruk:**
+```
+Appen er rettet mot konkurranseskyttere og standplassledere i Norge, 
+Sverige og Danmark. Den brukes for timing under trening og konkurranser.
+```
+
+### 13.4 Send inn søknaden
+
+1. Gjennomgå svarene dine
+2. Klikk **"Submit"** (Send inn)
+3. Vent på svar fra Google
+
+### 13.5 Ventetid
+
+- **Review-tid**: Vanligvis 1-7 dager
+- Du får e-post når Google har tatt en beslutning
+- Sjekk Play Console Dashboard for status
+
+### 13.6 Hvis godkjent
+
+✅ Du får tilgang til å publisere i **Production**!
+- Fortsett til Steg 14
+
+### 13.7 Hvis avvist
+
+❌ Google vil forklare hvorfor:
+- Fiks problemene som nevnes
+- Kjør evt. mer testing
+- Søk på nytt
+
+---
+
+## 🚀 Steg 14: Send til Production review
+
+### 14.1 Opprett Production release
+
+Nå som du har produksjonstilgang:
+
+1. Gå til **Release** → **Production**
+2. Klikk **"Create new release"**
+3. **Google Play App Signing** er allerede aktivert fra Closed testing
+
+### 14.2 Bruk samme AAB
+
+Du kan:
+- **Alternativ A**: Laste opp samme AAB som ble testet (anbefalt hvis ingen endringer)
+- **Alternativ B**: Bygge og laste opp ny AAB med høyere `versionCode`
+
+### 14.3 Skriv production release notes
+
+**Release notes** (norsk):
+
+```
+🎉 Første offisielle release av SkyteKlokke!
+
+Funksjoner:
+• Feltmatch timer med automatiske faseskift
+• Duellmatch simulator
+• Norsk talefeedback og kommandoer
+• Tilpassbare tidsinnstillinger
+• Skjermen holder seg aktiv under bruk
+• Intuitiv betjening for standplassleder
+
+Utviklet av og for norske skyttere.
+Testet grundig i 14 dager med positive tilbakemeldinger.
+```
+
+### 14.4 Velg rollout-strategi
+
+For første production release:
+- **Staged rollout**: Start med 20% (anbefalt)
+- **Full rollout**: 100% hvis du er veldig sikker
+
+### 14.5 Lagre og send til review
+
+1. Klikk **"Save"**
+2. Klikk **"Review release"**
+3. Sjekk at alle seksjoner er grønne ✅
+4. Klikk **"Start rollout to Production"**
+
+### 14.6 Google reviewer appen (igjen)
+
+- **Review-tid**: 1-7 dager (vanligvis 24-48 timer)
+- Google sjekker:
+  - At appen følger retningslinjer
+  - At metadata er korrekt
+  - At appen fungerer som beskrevet
+- Du får e-post når status endres
+
+### 14.7 Publisert! 🎉
+
+Når Google godkjenner:
+- Appen blir tilgjengelig på Google Play Store
+- Brukere kan søke etter "SkyteKlokke" og installere den
+- Du kan dele lenken: `https://play.google.com/store/apps/details?id=com.skyteklokke.app`
+
+---
+
+## 📊 Steg 15: Etter publisering
 
 ### 10.1 Gå til Production release
 
@@ -564,21 +888,21 @@ Gå gjennom alle seksjoner og sjekk at alle har grønn hake ✅:
 
 ---
 
-## 📊 Steg 12: Etter publisering
+## 📊 Steg 15: Etter publisering
 
-### 12.1 Overvåk lansering
+### 15.1 Overvåk lansering
 
 - **Play Console Dashboard**: Se nedlastninger, crashes, ratings
 - **Pre-launch report**: Google tester appen automatisk på ulike enheter
 - **Crashes and ANRs**: Overvåk for feil
 
-### 12.2 Første 48 timer
+### 15.2 Første 48 timer
 
 - Sjekk for crashes daglig
 - Svar på brukeranmeldelser
 - Overvåk rating
 
-### 12.3 Gradvis øk rollout
+### 15.3 Gradvis øk rollout
 
 Hvis du startet med 20%:
 - **Dag 2-3**: Øk til 50% hvis alt går bra
