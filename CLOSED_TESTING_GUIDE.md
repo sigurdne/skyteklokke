@@ -12,32 +12,29 @@ Kjøre en vellykket 14-dagers beta-test med minst 12 testere for å kvalifisere 
 
 ## 👥 Testere
 
-### Minimumskrav
-- ✅ Minimum **12 testere**
-- ✅ Alle må være **opted-in** til testen
-- ✅ Må forbli opted-in i **14 dager sammenhengende**
+### 11.2 Legg til e-postadresser
 
-### Tester-liste (Mål: 12+)
+Legg til minimum 12 e-postadresser knyttet til Google-kontoer:
 
-| # | Navn | E-post | Opt-in dato | Status |
-|---|------|--------|-------------|--------|
-| 1 |  |  |  | ⏳ Venter |
-| 2 |  |  |  | ⏳ Venter |
-| 3 |  |  |  | ⏳ Venter |
-| 4 |  |  |  | ⏳ Venter |
-| 5 |  |  |  | ⏳ Venter |
-| 6 |  |  |  | ⏳ Venter |
-| 7 |  |  |  | ⏳ Venter |
-| 8 |  |  |  | ⏳ Venter |
-| 9 |  |  |  | ⏳ Venter |
-| 10 |  |  |  | ⏳ Venter |
-| 11 |  |  |  | ⏳ Venter |
-| 12 |  |  |  | ⏳ Venter |
-| 13 |  |  |  | ⏳ Bonus |
-| 14 |  |  |  | ⏳ Bonus |
-| 15 |  |  |  | ⏳ Bonus |
+```
+tester1@gmail.com
+tester2@example.com (hvis de har Google-konto med denne eposten)
+...
+tester12@gmail.com
+```
 
-**Tips**: Rekrutter 15+ testere for å ha buffer om noen dropper ut!
+**⚠️ VIKTIG: Google-konto er påkrevd!**
+- Testere **må ha Google-konto** for å delta i Closed Testing
+- De trenger **ikke Gmail** - hvilken som helst epost kan brukes til Google-konto
+- Har de ikke Google-konto? De kan opprette gratis på: https://accounts.google.com/signup (tar ~2 min)
+- E-postadressen du legger til må være den som er **knyttet til deres Google-konto**
+
+**Tips for å finne testere:**
+- Skytterklubben din (standplassledere, skyttere)
+- Venner og familie (spør om de har Google-konto)
+- Kollegaer
+- Post i norske skytte-forum/Facebook-grupper
+- Post på klubbens Discord/Slack
 
 ## 📋 Testplan
 
@@ -219,13 +216,19 @@ SkyteKlokke er en presisjons-timer for feltmatch og duellskyting, laget spesielt
 - Teste hovedfunksjonene (tar ~15 minutter)
 - Gi tilbakemelding på hva som fungerer/ikke fungerer
 
+**VIKTIG: Du må ha Google-konto!**
+- Har du Gmail? Da har du allerede Google-konto! ✅
+- Har du ikke? Opprett gratis her: https://accounts.google.com/signup (tar ~2 min)
+- E-posten du bruker må være knyttet til din Google-konto
+
 **Slik blir du med:**
 
 1. Klikk på denne lenken: https://play.google.com/apps/testing/com.skyteklokke.app
-2. Klikk "Bli med i testen" (opt-in)
-3. Vent noen minutter
-4. Last ned "SkyteKlokke" fra Google Play Store
-5. Test appen og send tilbakemelding til [din-epost]
+2. Logg inn med din Google-konto
+3. Klikk "Bli med i testen" (opt-in)
+4. Vent noen minutter
+5. Last ned "SkyteKlokke" fra Google Play Store
+6. Test appen og send tilbakemelding til [din-epost]
 
 **Viktig:**
 - Du må forbli "opted-in" i hele testperioden (14 dager)
