@@ -16,6 +16,7 @@
   "commands": {
     "ready_check": "Är skyttarna klara",
     "ready_question": "Är skyttarna klara?",
+    "shooters_ready": "Är skyttarna klara",
     "ready_command": "KLAR!",
     "fire_command": "ELD!",
     "cease_command": "ELDUPPHÖR",
