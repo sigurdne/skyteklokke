@@ -16,6 +16,7 @@
   "commands": {
     "ready_check": "Er skytterne klar",
     "ready_question": "Er skytterne klar?",
+    "shooters_ready": "Er skytterne klar",
     "ready_command": "KLAR!",
     "fire_command": "ILD!",
     "cease_command": "STOP",

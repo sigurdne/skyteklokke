@@ -1,4 +1,4 @@
-const DEBUG = false; // set to true for local debugging
+const DEBUG = true; // set to true for local debugging
 
 export const log = (...args: any[]) => {
   if (!DEBUG) return;

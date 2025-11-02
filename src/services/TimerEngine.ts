@@ -2,6 +2,14 @@ import { TimingStep, TimerEvent, TimerEventListener } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '../utils/logger';
 
+const INSTANT_COMMANDS = new Set([
+  'beep',
+  'continuous_beep',
+  'preplay_ready_command',
+  'preplay_fire_command',
+  'preplay_cease_command',
+]);
+
 /**
  * Timer Engine - Manages timer execution with precise timing
  */
@@ -232,23 +240,39 @@ export class TimerEngine {
         }
       };
 
-      if (step.command && step.audioEnabled) {
+      const commandName = step.command;
+      const shouldDelayState = Boolean(
+        commandName &&
+          step.audioEnabled &&
+          !INSTANT_COMMANDS.has(commandName)
+      );
+
+      if (commandName && step.audioEnabled) {
         try {
-          this.emit({ type: 'command', command: step.command, state: step.state, stepId: step.id, timestamp: Date.now() });
+          this.emit({ type: 'command', command: commandName, state: step.state, stepId: step.id, timestamp: Date.now() });
         } catch (e) {
           logger.error('TimerEngine: emit(command) error', e, 'step=', step);
           this.pushDiagnostic({ timestamp: Date.now(), note: 'emit_command_error', stepId: step.id });
         }
 
-        setTimeout(() => {
+        if (shouldDelayState) {
+          setTimeout(() => {
+            try {
+              emitStateAndCountdown();
+            } catch (innerErr) {
+              logger.error('TimerEngine: error in delayed emit', innerErr, 'step=', step);
+              this.pushDiagnostic({ timestamp: Date.now(), note: 'delayed_emit_error', stepId: step.id });
+              try { AsyncStorage.setItem('timerEngineDiagnostics', JSON.stringify(this.diagnostics)); } catch (e) { /* ignore */ }
+            }
+          }, 350);
+        } else {
           try {
             emitStateAndCountdown();
-          } catch (innerErr) {
-            logger.error('TimerEngine: error in delayed emit', innerErr, 'step=', step);
-            this.pushDiagnostic({ timestamp: Date.now(), note: 'delayed_emit_error', stepId: step.id });
-            try { AsyncStorage.setItem('timerEngineDiagnostics', JSON.stringify(this.diagnostics)); } catch (e) { /* ignore */ }
+          } catch (instantErr) {
+            logger.error('TimerEngine: error in immediate emit for instant command', instantErr, 'step=', step);
+            this.pushDiagnostic({ timestamp: Date.now(), note: 'instant_emit_error', stepId: step.id });
           }
-        }, 350);
+        }
       } else {
         try {
           emitStateAndCountdown();
