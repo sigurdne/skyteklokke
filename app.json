@@ -24,7 +24,7 @@
         "backgroundColor": "#2C3E50"
       },
       "package": "com.skyteklokke.app",
-  "versionCode": 4,
+  "versionCode": 5,
       "permissions": []
     },
     "web": {
