@@ -1,6 +1,4 @@
 import { Audio } from 'expo-av';
-import { createAudioPlayer } from 'expo-audio';
-import type { AudioPlayer } from 'expo-audio';
 import { Directory, File, Paths } from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '../utils/logger';
@@ -40,8 +38,29 @@ const PHASE_LABELS: Record<PhaseKey, string> = {
 
 // Global recorder and player instances
 let currentRecording: Recording | null = null;
-let playbackPlayers: Map<string, AudioPlayer> = new Map();
+let playbackPlayers: Map<string, Audio.Sound> = new Map();
 const playbackDurations: Map<string, number> = new Map();
+
+async function stopSound(key: string): Promise<void> {
+  const sound = playbackPlayers.get(key);
+  if (!sound) {
+    return;
+  }
+
+  try {
+    await sound.stopAsync();
+  } catch (error) {
+    // Safe to ignore; sound might already be stopped
+  }
+
+  try {
+    await sound.unloadAsync();
+  } catch (error) {
+    logger.error(`Error unloading sound ${key}:`, error);
+  }
+
+  playbackPlayers.delete(key);
+}
 
 async function ensureAudioModeForRecording() {
   await Audio.setAudioModeAsync({
@@ -282,16 +301,7 @@ export async function deleteRecording(programId: string, phase: PhaseKey): Promi
       await file.delete();
     }
     const key = `${programId}:${phase}`;
-    const existingPlayer = playbackPlayers.get(key);
-    if (existingPlayer) {
-      try {
-        existingPlayer.pause();
-        existingPlayer.remove?.();
-      } catch (e) {
-        logger.error('Error removing player during deleteRecording:', e);
-      }
-      playbackPlayers.delete(key);
-    }
+    await stopSound(key);
     playbackDurations.delete(key);
     await setEnabled(programId, phase, false);
     logger.log(`Recording deleted: ${path}`);
@@ -353,25 +363,23 @@ export async function playIfEnabled(programId: string, phase: PhaseKey): Promise
     const offset = await getOffset(programId, phase);
 
     // Stop previous player for this phase
-    const existingPlayer = playbackPlayers.get(key);
-    if (existingPlayer) {
-      try {
-        existingPlayer.pause();
-        existingPlayer.remove?.();
-      } catch (e) {
-        // Ignore
-      }
-      playbackPlayers.delete(key);
-    }
+    await stopSound(key);
 
     // Note: Offset is handled in initializeTimer by adjusting step delays in the timing sequence
     // So we play immediately when called
 
-    // Create and play with expo-audio
-    const { createAudioPlayer } = require('expo-audio');
-    const player = createAudioPlayer({ uri: path });
-    playbackPlayers.set(key, player);
-    player.play();
+    // Create and play with expo-av
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: path },
+      { shouldPlay: true },
+      (status) => {
+        const isFinished = (status as any)?.didJustFinish;
+        if (isFinished) {
+          stopSound(key);
+        }
+      }
+    );
+    playbackPlayers.set(key, sound);
 
     // Retrieve cached duration to avoid delaying playback; fetch asynchronously if missing
     let duration = playbackDurations.get(key) || 0;
@@ -407,14 +415,9 @@ export async function playIfEnabled(programId: string, phase: PhaseKey): Promise
  * Stop all playback
  */
 export async function stopAllPlayback(): Promise<void> {
-  for (const [key, player] of playbackPlayers) {
-    try {
-      player.pause();
-      player.remove?.();
-    } catch (e) {
-      logger.error(`Error stopping player ${key}:`, e);
-    }
-    playbackPlayers.delete(key);
+  const keys = Array.from(playbackPlayers.keys());
+  for (const key of keys) {
+    await stopSound(key);
   }
 }
 
