@@ -512,49 +512,70 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
             )}
           </TouchableOpacity>
         ) : currentState === 'idle' ? (
-          <View style={timerStyles.idleContainer}>
-            <Text
-              accessible
-              accessibilityRole="text"
-              style={{
-                ...typography.h2,
-                textTransform: 'uppercase',
-                textAlign: 'center',
-                color: textColor,
-              }}
-            >
-              {t('states.idle')}
-            </Text>
+          <View style={{ flex: 1, justifyContent: 'space-between' }}>
+            <View style={timerStyles.idleContainer}>
+              <Text
+                accessible
+                accessibilityRole="text"
+                style={{
+                  ...typography.h2,
+                  textTransform: 'uppercase',
+                  textAlign: 'center',
+                  color: textColor,
+                }}
+              >
+                {t('states.idle')}
+              </Text>
+            </View>
+            <View style={[timerStyles.controls, timerStyles.controlsBottom]}>
+              {!isRunning && settingsBindings?.showButton && (
+                <TouchableOpacity
+                  style={[timerStyles.button, timerStyles.settingsButton]}
+                  onPress={openSettings}
+                >
+                  <Text style={timerStyles.buttonText}>
+                    {settingsBindings.buttonLabel ?? 'Innstillinger'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {!isRunning && customStartControls}
+              {!isRunning && shouldShowDefaultStartButton && (
+                <TouchableOpacity style={timerStyles.button} onPress={handleStart}>
+                  <Text style={timerStyles.buttonText}>{t('controls.start')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         ) : (
-          <TimerDisplay
-            time={elapsedTime}
-            state={currentState ? t(`states.${currentState}`) : t('states.idle')}
-            command={currentCommand}
-            countdown={countdown}
-            backgroundColor={backgroundColor}
-            textColor={textColor}
-          />
+          <View style={{ flex: 1, justifyContent: 'space-between' }}>
+            <TimerDisplay
+              time={elapsedTime}
+              state={currentState ? t(`states.${currentState}`) : t('states.idle')}
+              command={currentCommand}
+              countdown={countdown}
+              backgroundColor={backgroundColor}
+              textColor={textColor}
+            />
+            <View style={[timerStyles.controls, timerStyles.controlsBottom]}>
+              {!isRunning && settingsBindings?.showButton && (
+                <TouchableOpacity
+                  style={[timerStyles.button, timerStyles.settingsButton]}
+                  onPress={openSettings}
+                >
+                  <Text style={timerStyles.buttonText}>
+                    {settingsBindings.buttonLabel ?? 'Innstillinger'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {!isRunning && customStartControls}
+              {!isRunning && shouldShowDefaultStartButton && (
+                <TouchableOpacity style={timerStyles.button} onPress={handleStart}>
+                  <Text style={timerStyles.buttonText}>{t('controls.start')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         )}
-
-        <View style={[timerStyles.controls, timerStyles.controlsBottom]}>
-          {!isRunning && settingsBindings?.showButton && (
-            <TouchableOpacity
-              style={[timerStyles.button, timerStyles.settingsButton]}
-              onPress={openSettings}
-            >
-              <Text style={timerStyles.buttonText}>
-                {settingsBindings.buttonLabel ?? 'Innstillinger'}
-              </Text>
-            </TouchableOpacity>
-          )}
-          {!isRunning && customStartControls}
-          {!isRunning && shouldShowDefaultStartButton && (
-            <TouchableOpacity style={timerStyles.button} onPress={handleStart}>
-              <Text style={timerStyles.buttonText}>{t('controls.start')}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
 
         <Modal
           visible={settingsBindings?.isVisible ?? false}

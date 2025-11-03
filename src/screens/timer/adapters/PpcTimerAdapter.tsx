@@ -223,6 +223,8 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       let cancelled = false;
 
       const evaluateStageClips = async () => {
+        logger.info(`evaluateStageClips: titleKey=${stageClipKeys.title}, briefingKey=${stageClipKeys.briefing}`);
+        
         if (!stageClipKeys.title && !stageClipKeys.briefing) {
           if (!cancelled) {
             setHasStageTitleClip(false);
@@ -237,9 +239,14 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             getClipMeta(stageClipKeys.briefing),
           ]);
 
+          logger.info(`evaluateStageClips: titleMeta=${JSON.stringify(titleMeta)}, briefingMeta=${JSON.stringify(briefingMeta)}`);
+
           if (!cancelled) {
-            setHasStageTitleClip(Boolean(titleMeta?.uri));
-            setHasStageBriefingClip(Boolean(briefingMeta?.uri));
+            const hasTitleClip = Boolean(titleMeta?.uri);
+            const hasBriefingClip = Boolean(briefingMeta?.uri);
+            logger.info(`evaluateStageClips: Setting hasTitleClip=${hasTitleClip}, hasBriefingClip=${hasBriefingClip}`);
+            setHasStageTitleClip(hasTitleClip);
+            setHasStageBriefingClip(hasBriefingClip);
           }
         } catch (error) {
           logger.warn('Failed to inspect stage clips for availability', error);
@@ -295,7 +302,10 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const playRecordedClip = useCallback(
       async (clipKey: string | null) => {
+        logger.info(`playRecordedClip: clipKey=${clipKey}`);
+        
         if (!clipKey) {
+          logger.warn('playRecordedClip: No clipKey provided');
           return false;
         }
 
@@ -303,22 +313,29 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
         try {
           const meta = await getClipMeta(clipKey);
+          logger.info(`playRecordedClip: meta=${JSON.stringify(meta)}`);
+          
           if (meta?.uri) {
+            logger.info(`playRecordedClip: Creating sound from uri=${meta.uri}`);
             const { sound } = await Audio.Sound.createAsync({ uri: meta.uri });
             soundRef.current = sound;
             sound.setOnPlaybackStatusUpdate((status) => {
               if (!status.isLoaded) {
                 return;
               }
-              if (status.didJustFinish || !status.isPlaying) {
+              if (status.didJustFinish || status.positionMillis >= (status.durationMillis ?? Number.MAX_SAFE_INTEGER)) {
                 sound.unloadAsync().catch(() => undefined);
                 if (soundRef.current === sound) {
                   soundRef.current = null;
                 }
               }
             });
+            logger.info('playRecordedClip: Playing sound...');
             await sound.playAsync();
+            logger.info('playRecordedClip: Sound playing successfully');
             return true;
+          } else {
+            logger.warn('playRecordedClip: No URI in meta');
           }
         } catch (error) {
           logger.warn('Failed to play recorded stage clip', error);
@@ -529,13 +546,18 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         ];
 
         const handleInfoPress = async (button: (typeof infoButtons)[number]) => {
+          logger.info(`handleInfoPress: key=${button.key}, hasClip=${button.hasClip}, clipKey=${button.clipKey}, busy=${stagePreviewBusy}`);
+          
           if (!button.hasClip || stagePreviewBusy) {
+            logger.warn(`handleInfoPress: Skipping - hasClip=${button.hasClip}, busy=${stagePreviewBusy}`);
             return;
           }
 
           setStagePreviewBusy(button.key);
           try {
-            await playRecordedClip(button.clipKey);
+            logger.info(`handleInfoPress: Calling playRecordedClip with clipKey=${button.clipKey}`);
+            const result = await playRecordedClip(button.clipKey);
+            logger.info(`handleInfoPress: playRecordedClip returned ${result}`);
           } finally {
             setStagePreviewBusy(null);
           }
@@ -605,6 +627,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
         return (
           <View style={startControlsStyles.container}>
+            <Text style={startControlsStyles.prompt}>{manualPrompt}</Text>
             <View style={startControlsStyles.infoSection}>
               {infoButtons.map((button) => {
                 const disabled = !button.hasClip || Boolean(stagePreviewBusy);
@@ -628,7 +651,6 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
                 );
               })}
             </View>
-            <Text style={startControlsStyles.prompt}>{manualPrompt}</Text>
             <View style={startControlsStyles.list}>
               {buttons.map((button) => {
                 const completed = manualStep > button.stepIndex;

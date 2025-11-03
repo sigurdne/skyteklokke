@@ -17,10 +17,6 @@ export const timerStyles = StyleSheet.create({
     gap: spacing.md,
   },
   controlsBottom: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: '33%',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -30,7 +26,6 @@ export const timerStyles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: '33%',
   },
   button: {
     backgroundColor: colors.success,
