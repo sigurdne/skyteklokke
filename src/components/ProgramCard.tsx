@@ -23,6 +23,8 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
         return colors.warning;
       case 'silhouette':
         return colors.primary;
+      case 'ppc':
+        return colors.secondary;
       default:
         return colors.text;
     }

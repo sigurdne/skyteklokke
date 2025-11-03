@@ -166,6 +166,23 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 - Detaljer fleksibel treningsmodus (hvordan bruker omarrangerer, lagrer og repeterer matcher/stages).
 - Bestem om scoring integreres (ikke del av første iterasjon, men bør vurderes).
 - Dokumenter kommando- og lydlogikk i kode (kommentarer) for vedlikehold.
-- Definer arbeidsflyt for innspilling, lagring og gjenbruk av briefing- og kommandoopptak.
+- Arbeidsflyt for innspilling, lagring og gjenbruk av briefing- og kommandoopptak:
+   1. Bruker åpner en stage i PPC-visningen og får opp detaljpanel med briefing- og kommando-seksjon.
+   2. For hvert element (tittel, briefing, kommandoer) kan man spille av enten eksisterende opptak eller standard TTS via `AudioService`.
+   3. «Ta opp» starter Expo AV-opptak; fil flyttes til `AudioClipService` bibliotek ved stopp og metadata lagres i AsyncStorage.
+   4. Opptak kan slettes direkte fra panelet; da faller avspilling tilbake til standard TTS.
+   5. Timeren vil etter integrasjon lese lagrede nøkler for å trigge tilpassede opptak under kommando/briefing.
+
+## 11. TODO-liste
+
+- [x] Registrer `PPCProgram` i `ProgramManager` med nødvendige standardinnstillinger.
+- [x] Modellér stage-data (type `PPCStage`) og gjenbruk briefing- og audio-nøkler der det er mulig.
+- [x] Generer timersekvenser per stage, inkludert -3 til -1 nedtelling og start/slutt-signaler.
+- [x] Utvid `TimerEngine`/adaptere for å støtte negative tellere og PPC-spesifikke kommandoer.
+- [x] Lag PPC-hjemvisning med navigasjon til hoveddisipliner og tilhørende matcher/stages.
+- [x] Implementer briefing- og kommando-panel med avspillings- og opptaksstøtte.
+- [ ] Integrer lydopptaksflyten i innstillinger med gjenbrukbare ressurser for PPC.
+- [ ] Oppdater i18n-filer (no/en/sv/da) med alle nye PPC-strenger.
+- [ ] Skriv testplan og gjennomfør regresjonstester for eksisterende programmer.
 
 Når disse punktene er avklart kan vi lage konkrete utviklingsoppgaver (Issues) og estimere innsats per komponent.

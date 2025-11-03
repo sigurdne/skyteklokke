@@ -4,10 +4,12 @@ import { BaseTimerScreen, TimerProgramAdapter, TimerScreenProps } from './timer/
 import { defaultTimerAdapter } from './timer/adapters/DefaultTimerAdapter';
 import { standardDuelTimerAdapter } from './timer/adapters/StandardDuelTimerAdapter';
 import { standardFieldTimerAdapter } from './timer/adapters/StandardFieldTimerAdapter';
+import { ppcTimerAdapter } from './timer/adapters/PpcTimerAdapter';
 
 const adapterRegistry: Record<string, TimerProgramAdapter> = {
   'standard-field': standardFieldTimerAdapter,
   'standard-duel': standardDuelTimerAdapter,
+  'ppc-standard': ppcTimerAdapter,
 };
 
 export const TimerScreen: React.FC<TimerScreenProps> = (props) => {

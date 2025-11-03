@@ -7,13 +7,7 @@ import { Header } from '../components/Header';
 import { ProgramCard } from '../components/ProgramCard';
 import { colors, spacing, typography } from '../theme';
 import ProgramManager from '../services/ProgramManager';
-
-type RootStackParamList = {
-  Home: undefined;
-  Timer: { programId: string };
-  Settings: undefined;
-  About: undefined;
-};
+import { RootStackParamList } from '../navigation/types';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -74,6 +68,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             category="duel"
             difficulty="beginner"
             onPress={() => handleProgramSelect('standard-duel')}
+          />
+          <ProgramCard
+            icon="🎯"
+            title={t('programs.ppc_title')}
+            description={t('programs.ppc_description')}
+            category="ppc"
+            difficulty="intermediate"
+            onPress={() => navigation.navigate('PPC')}
           />
         </ScrollView>
 

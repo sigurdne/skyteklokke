@@ -11,6 +11,8 @@
     "field_description": "Standard konkurrence med valgbar skytetid og 10s kommandotid",
     "duel_title": "Duelskytte",
     "duel_description": "Tørtræning simulator med lys",
+    "ppc_title": "Præcisionspistol",
+    "ppc_description": "WA1500-discipliner med guidede serier",
     "start_program": "Start program"
   },
   "commands": {
@@ -23,18 +25,27 @@
     "prepare": "Lad",
     "fire": "Ild",
     "cease_fire": "Stop",
-    "start": "Start"
+    "start": "Start",
+    "go": "Ild",
+    "lade_hylstre": "Lad og hylster",
+    "er_linja_klar": "Er linjen klar?",
+    "linja_er_klar": "Linjen er klar"
   },
   "states": {
     "idle": "Er skytterne klar?",
     "ready_check": "Forbereder skytter",
     "prepare": "Forbered",
+    "prepare_warning": "Forbered",
     "fire": "Aktiv skydning",
+    "fire_warning": "Snart færdig",
     "cease_fire": "Skydning afsluttet",
     "finished": "Færdig",
     "countdown": "Nedtælling",
     "red_light": "Rødt lys",
-    "green_light": "Grønt lys"
+    "green_light": "Grønt lys",
+    "briefing": "Briefing",
+    "prestart": "Forbered linjen",
+    "shooting": "Skydning i gang"
   },
   "controls": {
     "start": "Start",
@@ -65,5 +76,61 @@
     "feature_multilang": "Flersproget support - Norsk, engelsk, svensk og dansk",
     "developer": "Udvikler",
     "license": "Licens"
+  },
+  "ppc": {
+    "home": {
+      "subtitle": "WA1500-discipliner og stagebeskrivelser",
+      "program_missing": "PPC-programmet er ikke tilgængeligt lige nu.",
+      "select_discipline": "Vælg en disciplin",
+      "select_stage": "Vælg en stage",
+      "back_to_disciplines": "Tilbage til discipliner",
+      "stage_count_one": "{{count}} stage",
+      "stage_count_other": "{{count}} stager",
+      "tap_to_start": "Tryk for at starte timeren"
+    },
+    "labels": {
+      "shots_one": "{{count}} skud",
+      "shots_other": "{{count}} skud",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yard",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Stående",
+      "standing_one_hand": "Stående (én hånd)",
+      "kneeling": "Knælende",
+      "sitting": "Siddende",
+      "prone": "Liggende",
+      "barricade_left": "Barrikade venstre",
+      "barricade_right": "Barrikade højre"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Stage-titel",
+      "stage_briefing_label": "Briefingtekst",
+      "section_commands": "Kommandoer",
+      "command_prepare_label": "Kommando: \"Lad og hylster\"",
+      "command_line_ready_query_label": "Kommando: \"Er linjen klar?\"",
+      "command_line_ready_label": "Kommando: \"Linjen er klar\"",
+      "distance_label": "Afstand",
+      "time_label": "Tidsgrænse",
+      "positions_label": "Skydestillinger",
+      "start_stage": "Start stage",
+      "close": "Luk",
+      "play_recorded": "Afspil optagelse",
+      "play_default": "Afspil standard",
+      "record": "Optag",
+      "stop": "Stop",
+      "delete": "Slet",
+      "recorded_on": "Optaget {{date}}",
+  "recording": "Optager...",
+  "section_recordings": "Optagelser",
+  "no_recording": "Ingen optagelse gemt endnu"
+    },
+    "timer": {
+      "manual_prompt": "Afspil kommandoerne i rækkefølge for at starte serien",
+      "manual_reset": "Start forfra"
+    }
   }
 }

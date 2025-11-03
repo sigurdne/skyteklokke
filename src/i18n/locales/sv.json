@@ -11,6 +11,8 @@
     "field_description": "Standard tävling med valbar skjutning och 10s kommandotid",
     "duel_title": "Duellskytte",
     "duel_description": "Torrträning simulator med ljus",
+    "ppc_title": "Precision Pistol",
+    "ppc_description": "WA1500-discipliner med styrda moment",
     "start_program": "Starta program"
   },
   "commands": {
@@ -23,18 +25,27 @@
     "prepare": "Ladda",
     "fire": "Eld",
     "cease_fire": "Stopp",
-    "start": "Start"
+    "start": "Start",
+    "go": "Eld",
+    "lade_hylstre": "Ladda, hölstra",
+    "er_linja_klar": "Är linjen klar?",
+    "linja_er_klar": "Linjen är klar"
   },
   "states": {
     "idle": "Är skyttarna klara?",
     "ready_check": "Förbereder skyttar",
     "prepare": "Förbered",
+    "prepare_warning": "Förbered",
     "fire": "Aktiv skytte",
+    "fire_warning": "Snart slut",
     "cease_fire": "Skytte avslutat",
     "finished": "Färdig",
     "countdown": "Nedräkning",
     "red_light": "Rött ljus",
-    "green_light": "Grönt ljus"
+    "green_light": "Grönt ljus",
+    "briefing": "Briefing",
+    "prestart": "Förbered linjen",
+    "shooting": "Skytte pågår"
   },
   "controls": {
     "start": "Start",
@@ -65,5 +76,61 @@
     "feature_multilang": "Flerspråkigt stöd - Norska, engelska, svenska och danska",
     "developer": "Utvecklare",
     "license": "Licens"
+  },
+  "ppc": {
+    "home": {
+      "subtitle": "WA1500-discipliner och momentbeskrivningar",
+      "program_missing": "PPC-programmet är inte tillgängligt just nu.",
+      "select_discipline": "Välj en disciplin",
+      "select_stage": "Välj ett moment",
+      "back_to_disciplines": "Tillbaka till discipliner",
+      "stage_count_one": "{{count}} moment",
+      "stage_count_other": "{{count}} moment",
+      "tap_to_start": "Tryck för att starta timern"
+    },
+    "labels": {
+      "shots_one": "{{count}} skott",
+      "shots_other": "{{count}} skott",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yard",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Stående",
+      "standing_one_hand": "Stående (en hand)",
+      "kneeling": "Knästående",
+      "sitting": "Sittande",
+      "prone": "Liggande",
+      "barricade_left": "Barrikad vänster",
+      "barricade_right": "Barrikad höger"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Momenttitel",
+      "stage_briefing_label": "Briefingtext",
+      "section_commands": "Kommandon",
+      "command_prepare_label": "Kommando: \"Ladda, hölstra\"",
+      "command_line_ready_query_label": "Kommando: \"Är linjen klar?\"",
+      "command_line_ready_label": "Kommando: \"Linjen är klar\"",
+      "distance_label": "Avstånd",
+      "time_label": "Tidsgräns",
+      "positions_label": "Skjutställningar",
+      "start_stage": "Starta moment",
+      "close": "Stäng",
+      "play_recorded": "Spela upp inspelning",
+      "play_default": "Spela standard",
+      "record": "Spela in",
+      "stop": "Stoppa",
+      "delete": "Ta bort",
+      "recorded_on": "Inspelad {{date}}",
+  "recording": "Spelar in...",
+  "section_recordings": "Inspelningar",
+  "no_recording": "Ingen inspelning sparad ännu"
+    },
+    "timer": {
+      "manual_prompt": "Spela upp kommandona i ordning för att starta momentet",
+      "manual_reset": "Börja om"
+    }
   }
 }

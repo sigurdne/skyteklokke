@@ -11,6 +11,8 @@
     "field_description": "Standard competition with 10s preparation time",
     "duel_title": "Duel Shooting",
     "duel_description": "Dry training simulator with lights",
+    "ppc_title": "Precision Pistol",
+    "ppc_description": "WA1500 disciplines with guided stages",
     "start_program": "Start program"
   },
   "commands": {
@@ -24,7 +26,10 @@
     "fire": "Fire",
     "cease_fire": "Stop",
     "start": "Start",
-    "go": "Fire"
+    "go": "Fire",
+    "lade_hylstre": "Load and holster",
+    "er_linja_klar": "Is the line ready?",
+    "linja_er_klar": "The line is ready"
   },
   "states": {
     "idle": "Are the shooters ready?",
@@ -37,7 +42,10 @@
     "finished": "Finished",
     "countdown": "Countdown",
     "red_light": "Red light",
-    "green_light": "Green light"
+    "green_light": "Green light",
+    "briefing": "Briefing",
+    "prestart": "Line preparation",
+    "shooting": "Shooting"
   },
   "controls": {
     "start": "Start",
@@ -68,5 +76,61 @@
     "feature_multilang": "Multilingual support - Norwegian, English, Swedish and Danish",
     "developer": "Developer",
     "license": "License"
+  },
+  "ppc": {
+    "home": {
+      "subtitle": "WA1500 disciplines and stage briefs",
+      "program_missing": "The PPC program is unavailable right now.",
+      "select_discipline": "Choose a discipline",
+      "select_stage": "Choose a stage",
+      "back_to_disciplines": "Back to disciplines",
+      "stage_count_one": "{{count}} stage",
+      "stage_count_other": "{{count}} stages",
+      "tap_to_start": "Tap to load the timer"
+    },
+    "labels": {
+      "shots_one": "{{count}} shot",
+      "shots_other": "{{count}} shots",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yards",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Standing",
+      "standing_one_hand": "Standing (one hand)",
+      "kneeling": "Kneeling",
+      "sitting": "Sitting",
+      "prone": "Prone",
+      "barricade_left": "Barricade left",
+      "barricade_right": "Barricade right"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Stage title",
+      "stage_briefing_label": "Briefing summary",
+      "section_commands": "Commands",
+      "command_prepare_label": "Command: \"Load and holster\"",
+      "command_line_ready_query_label": "Command: \"Is the line ready?\"",
+      "command_line_ready_label": "Command: \"The line is ready\"",
+      "distance_label": "Distance",
+      "time_label": "Time limit",
+      "positions_label": "Positions",
+      "start_stage": "Start stage",
+      "close": "Close",
+      "play_recorded": "Play recording",
+      "play_default": "Play default",
+      "record": "Record",
+      "stop": "Stop",
+      "delete": "Delete",
+      "recorded_on": "Recorded {{date}}",
+  "recording": "Recording...",
+  "section_recordings": "Recordings",
+  "no_recording": "No recording saved yet"
+    },
+    "timer": {
+      "manual_prompt": "Play each command in order to start the stage",
+      "manual_reset": "Start over"
+    }
   }
 }

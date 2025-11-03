@@ -75,6 +75,17 @@ export interface TimerProgramBindings {
   getTimerFontSize?: (context: TimerDisplayContext) => number;
   renderFullscreenOverlay?: (context: TimerDisplayContext) => React.ReactNode;
   cleanup?: () => void;
+  renderStartControls?: (context: TimerStartControlContext) => React.ReactNode;
+  showDefaultStartButton?: boolean;
+}
+
+export interface TimerStartControlContext {
+  startTimer: () => Promise<void>;
+  isRunning: boolean;
+  isPaused: boolean;
+  currentState: string;
+  currentCommand: string;
+  countdown: number | null;
 }
 
 export interface TimerProgramAdapterContext {
@@ -425,6 +436,19 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     textColor,
   };
 
+  const hasCustomStartControls = Boolean(adapterBindings.renderStartControls);
+  const customStartControls = !isRunning && adapterBindings.renderStartControls
+    ? adapterBindings.renderStartControls({
+        startTimer: handleStart,
+        isRunning,
+        isPaused,
+        currentState,
+        currentCommand,
+        countdown,
+      })
+    : null;
+  const shouldShowDefaultStartButton = adapterBindings.showDefaultStartButton ?? !hasCustomStartControls;
+
   const showFullscreenDisplay = adapterBindings.showFullscreenDisplay
     ? adapterBindings.showFullscreenDisplay(displayContext)
     : false;
@@ -524,7 +548,8 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
               </Text>
             </TouchableOpacity>
           )}
-          {!isRunning && (
+          {!isRunning && customStartControls}
+          {!isRunning && shouldShowDefaultStartButton && (
             <TouchableOpacity style={timerStyles.button} onPress={handleStart}>
               <Text style={timerStyles.buttonText}>{t('controls.start')}</Text>
             </TouchableOpacity>

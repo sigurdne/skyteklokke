@@ -45,17 +45,37 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
     return colors.text;
   };
 
+  const getCountdownColor = (value: number | null | undefined, currentState?: string): string => {
+    if (value === null || value === undefined) {
+      return colors.warning;
+    }
+    if (value < 0) {
+      return colors.secondary;
+    }
+    if (value === 0) {
+      return colors.danger;
+    }
+    const stateLabel = (currentState || '').toLowerCase();
+    if (stateLabel.includes('shoot') || stateLabel.includes('fire')) {
+      return colors.success;
+    }
+    if (stateLabel.includes('prepare') || stateLabel.includes('ready')) {
+      return colors.warning;
+    }
+    return colors.success;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {countdown !== null && countdown !== undefined ? (
         // Show large countdown during prepare/fire phase with optional command text above
         <View style={styles.countdownSection}>
           {command && (
-            <Text style={[styles.countdownCommand, { color: colors.warning }]}>
+            <Text style={[styles.countdownCommand, { color: getCountdownColor(countdown, state) }]}>
               {command}
             </Text>
           )}
-          <Text style={[styles.countdown, { color: colors.warning }]}>
+          <Text style={[styles.countdown, { color: getCountdownColor(countdown, state) }]}>
             {countdown}
           </Text>
         </View>

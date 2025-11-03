@@ -11,6 +11,8 @@
     "field_description": "Standard konkurranse med 10s valgbar skytetid og 10s kommandotid",
     "duel_title": "Duellskyting",
     "duel_description": "Tørrtrening simulator med lys",
+    "ppc_title": "Presisjonspistol",
+    "ppc_description": "WA1500-disipliner med trinnvise kommandoer",
     "start_program": "Start program"
   },
   "commands": {
@@ -24,7 +26,10 @@
     "fire": "Ild",
     "cease_fire": "Stans",
     "start": "Start",
-    "go": "Ild"
+    "go": "Ild",
+    "lade_hylstre": "Lade, hylstre",
+    "er_linja_klar": "Er linja klar?",
+    "linja_er_klar": "Linja er klar"
   },
   "states": {
     "idle": "Er skytterene klare?",
@@ -37,7 +42,10 @@
     "finished": "Ferdig",
     "countdown": "Nedtelling",
     "red_light": "Rød lys",
-    "green_light": "Grønn lys"
+    "green_light": "Grønn lys",
+    "briefing": "Briefing",
+    "prestart": "Forbered linja",
+    "shooting": "Skyting pågår"
   },
   "controls": {
     "start": "Start",
@@ -68,5 +76,61 @@
     "feature_multilang": "Flerspråklig støtte - Norsk, engelsk, svensk og dansk",
     "developer": "Utvikler",
     "license": "Lisens"
+  },
+  "ppc": {
+    "home": {
+      "subtitle": "WA1500-disipliner og stagebeskrivelser",
+      "program_missing": "PPC-programmet er ikke tilgjengelig nå.",
+      "select_discipline": "Velg en disiplin",
+      "select_stage": "Velg en stage",
+      "back_to_disciplines": "Tilbake til disipliner",
+      "stage_count_one": "{{count}} stage",
+      "stage_count_other": "{{count}} stager",
+      "tap_to_start": "Trykk for å åpne timeren"
+    },
+    "labels": {
+      "shots_one": "{{count}} skudd",
+      "shots_other": "{{count}} skudd",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yard",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Stående",
+      "standing_one_hand": "Stående (én hånd)",
+      "kneeling": "Knestående",
+      "sitting": "Sittende",
+      "prone": "Liggende",
+      "barricade_left": "Barrikade venstre",
+      "barricade_right": "Barrikade høyre"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Stage-tittel",
+      "stage_briefing_label": "Briefingtekst",
+      "section_commands": "Kommandoer",
+      "command_prepare_label": "Kommando: \"Lade, hylstre\"",
+      "command_line_ready_query_label": "Kommando: \"Er linja klar?\"",
+      "command_line_ready_label": "Kommando: \"Linja er klar\"",
+      "distance_label": "Avstand",
+      "time_label": "Tidsgrense",
+      "positions_label": "Skytestillinger",
+      "start_stage": "Start stage",
+      "close": "Lukk",
+      "play_recorded": "Spill opptak",
+      "play_default": "Spill standard",
+      "record": "Ta opp",
+      "stop": "Stopp",
+      "delete": "Slett",
+      "recorded_on": "Opptak {{date}}",
+  "recording": "Tar opp...",
+  "section_recordings": "Opptak",
+  "no_recording": "Ingen opptak lagret"
+    },
+    "timer": {
+      "manual_prompt": "Spill av kommandoene i rekkefølge for å starte stage",
+      "manual_reset": "Start på nytt"
+    }
   }
 }

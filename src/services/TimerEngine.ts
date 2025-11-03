@@ -8,6 +8,8 @@ const INSTANT_COMMANDS = new Set([
   'preplay_ready_command',
   'preplay_fire_command',
   'preplay_cease_command',
+  'preplay_ppc_stage_title',
+  'preplay_ppc_stage_briefing',
 ]);
 
 /**

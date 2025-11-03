@@ -9,15 +9,10 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { TimerScreen } from './src/screens/TimerScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { AboutScreen } from './src/screens/AboutScreen';
+import { PpcHomeScreen } from './src/screens/PpcHomeScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from './src/utils/logger';
-
-export type RootStackParamList = {
-  Home: undefined;
-  Timer: { programId: string };
-  Settings: undefined;
-  About: undefined;
-};
+import { RootStackParamList } from './src/navigation/types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -121,6 +116,7 @@ export default function App() {
             <Stack.Screen name="Timer" component={TimerScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
+            <Stack.Screen name="PPC" component={PpcHomeScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </I18nextProvider>
