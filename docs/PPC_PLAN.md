@@ -5,6 +5,7 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 ## 1. Mål og omfang
 
 - Legg til et nytt programområde kalt **PPC** med tre hoveddisipliner: `WA1500 - 150 skudds match`, `WA1500 - 60 skudds match` og `WA1500 - 48 skudds match`.
+- Hjem-skjermen skal få et nytt kort/knapp merket **PPC** med undertittel **Precision Pistol Competition**.
 - Hver hoveddisiplin består av faste matcher og eventuelle underliggende *stages*.
 - Skytteren skal få tydelig briefing før hvert delmoment (avstand, skytetid, skytestilling og antall skudd per stilling).
 - Appen skal kunne brukes til både konkurranse og trening; i treningssammenheng må rekkefølge og repetisjon av matcher/stages være fleksibel.
@@ -12,7 +13,7 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 
 ## 2. Programoversikt og struktur
 
-| Hovedprogram | Match / Stage | Avstand | Iterasjoner | Skytested (rekkefølge) | Skytetid |
+| Hovedprogram | Match / Stage | Avstand | Iterasjoner | Skytestilling (rekkefølge) | Skytetid |
 |--------------|---------------|---------|-------------|------------------------|----------|
 | **WA1500 - 150 skudds match** | Match 1 Stage 1 | 7 yard | 2×6 skudd | Stående | 20 s |
 | | Match 1 Stage 2 | 15 yard | 2×6 skudd | Stående | 20 s |
@@ -38,14 +39,15 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 ## 3. Logisk flyt per stage
 
 1. **Briefing**
-   - Vises før nedtelling starter.
-   - Inneholder tekst: `Avstand`, `Totalt antall skudd`, nedbrutt per skytestilling, og `Skytetid`.
-   - Lagres i i18n for flerspråklig støtte.
+   - Består av to deler: **tittel** (match/stage-navn) og **øvelsesbeskrivelse** (avstand, iterasjoner, skytestilling i rekkefølge og skytetid).
+   - Briefing skal kunne gjenbrukes på tvers av hovedprogrammer: både tittel og øvelsesbeskrivelse lagres med felles nøkler, og tilhørende lydopptak kan knyttes til samme referanser.
+   - Lagres i i18n for flerspråklig støtte og skal kunne spille av et forhåndsinnspilt lydklipp i lydmodus.
 
 2. **Kommandoer**
    1. "Lade, hylstre" (forberedelse)
    2. "Er linja klar?"
    3. "Linja er klar" (trigger for strekk på -3 sekunder)
+   - Alle tre kommandoer skal støtte avspilling av et forhåndsinnspilt lydklipp (gjenbrukes på tvers av stages).
 
 3. **Nedtelling og skyting**
    - Når kommando 3 er annonsert, viser klokka `-3`, `-2`, `-1` før den hopper til valgt skytetid (f.eks. `165`) og teller ned til `0`.
@@ -68,7 +70,7 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
    - Konfigurer `defaultSettings` med PPC-spesifikke felter (f.eks. valgt hoveddisiplin, valgt match/stage, lydmodus etc.).
 
 2. **Stage-definisjoner**
-   - Lag struktur i koden (f.eks. JSON eller TypeScript-objekt) som beskriver hver stage:
+   - Lag struktur i koden (f.eks. JSON eller TypeScript-objekt) som beskriver hver stage og muliggjør gjenbruk av briefing:
 
      ```ts
      interface PPCStage {
@@ -78,24 +80,29 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
        distanceYards: number;
        series: Array<{ shots: number; position: 'kne' | 'stå' | 'sitt' | 'ligg' | 'barrikade_l' | 'barrikade_h' }>;
        timeSeconds: 8 | 12 | 20 | 35 | 90 | 165;
-       briefingKey: string; // i18n nøkkel
+       titleKey: string; // i18n nøkkel for match/stage-navn
+       briefingKey: string; // i18n nøkkel for øvelsesbeskrivelse (gjenbrukes på tvers av hovedprogrammer)
+       audioTitleKey?: string; // valgfritt opptak for tittel-delen
+       audioBriefingKey?: string; // referanse til lagret lydopptak for øvelsesbeskrivelsen
      }
      ```
 
-   - Lag en array for hver hoveddisiplin.
+   - Lag en array for hver hoveddisiplin. Når samme stage dukker opp i flere programmer, referer til samme `id`, `titleKey` og `briefingKey` for å gjenbruke tekst og audio.
+   - Eksempel: `WA1500 - 150 skudds match – Match 1 Stage 1` og `WA1500 - 60 skudds match – Stage 1` deler samme stage-id slik at briefingtekst og lydopptak gjenbrukes.
 
 3. **ProgramSettings**
-   - Utvid `ProgramSettings` der nødvendig med felt som `discipline`, `currentStageIndex`, `autoAdvance`, etc.
+   - Utvid `ProgramSettings` der nødvendig med felt som `discipline`, `currentStageId`, `autoAdvance`, og referanser til valgte `briefingKey`/`audioBriefingKey`.
+   - Legg til struktur for å lagre hvilke lydopptak som er knyttet til kommando 1–3 (f.eks. `commandAudioKeys`), slik at de kan spilles av på tvers av matcher.
 
 4. **TimerSequence**
-   - For hver stage, generer en sekvens i `getTimingSequence()` som:
-     - Bruker negative trinn for `-3` til `-1` (kan løses ved å inkludere en pre-sekvens med countdown type `countdown` i `TimerEngine`).
-     - Setter `command`-felt for lydsignaler (f.eks. `beep` for start og slutt).
+   - For hver stage, generer en sekvens i `getTimingSequence()` som dekker:
+     - Negative trinn for `-3` til `-1` (kan løses ved å inkludere en pre-sekvens med countdown type `countdown` i `TimerEngine`).
+     - `command`-felt for lydsignaler (f.eks. `beep` for start og slutt) og eventuelle referanser til lydopptak for kommando 1–3.
    - Alternativ: la `TimerScreen` styre -3 countdown (UI/TimerEngine). Undersøk eksisterende logikk for custom audio.
 
 5. **TimerEngine**
    - Verifiser at motoren kan håndtere negative startverdier. Hvis ikke, utvid med et nytt state for "pre-start".
-   - Lydsignaler: gjenbruk systemlyd eller custom audio (dersom `soundMode` aktivert).
+   - Lydsignaler: gjenbruk systemlyd eller custom audio (dersom `soundMode` aktivert) og sørg for at kommando-/briefingopptak trigges på riktige tidspunkt.
 
 6. **Program Manager**
    - Registrer nytt program i `ProgramManager` (`registerProgram(new PPCProgram())`).
@@ -103,23 +110,32 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 ## 6. UI og brukeropplevelse
 
 1. **Hjem-skjerm**
-   - Legg til nytt kort for PPC (ikon + beskrivelse).
-   - Evt. underkategorier ("WA1500 - 150 skudds match", "WA1500 - 60 skudds match", "WA1500 - 48 skudds match") i en modal eller nedtrekksmeny.
+   - Nytt PPC-kort med tittel **PPC** og undertittel "Precision Pistol Competition".
+   - Trykk åpner PPC-visning med liste over hovedprogrammer (WA1500 - 150 / 60 / 48).
 
-2. **TimerScreen**
-   - Vis aktiv match/stage øverst (f.eks. `Match 3 – Stage 2`).
-   - Legg inn briefing-panel (kan være kollapsbar) som lister distanse og shotplan.
-   - Etter hver stage, vis resultatoppsummering / mulighet til å gå videre.
+2. **PPC-visning**
+   - Nivå 1: liste over hovedprogrammer med kort beskrivelse og ikon.
+   - Nivå 2: etter valg av hovedprogram vises match-/stage-liste. Deløvelser som forekommer flere ganger gjenbruker samme briefingtekst/audio.
+   - Når en match/stage velges:
+     - Vises briefingpanel som tydelig skiller **tittel** (match/stage-navn) og **øvelsesbeskrivelse** (avstand, iterasjoner, skytetid). Begge kan spilles av via egne knapper ved tilgjengelige opptak.
+     - Viser tre kommando-knapper (1–3). Kommandoene har tilhørende lydopptak; kommando 3 trigger nedtellingen (-3 til 0).
+   - Etter ferdig stage returnerer UI til match-/stage-listen for valgt hovedprogram slik at skytteren kan repetere eller velge neste.
 
 3. **Innstillinger**
-   - Lar Skytteren velge hovedprogram ("WA1500 - 150 skudds match", "WA1500 - 60 skudds match", "WA1500 - 48 skudds match") og om appen skal auto-avanse til neste stage.
-   - Tilbyr treningsmodus der skytter kan omarrangere eller repetere matcher/stages etter behov.
-   - Tillat toggling av lydmodus som i eksisterende feltprogram.
+   - Lar skytteren velge standard hovedprogram og om appen skal auto-avanse til neste stage.
+   - Tilbyr treningsmodus der bruker kan omarrangere eller repetere matcher/stages.
+   - Inneholder egen seksjon for lydopptak:
+     - Viser samme hierarki av hovedprogrammer → matcher/stages som i PPC-visningen.
+     - For hvert stage kan bruker spille inn eller erstatte opptak for **tittel** og **briefing**.
+     - Når et opptak allerede finnes via gjenbruk, listes det med mulighet for avspilling (test) og sletting før ny innspilling.
+   - Tillater toggling av lydmodus samt valg av hvilke kommando-/briefingopptak som skal brukes.
 
 ## 7. Lyd og tilpasning
 
 - Lydsignaler: gjenbruk eksisterende `beep`/`continuous_beep` eller introduser nye kommandoer (kort beep ved start + slutt).
 - Custom audio: vurder om PPC trenger egne voice prompts (kan være gjenbruk av generiske kommandoer).
+- Kommando 1–3 og briefingopptak må kunne spilles inn én gang og gjenbrukes på tvers av matcher/hovedprogram.
+- Innstillingssiden skal bruke felles opptaksmodul som lagrer lyd med referanse til `audioTitleKey` og `audioBriefingKey`, slik at alle programmer deler samme ressurs.
 
 ## 8. Internasjonalisering
 
@@ -129,13 +145,15 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
   - Briefing-tekst (avstand, stilling, skytetid).
   - Kommandoer ("Lade, hylstre", "Er linja klar?", "Linja er klar").
 - Oppdater `en`, `no`, `sv`, `da` JSON-filer.
+- Alle brukertekster som vises i opptaksflyten (inkludert knapper, tomtilstand, bekreftelser og feilmeldinger) må registreres med i18n-nøkler som deles på tvers av språk og gjenbrukes både i PPC-visningen og innstillingssiden.
 
 ## 9. Testplan
 
 1. **Funksjonelle tester**
-   - Gjennomfør alle matcher og stages i "WA1500 - 150 skudds match" for å sikre riktig rekkefølge og tidsbruk.
-   - Bekreft at -3 → skytetid → 0 fungerer med lydsignaler.
-   - Test auto-avanse (hvis implementert).
+   - Bekreft at PPC-kortet på hjem-skjermen åpner hovedprogramlisten.
+   - Naviger gjennom alle hovedprogrammer og verifiser at del-stages med gjenbruk deler briefingtekst og lyd.
+   - Test at briefing vises og kan spilles av før hver stage, og at kommando 1–3 kan trigges med tilhørende lyd (kommando 3 starter nedtelling).
+   - Etter fullført stage skal visningen returnere til match-/stage-listen; verifiser mulighet til å kjøre samme stage igjen.
 
 2. **Regression**
    - Sørg for at eksisterende programmer (standard felt, duel) fortsatt fungerer.
@@ -148,5 +166,6 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 - Detaljer fleksibel treningsmodus (hvordan bruker omarrangerer, lagrer og repeterer matcher/stages).
 - Bestem om scoring integreres (ikke del av første iterasjon, men bør vurderes).
 - Dokumenter kommando- og lydlogikk i kode (kommentarer) for vedlikehold.
+- Definer arbeidsflyt for innspilling, lagring og gjenbruk av briefing- og kommandoopptak.
 
 Når disse punktene er avklart kan vi lage konkrete utviklingsoppgaver (Issues) og estimere innsats per komponent.
