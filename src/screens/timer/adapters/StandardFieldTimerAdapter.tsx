@@ -474,9 +474,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
     const handleTimerEvent = async (event: TimerEvent, helpers: TimerEventHelpers) => {
       if (event.type === 'state_change') {
         const nextState = event.state || 'idle';
-        if (nextState === 'prepare') {
-          helpers.clearCurrentCommand();
-        } else if (nextState === 'prepare_warning') {
+        if (nextState === 'prepare_warning') {
           helpers.setCurrentCommand(t('commands.ready_command'));
         } else if (nextState === 'fire') {
           helpers.setCurrentCommand(t('commands.fire_command'));
@@ -585,6 +583,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       }
 
       if (event.command === 'shooters_ready') {
+        helpers.setCurrentCommand(t('commands.shooters_ready'));
         const duration = await CustomAudio.playIfEnabled(programId, 'shooters_ready');
         logger.log(`Custom audio playing for shooters_ready: duration=${duration}ms`);
         if (duration === 0) {

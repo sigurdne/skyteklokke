@@ -467,21 +467,25 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
             activeOpacity={0.9}
           >
             {adapterBindings.renderFullscreenOverlay?.(displayContext)}
-            {currentCommand && (
+            <View pointerEvents="none" style={timerStyles.fullscreenTimerWrapper}>
               <Text
-                style={[timerStyles.fullscreenCommand, { color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' }]}
+                style={[timerStyles.fullscreenTimer, {
+                  color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF',
+                  fontSize: timerFontSize,
+                }]}
               >
-                {currentCommand}
+                {countdown ?? 0}
               </Text>
+            </View>
+            {currentCommand && (
+              <View pointerEvents="none" style={timerStyles.fullscreenCommandContainer}>
+                <Text
+                  style={[timerStyles.fullscreenCommand, { color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF' }]}
+                >
+                  {currentCommand}
+                </Text>
+              </View>
             )}
-            <Text
-              style={[timerStyles.fullscreenTimer, {
-                color: currentState === 'prepare' ? '#2C3E50' : '#FFFFFF',
-                fontSize: timerFontSize,
-              }]}
-            >
-              {countdown ?? 0}
-            </Text>
           </TouchableOpacity>
         ) : currentState === 'idle' ? (
           <View style={timerStyles.idleContainer}>
