@@ -124,11 +124,34 @@ const startControlsStyles = StyleSheet.create({
   },
   infoButton: {
     alignItems: 'flex-start',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    opacity: 1,
+  },
+  infoButtonDisabled: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    opacity: 1,
+  },
+  infoButtonTitle: {
+    color: colors.background,
+    fontWeight: '700',
+  },
+  infoButtonTitleDisabled: {
+    color: colors.text,
+  },
+  infoButtonText: {
+    color: colors.background,
+    opacity: 0.9,
+  },
+  infoButtonTextDisabled: {
+    color: colors.textSecondary,
   },
   infoStatus: {
     ...typography.caption,
-    color: colors.textSecondary,
+    color: colors.background,
     marginTop: spacing.xs,
+    opacity: 0.8,
   },
   resetButton: {
     alignSelf: 'center',
@@ -647,13 +670,25 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
                     style={[
                       startControlsStyles.commandButton,
                       startControlsStyles.infoButton,
-                      disabled && startControlsStyles.commandButtonDisabled,
+                      disabled && startControlsStyles.infoButtonDisabled,
                     ]}
                     onPress={() => handleInfoPress(button)}
                     disabled={disabled}
                   >
-                    <Text style={startControlsStyles.commandTitle}>{button.label}</Text>
-                    <Text style={startControlsStyles.commandText}>{button.text}</Text>
+                    <Text style={[
+                      startControlsStyles.commandTitle,
+                      startControlsStyles.infoButtonTitle,
+                      disabled && startControlsStyles.infoButtonTitleDisabled,
+                    ]}>
+                      {button.label}
+                    </Text>
+                    <Text style={[
+                      startControlsStyles.commandText,
+                      startControlsStyles.infoButtonText,
+                      disabled && startControlsStyles.infoButtonTextDisabled,
+                    ]}>
+                      {button.text}
+                    </Text>
                     {!button.hasClip && (
                       <Text style={startControlsStyles.infoStatus}>{t('ppc.detail.no_recording')}</Text>
                     )}
