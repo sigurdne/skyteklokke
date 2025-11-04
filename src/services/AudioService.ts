@@ -1,4 +1,5 @@
 import * as Speech from 'expo-speech';
+import { Audio } from 'expo-av';
 import logger from '../utils/logger';
 import { Language } from '../types';
 
@@ -124,28 +125,107 @@ export class AudioService {
   }
 
   /**
-   * Play system beep sound for training mode
-   * Uses a synthesized beep sound with TTS
+   * Generate a loud horn-like beep sound (0.3 seconds)
+   * Creates a train horn effect using two frequencies
    */
-  playBeep(continuous: boolean = false): void {
-  logger.log('🔊 playBeep called, continuous:', continuous);
+  private generateHornBeep(): string {
+    // Generate a WAV file data URL with a train horn sound
+    const sampleRate = 44100;
+    const duration = 0.3; // 300ms
+    const numSamples = Math.floor(sampleRate * duration);
+    
+    // Create WAV buffer
+    const buffer = new ArrayBuffer(44 + numSamples * 2);
+    const view = new DataView(buffer);
+    
+    // WAV header
+    const writeString = (offset: number, string: string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+    
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + numSamples * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true); // fmt chunk size
+    view.setUint16(20, 1, true); // PCM format
+    view.setUint16(22, 1, true); // mono
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true); // byte rate
+    view.setUint16(32, 2, true); // block align
+    view.setUint16(34, 16, true); // bits per sample
+    writeString(36, 'data');
+    view.setUint32(40, numSamples * 2, true);
+    
+    // Generate horn sound: two frequencies (220Hz and 330Hz) for train horn effect
+    for (let i = 0; i < numSamples; i++) {
+      const t = i / sampleRate;
+      // Envelope: fade in quickly, sustain, fade out
+      const envelope = t < 0.05 ? t / 0.05 : t > 0.25 ? (0.3 - t) / 0.05 : 1.0;
+      
+      // Two sine waves for train horn effect
+      const freq1 = 220; // A3
+      const freq2 = 330; // E4
+      const sample1 = Math.sin(2 * Math.PI * freq1 * t);
+      const sample2 = Math.sin(2 * Math.PI * freq2 * t);
+      
+      // Mix and apply envelope, scale to 16-bit range with doubled volume
+      const value = Math.floor((sample1 + sample2) * 0.5 * envelope * 32767 * this.volume * 2.0);
+      view.setInt16(44 + i * 2, value, true);
+    }
+    
+    // Convert to base64 data URL
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+    return `data:audio/wav;base64,${base64}`;
+  }
+
+  /**
+   * Play system beep sound for training mode
+   * Generates a loud train horn-like sound (0.3 seconds)
+   */
+  async playBeep(continuous: boolean = false): Promise<void> {
+    logger.log('🔊 playBeep called, continuous:', continuous);
     
     try {
-      // Use a very short, high-pitched vowel sound that sounds like a beep
-      // Continuous beep is longer with 11 bips and slower rate to cover full 2 seconds
-      const beepSound = continuous ? 'bip bip bip bip bip bip bip bip bip bip bip' : 'bip';
+      const hornSound = this.generateHornBeep();
       
-  logger.log('🔊 Playing beep:', beepSound);
+      if (continuous) {
+        // Play multiple beeps with gaps for continuous mode
+        logger.log('🔊 Playing continuous horn beeps');
+        for (let i = 0; i < 5; i++) {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: hornSound },
+            { shouldPlay: true, volume: this.volume }
+          );
+          await new Promise(resolve => setTimeout(resolve, 400)); // 300ms beep + 100ms gap
+          await sound.unloadAsync();
+        }
+      } else {
+        // Single beep
+        logger.log('🔊 Playing single horn beep');
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: hornSound },
+          { shouldPlay: true, volume: this.volume }
+        );
+        
+        // Auto-cleanup after playing
+        setTimeout(async () => {
+          try {
+            await sound.unloadAsync();
+          } catch (err) {
+            // Ignore cleanup errors
+          }
+        }, 500);
+      }
       
-      // Speech.speak doesn't return a promise, just call it
-      Speech.speak(beepSound, {
-        language: 'en-US',
-        pitch: 2.0,  // Very high pitch
-        rate: continuous ? 1.3 : 3.0,  // Even slower for continuous to make it last 2 seconds
-        volume: this.volume,
-      });
-      
-      logger.log('🔊 Beep started');
+      logger.log('🔊 Horn beep started');
     } catch (error) {
       logger.error('❌ Error in playBeep:', error);
     }
