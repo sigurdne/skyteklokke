@@ -473,46 +473,25 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
 
     const handleTimerEvent = async (event: TimerEvent, helpers: TimerEventHelpers) => {
       if (event.type === 'state_change') {
-        const nextState = event.state || 'idle';
-        if (nextState === 'prepare_warning') {
-          helpers.setCurrentCommand(t('commands.ready_command'));
-        } else if (nextState === 'fire') {
-          helpers.setCurrentCommand(t('commands.fire_command'));
-        } else if (nextState === 'fire_warning') {
-          helpers.clearCurrentCommand();
-        } else if (nextState === 'finished' || nextState === 'idle') {
+        // Handle command display based on event.command (like main branch does)
+        const isPrePlayCommand = event.command?.startsWith('preplay_');
+        if (event.command && event.command !== 'beep' && event.command !== 'continuous_beep' && !isPrePlayCommand) {
+          let translatedCommand = '';
+          try {
+            translatedCommand = t(`commands.${event.command}`);
+          } catch (e) {
+            translatedCommand = String(event.command);
+          }
+          helpers.setCurrentCommand(translatedCommand);
+        } else if (!event.command || event.command === 'beep' || event.command === 'continuous_beep' || isPrePlayCommand) {
+          // Clear command text if no command or beep/pre-play command
           helpers.clearCurrentCommand();
         }
         return true;
       }
 
       if (event.type === 'countdown') {
-        const newCountdown = event.countdown ?? null;
-        if (newCountdown === null) {
-          return false;
-        }
-        const state = event.state || helpers.getCurrentState();
-
-        if (state === 'prepare' && newCountdown > 5) {
-          helpers.clearCurrentCommand();
-        } else if (state === 'prepare_warning' && newCountdown === 5) {
-          helpers.setCurrentCommand(t('commands.ready_command'));
-        } else if (state === 'prepare_warning' && newCountdown < 5) {
-          helpers.clearCurrentCommand();
-        } else if (state === 'fire' && newCountdown === shootingDuration) {
-          helpers.setCurrentCommand(t('commands.fire_command'));
-        } else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
-          helpers.clearCurrentCommand();
-        } else if (state === 'fire_warning') {
-          // Keep command cleared during fire_warning state until we show cease command
-          if (newCountdown === 1) {
-            helpers.setCurrentCommand(t('commands.cease_command'));
-          } else {
-            helpers.clearCurrentCommand();
-          }
-        } else if (state === 'finished' && newCountdown === 0) {
-          helpers.clearCurrentCommand();
-        }
+        // Don't handle command text in countdown events - let state_change handle it
         return false;
       }
 
