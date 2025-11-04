@@ -84,6 +84,7 @@
       "select_discipline": "Choose a discipline",
       "select_stage": "Choose a stage",
       "back_to_disciplines": "Back to disciplines",
+      "stage_count": "{{count}} stage",
       "stage_count_one": "{{count}} stage",
       "stage_count_other": "{{count}} stages",
       "tap_to_start": "Tap to load the timer"

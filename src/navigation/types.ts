@@ -3,5 +3,5 @@ export type RootStackParamList = {
   Timer: { programId: string };
   Settings: undefined;
   About: undefined;
-  PPC: undefined;
+  PPC: { selectedDiscipline?: string } | undefined;
 };

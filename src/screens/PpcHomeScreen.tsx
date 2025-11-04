@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Audio } from 'expo-av';
@@ -35,14 +36,34 @@ interface StageDetailState {
 
 interface PpcHomeScreenProps {
   navigation: NativeStackNavigationProp<RootStackParamList, 'PPC'>;
+  route: { params?: { selectedDiscipline?: string } };
 }
 
-export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation }) => {
+export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route }) => {
   const { t } = useTranslation();
-  const [selectedDiscipline, setSelectedDiscipline] = useState<PPCDiscipline | null>(null);
+  const [selectedDiscipline, setSelectedDiscipline] = useState<PPCDiscipline | null>(
+    (route.params?.selectedDiscipline as PPCDiscipline) || null
+  );
   const [stageDetail, setStageDetail] = useState<StageDetailState | null>(null);
 
   const program = useMemo(() => ProgramManager.getProgram('ppc-standard') as PPCProgram | undefined, []);
+
+  // Update selectedDiscipline when route params change
+  useEffect(() => {
+    console.log('[PpcHomeScreen] route.params.selectedDiscipline changed:', route.params?.selectedDiscipline);
+    if (route.params?.selectedDiscipline) {
+      console.log('[PpcHomeScreen] Setting selectedDiscipline to:', route.params.selectedDiscipline);
+      setSelectedDiscipline(route.params.selectedDiscipline as PPCDiscipline);
+    }
+  }, [route.params?.selectedDiscipline]);
+
+  // Close modal when screen is focused (e.g., when returning from timer)
+  useFocusEffect(
+    useCallback(() => {
+      console.log('[PpcHomeScreen] Screen focused - closing modal');
+      setStageDetail(null);
+    }, [])
+  );
 
   if (!program) {
     return (
@@ -140,12 +161,24 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation }) => {
                 <TouchableOpacity
                   key={`${group.id}-${entry.stageId}-${entry.titleKey}`}
                   style={styles.stageCard}
-                  onPress={() => handleStageSelect(disciplineId, entry)}
+                  onPress={() => handleStageStart(disciplineId, entry.stageId)}
                   activeOpacity={0.75}
                 >
                   <View style={styles.stageHeader}>
                     <Text style={styles.stageTitle}>{stageTitle(stage, entry.titleKey, t)}</Text>
-                    <Text style={styles.stageTime}>{formatStageTime(stage.timeSeconds, t)}</Text>
+                    <View style={styles.stageHeaderRight}>
+                      <Text style={styles.stageTime}>{formatStageTime(stage.timeSeconds, t)}</Text>
+                      <TouchableOpacity
+                        style={styles.editButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleStageSelect(disciplineId, entry);
+                        }}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Text style={styles.editIcon}>✏️</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                   <Text style={styles.stageSubtitle}>{stageSubtitle(stage, entry.descriptionKey, t)}</Text>
                   <View style={styles.seriesList}>
@@ -164,7 +197,6 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation }) => {
                       ))}
                     </View>
                   )}
-                  <Text style={styles.startHint}>{t('ppc.home.tap_to_start')}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -694,6 +726,7 @@ function disciplineDescription(definition: PPCDisciplineDefinition, t: TFunction
 }
 
 function countStages(definition: PPCDisciplineDefinition): number {
+  // Count total stage entries across all groups (matches)
   return definition.groups.reduce((total, group) => total + group.stages.length, 0);
 }
 
@@ -830,6 +863,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xs,
   },
+  stageHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   stageTitle: {
     ...typography.body,
     fontWeight: '700',
@@ -840,6 +878,13 @@ const styles = StyleSheet.create({
   stageTime: {
     ...typography.caption,
     color: colors.success,
+  },
+  editButton: {
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
+  },
+  editIcon: {
+    fontSize: 18,
   },
   stageSubtitle: {
     ...typography.caption,

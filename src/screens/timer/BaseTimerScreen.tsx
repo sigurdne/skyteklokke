@@ -185,7 +185,25 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     ProgramManager.setActiveProgram(programId);
     AudioService.setLanguage(i18n.language as any);
 
+    // Intercept all back navigation attempts (hardware back button, swipe, etc.)
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // For PPC programs, navigate to PPC screen with selected discipline
+      if (programId === 'ppc-standard') {
+        const settings = (program as any).getSettings?.();
+        const discipline = settings?.discipline;
+        console.log('[BaseTimerScreen] beforeRemove - PPC discipline:', discipline);
+        if (discipline) {
+          // Prevent default back behavior
+          e.preventDefault();
+          console.log('[BaseTimerScreen] beforeRemove - Navigating to PPC with discipline:', discipline);
+          // Navigate to PPC with discipline parameter
+          navigation.navigate('PPC' as any, { selectedDiscipline: discipline });
+        }
+      }
+    });
+
     return () => {
+      unsubscribe();
       if (timerEngineRef.current) {
         try {
           timerEngineRef.current.removeEventListener(handleTimerEvent);
@@ -200,6 +218,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
       AudioService.stop();
       ProgramManager.clearActiveProgram();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programId, navigation, i18n.language]);
 
   const eventHelpers: TimerEventHelpers = useMemo(() => ({
@@ -419,8 +438,23 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     if (isRunning) {
       handleReset();
     }
+    
+    // For PPC programs, navigate back to PPC screen with selected discipline
+    const program = ProgramManager.getProgram(programId);
+    if (program && programId === 'ppc-standard') {
+      const settings = (program as any).getSettings?.();
+      const discipline = settings?.discipline;
+      console.log('[BaseTimerScreen] PPC back navigation - discipline:', discipline);
+      if (discipline) {
+        console.log('[BaseTimerScreen] Navigating to PPC with discipline:', discipline);
+        navigation.navigate('PPC' as any, { selectedDiscipline: discipline });
+        return;
+      }
+    }
+    
+    console.log('[BaseTimerScreen] Using goBack()');
     navigation.goBack();
-  }, [handleReset, isRunning, navigation]);
+  }, [handleReset, isRunning, navigation, programId]);
 
   const program = ProgramManager.getProgram(programId);
   const uiConfig = program?.getUIConfig();

@@ -84,6 +84,7 @@
       "select_discipline": "Vælg en disciplin",
       "select_stage": "Vælg en stage",
       "back_to_disciplines": "Tilbage til discipliner",
+      "stage_count": "{{count}} stage",
       "stage_count_one": "{{count}} stage",
       "stage_count_other": "{{count}} stager",
       "tap_to_start": "Tryk for at starte timeren"

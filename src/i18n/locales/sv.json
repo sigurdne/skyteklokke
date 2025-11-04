@@ -84,6 +84,7 @@
       "select_discipline": "Välj en disciplin",
       "select_stage": "Välj ett moment",
       "back_to_disciplines": "Tillbaka till discipliner",
+      "stage_count": "{{count}} moment",
       "stage_count_one": "{{count}} moment",
       "stage_count_other": "{{count}} moment",
       "tap_to_start": "Tryck för att starta timern"
