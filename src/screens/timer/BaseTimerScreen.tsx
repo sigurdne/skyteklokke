@@ -113,6 +113,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [countdown, setCountdownState] = useState<number | null>(null);
+  const [showAbortConfirm, setShowAbortConfirm] = useState<boolean>(false);
 
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -187,6 +188,12 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
 
     // Intercept hardware back button and gestures
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // Block navigation if timer is running
+      if (isRunning && currentState !== 'finished') {
+        e.preventDefault();
+        return;
+      }
+
       // For PPC programs, navigate to PPC screen with selected discipline
       if (programId === 'ppc-standard') {
         const settings = (program as any).getSettings?.();
@@ -413,6 +420,34 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     }
   }, [handleTimerEvent]);
 
+  const handleAbort = useCallback(() => {
+    setShowAbortConfirm(false);
+    
+    // Stop the timer
+    if (timerEngineRef.current) {
+      try {
+        timerEngineRef.current.removeEventListener(handleTimerEvent);
+      } catch (e) {
+        // ignore
+      }
+      timerEngineRef.current.stop();
+      setIsRunning(false);
+      setIsPaused(false);
+      updateCountdown(null);
+      updateCurrentState('idle');
+      try {
+        deactivateKeepAwake('timer-active');
+      } catch (e) {
+        logger.log('Failed to deactivate keep awake:', e);
+      }
+      clearCurrentCommand();
+      setElapsedTime(0);
+    }
+
+    // Reset the stage - this returns to the command screen
+    handleReset();
+  }, [handleTimerEvent, handleReset, updateCountdown, updateCurrentState, clearCurrentCommand]);
+
   const handleStop = useCallback(() => {
     if (timerEngineRef.current) {
       try {
@@ -525,6 +560,9 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
               // For PPC programs that are finished, navigate back instead of stopping
               if (programId === 'ppc-standard' && currentState === 'finished') {
                 handleBack();
+              } else if (isRunning && currentState !== 'finished') {
+                // Show confirmation modal if timer is running
+                setShowAbortConfirm(true);
               } else {
                 handleStop();
               }
@@ -658,6 +696,33 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
                   onPress={() => settingsBindings?.close()}
                 >
                   <Text style={timerStyles.buttonText}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          visible={showAbortConfirm}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowAbortConfirm(false)}
+        >
+          <View style={timerStyles.modalOverlay}>
+            <View style={timerStyles.modalContent}>
+              <Text style={timerStyles.modalTitle}>Avbryt timer?</Text>
+              <View style={timerStyles.modalButtons}>
+                <TouchableOpacity
+                  style={[timerStyles.button, timerStyles.modalButton]}
+                  onPress={handleAbort}
+                >
+                  <Text style={timerStyles.buttonText}>Ja</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[timerStyles.button, timerStyles.modalButton, { backgroundColor: colors.secondary }]}
+                  onPress={() => setShowAbortConfirm(false)}
+                >
+                  <Text style={timerStyles.buttonText}>Nei</Text>
                 </TouchableOpacity>
               </View>
             </View>
