@@ -11,7 +11,7 @@
     "field_description": "Standard konkurranse med 10s valgbar skytetid og 10s kommandotid",
     "duel_title": "Duellskyting",
     "duel_description": "Tørrtrening simulator med lys",
-    "ppc_title": "Presisjonspistol",
+    "ppc_title": "PPC: Precision Pistol Competition",
     "ppc_description": "WA1500-disipliner med trinnvise kommandoer",
     "start_program": "Start program"
   },
@@ -131,6 +131,173 @@
     "timer": {
       "manual_prompt": "Spill av kommandoene i rekkefølge for å starte stage",
       "manual_reset": "Start på nytt"
+    },
+    "stage": {
+      "title": {
+        "wa1500_stage_7y_standing_20s": "7 yards - Stående - 20s",
+        "wa1500_stage_15y_standing_20s": "15 yards - Stående - 20s",
+        "wa1500_stage_25y_barricade_90s": "25 yards - Barrikade - 90s",
+        "wa1500_stage_50y_full_165s": "50 yards - Full serie - 165s",
+        "wa1500_stage_25y_double_standing_35s": "25 yards - Dobbel stående - 35s",
+        "wa1500_stage_50y_sit_prone_165s": "50 yards - Sittende/Liggende - 165s",
+        "wa1500_stage_25y_fast_12s": "25 yards - Hurtig - 12s",
+        "ppc48_stage_3y_onehand_8s": "3 yards - Én hånd - 8s",
+        "ppc48_stage_7y_standing_20s": "7 yards - Stående - 20s",
+        "ppc48_stage_15y_standing_20s": "15 yards - Stående - 20s",
+        "ppc48_stage_25y_barricade_90s": "25 yards - Barrikade - 90s"
+      },
+      "briefing": {
+        "wa1500_stage_7y_standing_20s": "6 skudd stående, gjenta 2 ganger. Total 12 skudd på 20 sekunder.",
+        "wa1500_stage_15y_standing_20s": "6 skudd stående, gjenta 2 ganger. Total 12 skudd på 20 sekunder.",
+        "wa1500_stage_25y_barricade_90s": "6 skudd knestående, 6 skudd barrikade venstre, 6 skudd barrikade høyre. Total 18 skudd på 90 sekunder.",
+        "wa1500_stage_50y_full_165s": "6 skudd sittende, 6 skudd liggende, 6 skudd barrikade venstre, 6 skudd barrikade høyre. Total 24 skudd på 165 sekunder.",
+        "wa1500_stage_25y_double_standing_35s": "6 skudd stående, gjenta 2 ganger. Total 12 skudd på 35 sekunder.",
+        "wa1500_stage_50y_sit_prone_165s": "6 skudd sittende, gjenta 2 ganger. 6 skudd liggende, gjenta 2 ganger. Total 24 skudd på 165 sekunder.",
+        "wa1500_stage_25y_fast_12s": "6 skudd stående på 12 sekunder.",
+        "ppc48_stage_3y_onehand_8s": "6 skudd stående med én hånd på 8 sekunder.",
+        "ppc48_stage_7y_standing_20s": "12 skudd stående på 20 sekunder.",
+        "ppc48_stage_15y_standing_20s": "12 skudd stående på 20 sekunder.",
+        "ppc48_stage_25y_barricade_90s": "6 skudd knestående, 6 skudd barrikade venstre, 6 skudd barrikade høyre. Total 18 skudd på 90 sekunder."
+      },
+      "variant": {
+        "ppc48_stage_3y_onehand_8s": {
+          "40shot": "5 skudd (40-skudd variant)"
+        },
+        "ppc48_stage_7y_standing_20s": {
+          "40shot": "10 skudd (40-skudd variant)"
+        },
+        "ppc48_stage_15y_standing_20s": {
+          "40shot": "10 skudd (40-skudd variant)"
+        },
+        "ppc48_stage_25y_barricade_90s": {
+          "40shot": "15 skudd (40-skudd variant)"
+        }
+      }
+    },
+    "discipline": {
+      "title": {
+        "wa1500_150": "WA1500 - 150 skudd",
+        "wa1500_60": "WA1500 - 60 skudd",
+        "wa1500_48": "WA1500 - 48 skudd"
+      },
+      "description": {
+        "wa1500_150": "Full WA1500-disiplin med 150 skudd fordelt over 5 matcher",
+        "wa1500_60": "Forkortet WA1500-disiplin med 60 skudd fordelt over 4 stager",
+        "wa1500_48": "Kort WA1500-disiplin med 48 skudd fordelt over 4 stager"
+      },
+      "wa1500_150": {
+        "match1": {
+          "title": "Match 1",
+          "stage1": {
+            "title": "Stage 1: 7 yards stående",
+            "description": "12 skudd stående på 7 yards"
+          },
+          "stage2": {
+            "title": "Stage 2: 15 yards stående",
+            "description": "12 skudd stående på 15 yards"
+          }
+        },
+        "match2": {
+          "title": "Match 2",
+          "stage1": {
+            "title": "Stage 1: 25 yards barrikade",
+            "description": "18 skudd fra barrikade på 25 yards"
+          }
+        },
+        "match3": {
+          "title": "Match 3",
+          "stage1": {
+            "title": "Stage 1: 50 yards full serie",
+            "description": "24 skudd fra ulike stillinger på 50 yards"
+          }
+        },
+        "match4": {
+          "title": "Match 4",
+          "stage1": {
+            "title": "Stage 1: 25 yards dobbel stående",
+            "description": "12 skudd stående på 25 yards"
+          }
+        },
+        "match5": {
+          "title": "Match 5",
+          "stage1": {
+            "title": "Stage 1: 7 yards stående",
+            "description": "12 skudd stående på 7 yards"
+          },
+          "stage2": {
+            "title": "Stage 2: 25 yards barrikade",
+            "description": "18 skudd fra barrikade på 25 yards"
+          },
+          "stage3": {
+            "title": "Stage 3: 50 yards sittende/liggende",
+            "description": "24 skudd sittende og liggende på 50 yards"
+          },
+          "stage4": {
+            "title": "Stage 4: 25 yards hurtig",
+            "description": "6 skudd stående på 25 yards på 12 sekunder"
+          }
+        }
+      },
+      "wa1500_60": {
+        "stage1": {
+          "title": "Stage 1",
+          "stage": {
+            "title": "7 yards stående",
+            "description": "12 skudd stående på 7 yards"
+          }
+        },
+        "stage2": {
+          "title": "Stage 2",
+          "stage": {
+            "title": "25 yards barrikade",
+            "description": "18 skudd fra barrikade på 25 yards"
+          }
+        },
+        "stage3": {
+          "title": "Stage 3",
+          "stage": {
+            "title": "50 yards full serie",
+            "description": "24 skudd fra ulike stillinger på 50 yards"
+          }
+        },
+        "stage4": {
+          "title": "Stage 4",
+          "stage": {
+            "title": "25 yards hurtig",
+            "description": "6 skudd stående på 25 yards"
+          }
+        }
+      },
+      "wa1500_48": {
+        "stage1": {
+          "title": "Stage 1",
+          "stage": {
+            "title": "3 yards én hånd",
+            "description": "6 skudd stående med én hånd på 3 yards"
+          }
+        },
+        "stage2": {
+          "title": "Stage 2",
+          "stage": {
+            "title": "7 yards stående",
+            "description": "12 skudd stående på 7 yards"
+          }
+        },
+        "stage3": {
+          "title": "Stage 3",
+          "stage": {
+            "title": "15 yards stående",
+            "description": "12 skudd stående på 15 yards"
+          }
+        },
+        "stage4": {
+          "title": "Stage 4",
+          "stage": {
+            "title": "25 yards barrikade",
+            "description": "18 skudd fra barrikade på 25 yards"
+          }
+        }
+      }
     }
   }
 }

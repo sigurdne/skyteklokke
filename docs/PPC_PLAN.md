@@ -181,7 +181,7 @@ Dette dokumentet beskriver hvordan vi kan legge til nye PPC-programmer (Precisio
 - [x] Utvid `TimerEngine`/adaptere for å støtte negative tellere og PPC-spesifikke kommandoer.
 - [x] Lag PPC-hjemvisning med navigasjon til hoveddisipliner og tilhørende matcher/stages.
 - [x] Implementer briefing- og kommando-panel med avspillings- og opptaksstøtte.
-- [ ] Integrer lydopptaksflyten i innstillinger med gjenbrukbare ressurser for PPC.
+- [x] Integrer lydopptaksflyten i innstillinger med gjenbrukbare ressurser for PPC.
 - [ ] Oppdater i18n-filer (no/en/sv/da) med alle nye PPC-strenger.
 - [ ] Skriv testplan og gjennomfør regresjonstester for eksisterende programmer.
 
