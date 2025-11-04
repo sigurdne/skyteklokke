@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Audio } from 'expo-av';
 
 import ProgramManager from '../../../services/ProgramManager';
@@ -39,8 +39,11 @@ const resolveStageClipKeys = (stage: PPCStage | null) => ({
 });
 
 const startControlsStyles = StyleSheet.create({
-  container: {
+  scrollContainer: {
+    flex: 1,
     width: '100%',
+  },
+  container: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
@@ -170,14 +173,18 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
     const [stagePreviewBusy, setStagePreviewBusy] = useState<'title' | 'briefing' | null>(null);
 
     const stopPlayback = useCallback(async () => {
+      logger.info(`stopPlayback: soundRef.current=${soundRef.current ? 'exists' : 'null'}`);
+      
       if (soundRef.current) {
         try {
           await soundRef.current.stopAsync();
+          logger.info('stopPlayback: Sound stopped');
         } catch (error) {
           logger.warn('Failed to stop PPC audio clip cleanly', error);
         }
         try {
           await soundRef.current.unloadAsync();
+          logger.info('stopPlayback: Sound unloaded');
         } catch (error) {
           logger.warn('Failed to unload PPC audio clip', error);
         }
@@ -186,6 +193,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
       try {
         await AudioService.stop();
+        logger.info('stopPlayback: AudioService stopped');
       } catch (error) {
         logger.warn('Failed to stop TTS before PPC audio playback', error);
       }
@@ -266,6 +274,8 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const playClipWithFallback = useCallback(
       async (clipKey: string | null, _fallbackText: string) => {
+        logger.info(`playClipWithFallback: clipKey=${clipKey}, soundMode=${soundMode}`);
+        
         if (!soundMode) {
           return false;
         }
@@ -274,7 +284,10 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
         try {
           const meta = await getClipMeta(clipKey);
+          logger.info(`playClipWithFallback: meta=${JSON.stringify(meta)}`);
+          
           if (meta?.uri) {
+            logger.info(`playClipWithFallback: Creating sound from uri=${meta.uri}`);
             const { sound } = await Audio.Sound.createAsync({ uri: meta.uri });
             soundRef.current = sound;
             sound.setOnPlaybackStatusUpdate((status) => {
@@ -357,49 +370,12 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           return false;
         }
 
-        if ((COMMAND_CLIP_KEYS as Record<string, string>)[command] && manualGateCompletedRef.current) {
-          const typed = command as CommandKey;
-          const text = commandTextMap[typed] ?? command;
-          helpers.setCurrentCommand(text);
-          helpers.setCountdown(null);
-          return true;
-        }
-
-        if (command === 'preplay_ppc_stage_title' || command === 'preplay_ppc_stage_briefing') {
-          const text = command === 'preplay_ppc_stage_title' ? stageTextMap.title : stageTextMap.briefing;
-          if (text) {
-            helpers.setCurrentCommand(text);
-          } else {
-            helpers.clearCurrentCommand();
-          }
-          helpers.setCountdown(null);
-
-          if (!soundMode) {
-            return true;
-          }
-
-          const clipKey = command === 'preplay_ppc_stage_title' ? stageClipKeys.title : stageClipKeys.briefing;
-          await playClipWithFallback(clipKey, text);
-          return true;
-        }
-
-        if ((COMMAND_CLIP_KEYS as Record<string, string>)[command]) {
-          const typed = command as CommandKey;
-          const text = commandTextMap[typed] ?? command;
-          helpers.setCurrentCommand(text);
-          helpers.setCountdown(null);
-
-          if (!soundMode) {
-            return false;
-          }
-
-          await playClipWithFallback(COMMAND_CLIP_KEYS[typed], text);
-          return true;
-        }
+        // Briefing and manual commands are no longer in the sequence
+        // They are handled entirely by the UI tiles and buttons before timer starts
 
         return false;
       },
-      [commandTextMap, playClipWithFallback, soundMode, stageClipKeys, stageTextMap, stopPlayback],
+      [stopPlayback],
     );
 
     const handleTimerEvent = useCallback(
@@ -422,13 +398,8 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             return false;
           }
 
-          if ((event.state || helpers.getCurrentState()) === 'prestart' && countdownValue < 0) {
-            helpers.setCurrentCommand(lineReadyText);
-          }
-
-          if (countdownValue === 0) {
-            helpers.clearCurrentCommand();
-          }
+          // Clear any command text during countdown
+          helpers.clearCurrentCommand();
           return false;
         }
 
@@ -461,55 +432,11 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const adjustSequence = useCallback(
       async (sequence: TimingStep[], _context: TimerSequenceContext) => {
-        const updated = sequence.map((step) => ({ ...step }));
-
-        const ensureDelay = async (command: string, clipKey: string | null, fallbackDelay: number) => {
-          const step = updated.find((item) => item.command === command);
-          if (!step) {
-            return;
-          }
-
-          let delay = fallbackDelay;
-          if (soundMode) {
-            try {
-              const meta = await getClipMeta(clipKey);
-              if (meta?.durationMs && meta.durationMs > 0) {
-                delay = Math.max(delay, meta.durationMs + DURATION_PADDING_MS);
-              }
-            } catch (error) {
-              logger.warn(`Failed to load metadata for ${command}`, error);
-            }
-          }
-
-          step.delay = delay;
-        };
-
-        await ensureDelay('preplay_ppc_stage_title', stageClipKeys.title, BRIEFING_TITLE_FALLBACK_DELAY);
-        await ensureDelay('preplay_ppc_stage_briefing', stageClipKeys.briefing, BRIEFING_OVERVIEW_FALLBACK_DELAY);
-
-        const disableCommandStep = (command: CommandKey, delayOverride?: number) => {
-          const step = updated.find((item) => item.command === command);
-          if (!step) {
-            return;
-          }
-          step.audioEnabled = false;
-          if (typeof delayOverride === 'number') {
-            step.delay = delayOverride;
-          }
-        };
-
-        disableCommandStep('lade_hylstre', MANUAL_COMMAND_DELAY_MS);
-        disableCommandStep('er_linja_klar', MANUAL_COMMAND_DELAY_MS);
-
-        const lineReadyStep = updated.find((item) => item.command === 'linja_er_klar');
-        if (lineReadyStep) {
-          lineReadyStep.audioEnabled = false;
-          lineReadyStep.delay = COUNTDOWN_INTERVAL_MS;
-        }
-
-        return updated;
+        // Sequence already starts at countdown -3, no adjustments needed
+        // Briefing and manual commands are handled entirely by UI before timer starts
+        return sequence;
       },
-      [getClipMeta, soundMode, stageClipKeys],
+      [],
     );
 
     const renderStartControls = useCallback(
@@ -596,19 +523,36 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           setIsManualBusy(true);
           try {
             const spokenText = commandTextMap[button.command] ?? button.command;
-            try {
-              await playClipWithFallback(COMMAND_CLIP_KEYS[button.command], spokenText);
-            } catch (playError) {
-              logger.warn('Manual command playback error', playError);
-            }
-
+            const clipKey = COMMAND_CLIP_KEYS[button.command];
+            logger.info(`handleManualPress: command=${button.command}, clipKey=${clipKey}, spokenText=${spokenText}`);
+            
             const isExpectedStep = manualStep === button.stepIndex;
-            if (isExpectedStep) {
-              setManualStep(button.stepIndex + 1);
-            }
-
             const isFinalCommand = button.command === 'linja_er_klar';
+
+            // For the final command (linja_er_klar), check if there's a recording
             if (isExpectedStep && isFinalCommand) {
+              const meta = await getClipMeta(clipKey);
+              const hasRecording = Boolean(meta?.uri);
+              
+              logger.info(`handleManualPress: isFinalCommand, hasRecording=${hasRecording}, meta=${JSON.stringify(meta)}`);
+
+              if (hasRecording) {
+                // Play the recording and wait for it to complete
+                try {
+                  await playClipWithFallback(clipKey, spokenText);
+                  const waitTime = meta?.durationMs ? meta.durationMs + 200 : 3000;
+                  logger.info(`handleManualPress: Waiting ${waitTime}ms for audio to complete`);
+                  await new Promise(resolve => setTimeout(resolve, waitTime));
+                } catch (playError) {
+                  logger.warn('Manual command playback error', playError);
+                }
+              } else {
+                // No recording, start timer immediately without waiting
+                logger.info('handleManualPress: No recording found, starting timer immediately');
+              }
+
+              // Start the timer
+              setManualStep(button.stepIndex + 1);
               manualGateCompletedRef.current = true;
               try {
                 await startTimer();
@@ -616,6 +560,17 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
                 manualGateCompletedRef.current = false;
                 setManualStep(button.stepIndex);
                 logger.error('Failed to start PPC timer after manual commands', startError);
+              }
+            } else {
+              // For non-final commands, just play the audio normally
+              try {
+                await playClipWithFallback(clipKey, spokenText);
+              } catch (playError) {
+                logger.warn('Manual command playback error', playError);
+              }
+
+              if (isExpectedStep) {
+                setManualStep(button.stepIndex + 1);
               }
             }
           } catch (sequenceError) {
@@ -626,7 +581,11 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         };
 
         return (
-          <View style={startControlsStyles.container}>
+          <ScrollView 
+            style={startControlsStyles.scrollContainer}
+            contentContainerStyle={startControlsStyles.container}
+            showsVerticalScrollIndicator={true}
+          >
             <Text style={startControlsStyles.prompt}>{manualPrompt}</Text>
             <View style={startControlsStyles.infoSection}>
               {infoButtons.map((button) => {
@@ -696,7 +655,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
                 </Text>
               </TouchableOpacity>
             )}
-          </View>
+          </ScrollView>
         );
       },
       [

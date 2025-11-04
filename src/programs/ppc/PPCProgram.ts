@@ -172,61 +172,57 @@ export class PPCProgram extends BaseProgram {
       });
     };
 
-    pushStep(`${prefix}_briefing_title`, 'briefing', {
-      command: 'preplay_ppc_stage_title',
-      audioEnabled: true,
-      delay: BRIEFING_SEGMENT_DELAY_MS,
-    });
+    // Briefing (title and overview) is handled by UI info tiles before timer starts
+    // Manual commands (lade_hylstre, er_linja_klar, linja_er_klar) are handled by UI buttons
+    // Timer sequence starts directly at countdown -3
 
-    pushStep(`${prefix}_briefing_overview`, 'briefing', {
-      command: 'preplay_ppc_stage_briefing',
-      audioEnabled: true,
-      delay: BRIEFING_SEGMENT_DELAY_MS,
-    });
-
-    pushStep(`${prefix}_command_prepare`, 'prestart', {
-      command: 'lade_hylstre',
-      audioEnabled: true,
-      delay: COMMAND_GAP_MS,
-    });
-
-    pushStep(`${prefix}_command_ready_check`, 'prestart', {
-      command: 'er_linja_klar',
-      audioEnabled: true,
-      delay: COMMAND_GAP_MS,
-    });
-
-    pushStep(`${prefix}_command_line_ready`, 'prestart', {
-      command: 'linja_er_klar',
-      audioEnabled: true,
+    pushStep(`${prefix}_countdown_neg3`, 'prestart', {
       countdown: -3,
       delay: COUNTDOWN_INTERVAL_MS,
     });
 
     pushStep(`${prefix}_countdown_neg2`, 'prestart', {
       countdown: -2,
+      delay: COUNTDOWN_INTERVAL_MS,
     });
 
     pushStep(`${prefix}_countdown_neg1`, 'prestart', {
       countdown: -1,
+      delay: COUNTDOWN_INTERVAL_MS - 200, // Shorten to make room for early beep
+    });
+
+    pushStep(`${prefix}_beep_before_shooting`, 'prestart', {
+      countdown: -1, // Keep showing -1 during beep
+      command: 'beep',
+      audioEnabled: true,
+      delay: 200, // Beep plays 200ms before transition to shooting
     });
 
     pushStep(`${prefix}_shooting_start`, 'shooting', {
       countdown: stage.timeSeconds,
-      command: 'beep',
-      audioEnabled: true,
+      delay: 0, // Immediate transition after beep
     });
 
-    for (let remaining = stage.timeSeconds - 1; remaining >= 1; remaining--) {
+    for (let remaining = stage.timeSeconds - 1; remaining >= 2; remaining--) {
       pushStep(`${prefix}_shooting_${remaining}`, 'shooting', {
         countdown: remaining,
       });
     }
 
-    pushStep(`${prefix}_finished`, 'finished', {
-      countdown: 0,
+    pushStep(`${prefix}_shooting_1`, 'shooting', {
+      countdown: 1,
+      delay: COUNTDOWN_INTERVAL_MS - 200, // Shorten to make room for early beep
+    });
+
+    pushStep(`${prefix}_beep_before_finished`, 'shooting', {
+      countdown: 1, // Keep showing 1 during beep
       command: 'beep',
       audioEnabled: true,
+      delay: 200, // Beep plays 200ms before transition to finished
+    });
+
+    pushStep(`${prefix}_finished`, 'finished', {
+      countdown: 0,
       delay: COMMAND_GAP_MS,
     });
 
