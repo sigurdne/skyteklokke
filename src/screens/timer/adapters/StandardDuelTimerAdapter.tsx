@@ -135,7 +135,9 @@ export const standardDuelTimerAdapter: TimerProgramAdapter = {
         return null;
       }
       return (
-        <Text style={[timerStyles.fullscreenCommand, { color: '#FFFFFF', fontSize: 28 }]}>{`Serie ${currentSeriesIndex}/${duelSeries}`}</Text>
+        <View style={{ position: 'absolute', top: 60, left: 0, right: 0, alignItems: 'center' }}>
+          <Text style={[timerStyles.fullscreenCommand, { color: '#FFFFFF', fontSize: 28 }]}>{`Serie ${currentSeriesIndex}/${duelSeries}`}</Text>
+        </View>
       );
     };
 

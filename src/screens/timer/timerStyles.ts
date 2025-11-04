@@ -107,11 +107,10 @@ export const timerStyles = StyleSheet.create({
   },
   fullscreenCommandContainer: {
     position: 'absolute',
-    top: 0,
-    bottom: '50%',
+    top: spacing.xl,
     left: spacing.lg,
     right: spacing.lg,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   fullscreenCommand: {
