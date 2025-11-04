@@ -591,22 +591,20 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
             )}
           </TouchableOpacity>
         ) : currentState === 'idle' ? (
-          <View style={{ flex: 1, justifyContent: 'space-between' }}>
-            <View style={timerStyles.idleContainer}>
-              <Text
-                accessible
-                accessibilityRole="text"
-                style={{
-                  ...typography.h2,
-                  textTransform: 'uppercase',
-                  textAlign: 'center',
-                  color: textColor,
-                }}
-              >
-                {t('states.idle')}
-              </Text>
-            </View>
-            <View style={[timerStyles.controls, timerStyles.controlsBottom]}>
+          <View style={timerStyles.idleContainer}>
+            <Text
+              accessible
+              accessibilityRole="text"
+              style={{
+                ...typography.h2,
+                textTransform: 'uppercase',
+                textAlign: 'center',
+                color: textColor,
+              }}
+            >
+              {t('states.idle')}
+            </Text>
+            <View style={[timerStyles.controls]}>
               {!isRunning && settingsBindings?.showButton && (
                 <TouchableOpacity
                   style={[timerStyles.button, timerStyles.settingsButton]}
