@@ -491,7 +491,41 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       }
 
       if (event.type === 'countdown') {
-        // Don't handle command text in countdown events - let state_change handle it
+        // Handle countdown-based command display (like main branch)
+        const newCountdown = event.countdown ?? null;
+        if (newCountdown === null) {
+          return false;
+        }
+        const state = event.state || helpers.getCurrentState();
+
+        // PREPARE phase (white, countdown > 5): no text
+        if (state === 'prepare' && newCountdown > 5) {
+          helpers.setCurrentCommand('');
+        }
+        // PREPARE_WARNING phase start (yellow, at 5): show "KLAR"
+        else if (state === 'prepare_warning' && newCountdown === 5) {
+          helpers.setCurrentCommand(t('commands.ready_command'));
+        }
+        // PREPARE_WARNING phase (yellow, countdown < 5): no text
+        else if (state === 'prepare_warning' && newCountdown < 5) {
+          helpers.setCurrentCommand('');
+        }
+        // FIRE phase start (green, at shootingDuration): show "ILD!"
+        else if (state === 'fire' && newCountdown === shootingDuration) {
+          helpers.setCurrentCommand(t('commands.fire_command'));
+        }
+        // FIRE phase (green, countdown < shootingDuration): no text
+        else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
+          helpers.setCurrentCommand('');
+        }
+        // FIRE_WARNING phase (yellow): show "STAANS"
+        else if (state === 'fire_warning') {
+          helpers.setCurrentCommand(t('commands.cease_command'));
+        }
+        // FINISHED phase (red, 0): no text
+        else if (state === 'finished' && newCountdown === 0) {
+          helpers.setCurrentCommand('');
+        }
         return false;
       }
 
