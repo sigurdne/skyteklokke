@@ -479,7 +479,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         } else if (nextState === 'fire') {
           helpers.setCurrentCommand(t('commands.fire_command'));
         } else if (nextState === 'fire_warning') {
-          helpers.setCurrentCommand(t('commands.cease_command'));
+          helpers.clearCurrentCommand();
         } else if (nextState === 'finished' || nextState === 'idle') {
           helpers.clearCurrentCommand();
         }
@@ -504,7 +504,12 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         } else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
           helpers.clearCurrentCommand();
         } else if (state === 'fire_warning') {
-          helpers.setCurrentCommand(t('commands.cease_command'));
+          // Keep command cleared during fire_warning state until we show cease command
+          if (newCountdown === 1) {
+            helpers.setCurrentCommand(t('commands.cease_command'));
+          } else {
+            helpers.clearCurrentCommand();
+          }
         } else if (state === 'finished' && newCountdown === 0) {
           helpers.clearCurrentCommand();
         }
