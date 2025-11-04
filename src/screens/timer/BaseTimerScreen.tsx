@@ -447,15 +447,12 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     if (program && programId === 'ppc-standard') {
       const settings = (program as any).getSettings?.();
       const discipline = settings?.discipline;
-      console.log('[BaseTimerScreen] PPC back navigation - discipline:', discipline);
       if (discipline) {
-        console.log('[BaseTimerScreen] Navigating to PPC with discipline:', discipline);
         navigation.navigate('PPC' as any, { selectedDiscipline: discipline });
         return;
       }
     }
     
-    console.log('[BaseTimerScreen] Using goBack()');
     navigation.goBack();
   }, [handleReset, isRunning, navigation, programId]);
 

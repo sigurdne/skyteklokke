@@ -212,7 +212,7 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route 
           if (selectedDiscipline) {
             setSelectedDiscipline(null);
           } else {
-            navigation.goBack();
+            navigation.navigate('Home');
           }
         }}
       />
