@@ -50,9 +50,7 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route 
 
   // Update selectedDiscipline when route params change
   useEffect(() => {
-    console.log('[PpcHomeScreen] route.params.selectedDiscipline changed:', route.params?.selectedDiscipline);
     if (route.params?.selectedDiscipline) {
-      console.log('[PpcHomeScreen] Setting selectedDiscipline to:', route.params.selectedDiscipline);
       setSelectedDiscipline(route.params.selectedDiscipline as PPCDiscipline);
     }
   }, [route.params?.selectedDiscipline]);
@@ -60,7 +58,6 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route 
   // Close modal when screen is focused (e.g., when returning from timer)
   useFocusEffect(
     useCallback(() => {
-      console.log('[PpcHomeScreen] Screen focused - closing modal');
       setStageDetail(null);
     }, [])
   );

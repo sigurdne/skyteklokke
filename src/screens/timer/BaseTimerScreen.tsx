@@ -185,21 +185,22 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     ProgramManager.setActiveProgram(programId);
     AudioService.setLanguage(i18n.language as any);
 
-    // Intercept all back navigation attempts (hardware back button, swipe, etc.)
+    // Intercept hardware back button and gestures
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       // For PPC programs, navigate to PPC screen with selected discipline
       if (programId === 'ppc-standard') {
         const settings = (program as any).getSettings?.();
         const discipline = settings?.discipline;
-        console.log('[BaseTimerScreen] beforeRemove - PPC discipline:', discipline);
         if (discipline) {
           // Prevent default back behavior
           e.preventDefault();
-          console.log('[BaseTimerScreen] beforeRemove - Navigating to PPC with discipline:', discipline);
           // Navigate to PPC with discipline parameter
           navigation.navigate('PPC' as any, { selectedDiscipline: discipline });
+          return;
         }
       }
+      
+      // For non-PPC or if discipline not found, allow default back navigation
     });
 
     return () => {
@@ -435,6 +436,8 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   }, [clearCurrentCommand, handleTimerEvent, updateCurrentState, updateCountdown]);
 
   const handleBack = useCallback(() => {
+    console.log('[BaseTimerScreen] handleBack called - isRunning:', isRunning, 'programId:', programId);
+    
     if (isRunning) {
       handleReset();
     }
@@ -521,7 +524,14 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
         {showFullscreenDisplay ? (
           <TouchableOpacity
             style={[timerStyles.fullscreenDisplay, { backgroundColor: displayColor }]}
-            onPress={handleStop}
+            onPress={() => {
+              // For PPC programs that are finished, navigate back instead of stopping
+              if (programId === 'ppc-standard' && currentState === 'finished') {
+                handleBack();
+              } else {
+                handleStop();
+              }
+            }}
             activeOpacity={0.9}
           >
             {adapterBindings.renderFullscreenOverlay?.(displayContext)}
@@ -582,14 +592,38 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
           </View>
         ) : (
           <View style={{ flex: 1, justifyContent: 'space-between' }}>
-            <TimerDisplay
-              time={elapsedTime}
-              state={currentState ? t(`states.${currentState}`) : t('states.idle')}
-              command={currentCommand}
-              countdown={countdown}
-              backgroundColor={backgroundColor}
-              textColor={textColor}
-            />
+            {(() => {
+              const shouldWrap = !isRunning && currentState === 'finished';
+              console.log('[BaseTimerScreen] Render - isRunning:', isRunning, 'currentState:', currentState, 'shouldWrap:', shouldWrap);
+              return shouldWrap ? (
+                <TouchableOpacity 
+                  style={{ flex: 1 }} 
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    console.log('[BaseTimerScreen] TouchableOpacity pressed on finished screen');
+                    handleBack();
+                  }}
+                >
+                  <TimerDisplay
+                    time={elapsedTime}
+                    state={currentState ? t(`states.${currentState}`) : t('states.idle')}
+                    command={currentCommand}
+                    countdown={countdown}
+                    backgroundColor={backgroundColor}
+                    textColor={textColor}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TimerDisplay
+                  time={elapsedTime}
+                  state={currentState ? t(`states.${currentState}`) : t('states.idle')}
+                  command={currentCommand}
+                  countdown={countdown}
+                  backgroundColor={backgroundColor}
+                  textColor={textColor}
+                />
+              );
+            })()}
             <View style={[timerStyles.controls, timerStyles.controlsBottom]}>
               {!isRunning && settingsBindings?.showButton && (
                 <TouchableOpacity

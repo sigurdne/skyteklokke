@@ -719,7 +719,10 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       return context.backgroundColor;
     }, []);
 
-    const showFullscreenDisplay = useCallback((context: TimerDisplayContext) => context.isRunning, []);
+    const showFullscreenDisplay = useCallback(
+      (context: TimerDisplayContext) => context.isRunning || context.currentState === 'finished',
+      []
+    );
 
     const cleanup = useCallback(() => {
       resetManualFlow();
