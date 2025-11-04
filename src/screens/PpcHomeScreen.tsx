@@ -805,6 +805,24 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.text,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  audioToggle: {
+    backgroundColor: colors.surface,
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  audioToggleIcon: {
+    fontSize: 24,
+  },
   sectionAction: {
     ...typography.button,
     color: colors.primary,

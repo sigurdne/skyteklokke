@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '../utils/logger';
 import { Language } from '../types';
 
@@ -12,11 +13,14 @@ export class AudioService {
   private isEnabled: boolean;
   private volume: number;
   private isWarmedUp: boolean = false;
+  private static AUDIO_ENABLED_KEY = '@audio_enabled';
 
   private constructor() {
     this.currentLanguage = 'no';
     this.isEnabled = true;
     this.volume = 1.0;
+    // Load audio enabled state from storage
+    this.loadAudioEnabledState();
     // Warm up TTS system immediately to avoid delay on first beep
     this.warmUpTTS();
   }
@@ -52,6 +56,25 @@ export class AudioService {
     }
   }
 
+  private async loadAudioEnabledState(): Promise<void> {
+    try {
+      const value = await AsyncStorage.getItem(AudioService.AUDIO_ENABLED_KEY);
+      if (value !== null) {
+        this.isEnabled = value === 'true';
+      }
+    } catch (error) {
+      logger.error('Error loading audio enabled state:', error);
+    }
+  }
+
+  private async saveAudioEnabledState(): Promise<void> {
+    try {
+      await AsyncStorage.setItem(AudioService.AUDIO_ENABLED_KEY, String(this.isEnabled));
+    } catch (error) {
+      logger.error('Error saving audio enabled state:', error);
+    }
+  }
+
   setLanguage(language: Language): void {
     this.currentLanguage = language;
   }
@@ -60,8 +83,13 @@ export class AudioService {
     return this.currentLanguage;
   }
 
+  isAudioEnabled(): boolean {
+    return this.isEnabled;
+  }
+
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
+    this.saveAudioEnabledState();
   }
 
   setVolume(volume: number): void {

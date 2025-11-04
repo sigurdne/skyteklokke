@@ -54,6 +54,28 @@ const startControlsStyles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
     textAlign: 'center',
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  audioToggle: {
+    backgroundColor: colors.surface,
+    borderRadius: 24,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexShrink: 0,
+  },
+  audioToggleIcon: {
+    fontSize: 24,
   },
   list: {
     width: '100%',
@@ -171,6 +193,12 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
     const [hasStageTitleClip, setHasStageTitleClip] = useState<boolean>(false);
     const [hasStageBriefingClip, setHasStageBriefingClip] = useState<boolean>(false);
     const [stagePreviewBusy, setStagePreviewBusy] = useState<'title' | 'briefing' | null>(null);
+    const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
+
+    // Load audio enabled state on mount
+    useEffect(() => {
+      setAudioEnabled(AudioService.isAudioEnabled());
+    }, []);
 
     const stopPlayback = useCallback(async () => {
       logger.info(`stopPlayback: soundRef.current=${soundRef.current ? 'exists' : 'null'}`);
@@ -274,9 +302,9 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const playClipWithFallback = useCallback(
       async (clipKey: string | null, _fallbackText: string) => {
-        logger.info(`playClipWithFallback: clipKey=${clipKey}, soundMode=${soundMode}`);
+        logger.info(`playClipWithFallback: clipKey=${clipKey}, audioEnabled=${audioEnabled}`);
         
-        if (!soundMode) {
+        if (!audioEnabled) {
           return false;
         }
 
@@ -310,15 +338,20 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
         return false;
       },
-      [getClipMeta, soundMode, stopPlayback],
+      [audioEnabled, getClipMeta, stopPlayback],
     );
 
     const playRecordedClip = useCallback(
       async (clipKey: string | null) => {
-        logger.info(`playRecordedClip: clipKey=${clipKey}`);
+        logger.info(`playRecordedClip: clipKey=${clipKey}, audioEnabled=${audioEnabled}`);
         
         if (!clipKey) {
           logger.warn('playRecordedClip: No clipKey provided');
+          return false;
+        }
+
+        if (!audioEnabled) {
+          logger.info('playRecordedClip: Audio disabled, skipping');
           return false;
         }
 
@@ -356,7 +389,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
         return false;
       },
-      [getClipMeta, stopPlayback],
+      [audioEnabled, getClipMeta, stopPlayback],
     );
 
     const handleCommandEvent = useCallback(
@@ -449,6 +482,12 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           defaultValue: 'Trykk kommandoene i rekkefølge for å starte',
         });
 
+        const toggleAudio = () => {
+          const newState = !audioEnabled;
+          setAudioEnabled(newState);
+          AudioService.setEnabled(newState);
+        };
+
         const infoButtons: Array<{
           key: 'title' | 'briefing';
           label: string;
@@ -529,14 +568,15 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             const isExpectedStep = manualStep === button.stepIndex;
             const isFinalCommand = button.command === 'linja_er_klar';
 
-            // For the final command (linja_er_klar), check if there's a recording
+            // For the final command (linja_er_klar), check if there's a recording and if audio is enabled
             if (isExpectedStep && isFinalCommand) {
               const meta = await getClipMeta(clipKey);
               const hasRecording = Boolean(meta?.uri);
               
-              logger.info(`handleManualPress: isFinalCommand, hasRecording=${hasRecording}, meta=${JSON.stringify(meta)}`);
+              logger.info(`handleManualPress: isFinalCommand, hasRecording=${hasRecording}, audioEnabled=${audioEnabled}, meta=${JSON.stringify(meta)}`);
 
-              if (hasRecording) {
+              // Only wait for recording if audio is enabled AND there's a recording
+              if (audioEnabled && hasRecording) {
                 // Play the recording and wait for it to complete
                 try {
                   await playClipWithFallback(clipKey, spokenText);
@@ -547,8 +587,8 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
                   logger.warn('Manual command playback error', playError);
                 }
               } else {
-                // No recording, start timer immediately without waiting
-                logger.info('handleManualPress: No recording found, starting timer immediately');
+                // No recording or audio disabled, start timer immediately without waiting
+                logger.info('handleManualPress: No recording found or audio disabled, starting timer immediately');
               }
 
               // Start the timer
@@ -562,7 +602,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
                 logger.error('Failed to start PPC timer after manual commands', startError);
               }
             } else {
-              // For non-final commands, just play the audio normally
+              // For non-final commands, just play the audio normally (will be skipped if audio disabled)
               try {
                 await playClipWithFallback(clipKey, spokenText);
               } catch (playError) {
@@ -586,7 +626,18 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             contentContainerStyle={startControlsStyles.container}
             showsVerticalScrollIndicator={true}
           >
-            <Text style={startControlsStyles.prompt}>{manualPrompt}</Text>
+            <View style={startControlsStyles.headerRow}>
+              <Text style={startControlsStyles.prompt}>{manualPrompt}</Text>
+              <TouchableOpacity
+                style={startControlsStyles.audioToggle}
+                onPress={toggleAudio}
+                activeOpacity={0.7}
+              >
+                <Text style={startControlsStyles.audioToggleIcon}>
+                  {audioEnabled ? '🔊' : '🔇'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={startControlsStyles.infoSection}>
               {infoButtons.map((button) => {
                 const disabled = !button.hasClip || Boolean(stagePreviewBusy);
@@ -659,6 +710,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         );
       },
       [
+        audioEnabled,
         commandTextMap,
         hasStageBriefingClip,
         hasStageTitleClip,
