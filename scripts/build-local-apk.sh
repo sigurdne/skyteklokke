@@ -24,9 +24,9 @@ echo ""
 # Step 1: Install dependencies
 echo "📦 Installing dependencies..."
 if [ -f "package-lock.json" ]; then
-    npm ci
+    npm ci --legacy-peer-deps
 else
-    npm install
+    npm install --legacy-peer-deps
 fi
 echo ""
 
