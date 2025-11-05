@@ -204,9 +204,166 @@ timerEngine.start()
             └─► State: FINISHED, emit('complete')
 ```
 
+## Program Adapter Pattern (Timer Specialization)
+
+The app uses an **Adapter Pattern** to separate generic timer logic from program-specific behavior. This allows each shooting program to customize timer display, controls, and event handling without modifying BaseTimerScreen.
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    BaseTimerScreen                          │
+│              (Generic Timer Container)                      │
+├─────────────────────────────────────────────────────────────┤
+│  - Manages timer state (running, paused, finished)          │
+│  - Handles navigation and lifecycle                         │
+│  - Provides event helpers (setCommand, clearCommand, etc)   │
+│  - Renders Header and base UI structure                     │
+│  - Delegates customization to adapter                       │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+           ┌────────────────────────────────────┐
+           │   TimerProgramAdapter Interface    │
+           │                                    │
+           │  - useBindings()                   │
+           │    ├─► handleTimerEvent()          │
+           │    ├─► renderStartControls()       │
+           │    ├─► renderFullscreenOverlay()   │
+           │    ├─► showFullscreenDisplay()     │
+           │    ├─► getDisplayColor()           │
+           │    ├─► adjustSequence()            │
+           │    ├─► beforeTimerStart()          │
+           │    └─► cleanup()                   │
+           └────────────────────────────────────┘
+                            │
+          ┌─────────────────┼─────────────────┐
+          │                 │                 │
+          ▼                 ▼                 ▼
+  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+  │   Field     │  │    Duel     │  │    PPC      │
+  │   Adapter   │  │   Adapter   │  │  Adapter    │
+  └─────────────┘  └─────────────┘  └─────────────┘
+
+Each adapter customizes:
+  - Event handling (when to show/hide commands)
+  - Start controls (buttons, manual sequences)
+  - Display behavior (colors, fullscreen mode)
+  - Audio playback (recordings vs TTS)
+  - Cleanup logic
+```
+
+### Adapter Responsibilities
+
+**BaseTimerScreen (Generic Container)**:
+- Navigation and back handling
+- Timer state management (isRunning, isPaused, currentState)
+- Command text display (currentCommand)
+- Countdown display
+- Idle/Running state rendering
+- Event delegation to adapter
+- Lifecycle management
+
+**Program Adapter (Specialized Behavior)**:
+- **handleTimerEvent()**: Intercept and customize event handling
+  - Return `true` to prevent BaseTimerScreen default behavior
+  - Return `false` to allow default behavior
+  - Example: PPC adapter clears command text for all state_change events
+  
+- **renderStartControls()**: Custom UI for idle state
+  - Example: PPC renders manual command sequence buttons
+  - Example: Field/Duel show standard Start button
+  
+- **showFullscreenDisplay()**: Control when to show fullscreen timer
+  - Example: PPC shows fullscreen during running/finished
+  - Example: Field shows fullscreen always when not idle
+  
+- **getDisplayColor()**: Customize background colors per state
+  - Example: Field uses green during shooting
+  - Example: PPC uses blue during prestart
+  
+- **adjustSequence()**: Modify timing sequence before start
+  - Example: PPC injects manual command delays
+  - Example: Field keeps sequence unchanged
+  
+- **beforeTimerStart()**: Pre-load resources before timer starts
+  - Example: PPC pre-caches audio clip metadata
+  
+- **cleanup()**: Reset adapter state when leaving timer
+  - Example: PPC resets manual command flow
+
+### Race Condition Protection
+
+To prevent events from previous programs affecting new programs during navigation:
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│  Protection Mechanisms:                                  │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│  1. useLayoutEffect - Clear state BEFORE render         │
+│     - Runs synchronously before browser paint           │
+│     - Clears currentCommand when programId changes      │
+│     - Updates programIdRef and isActiveRef              │
+│                                                          │
+│  2. isActiveRef - Ignore stale events                   │
+│     - Set to false in cleanup when programId changes    │
+│     - Set to true in useLayoutEffect for new program    │
+│     - handleTimerEvent checks flag and ignores if false │
+│                                                          │
+│  3. Adapter clearCurrentCommand - Always clear          │
+│     - PPC adapter calls helpers.clearCurrentCommand()   │
+│       for ALL state_change events                       │
+│     - Prevents stale text from other programs           │
+│                                                          │
+│  4. Conditional idle text - Program-specific            │
+│     - Only show "Er skytterene klare?" if no custom     │
+│       start controls (field/duel programs)              │
+│     - PPC has custom controls, so text is hidden        │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Example: PPC Manual Command Flow
+
+```text
+User opens PPC Timer
+        │
+        ▼
+BaseTimerScreen renders with ppcTimerAdapter
+        │
+        ├─► showFullscreenDisplay() → false (idle)
+        ├─► renderStartControls() → Manual command UI
+        └─► Conditional: Skip "Er skytterene klare?" text
+        
+User presses "Lade, hylstre" button
+        │
+        ├─► PPC adapter: Play audio clip
+        ├─► Increment manualStep (0 → 1)
+        └─► Enable next button
+        
+User presses "Er linja klar?" button
+        │
+        ├─► PPC adapter: Play audio clip
+        ├─► Increment manualStep (1 → 2)
+        └─► Enable next button
+        
+User presses "Linja er klar" button
+        │
+        ├─► PPC adapter: Play audio clip
+        ├─► Wait for audio completion
+        ├─► Call startTimer()
+        └─► Timer begins countdown sequence
+        
+Timer starts
+        │
+        ├─► showFullscreenDisplay() → true
+        ├─► handleTimerEvent(state_change)
+        │   └─► PPC adapter: clearCurrentCommand()
+        │       (prevents field timer text bleeding)
+        └─► Fullscreen countdown display shown
+```
+
 ## Timer Engine Event Flow
 
-```
+```text
 ┌──────────────┐
 │ TimerEngine  │
 │   Events     │
@@ -214,11 +371,17 @@ timerEngine.start()
       │
       ├─► 'state_change'
       │   ├─► Updates UI state
+      │   ├─► Adapter can intercept
       │   └─► Changes colors
       │
       ├─► 'command'
       │   ├─► Updates command text
+      │   ├─► Adapter can intercept
       │   └─► Triggers TTS audio
+      │
+      ├─► 'countdown'
+      │   ├─► Updates countdown display
+      │   └─► Adapter can intercept
       │
       ├─► 'complete'
       │   ├─► Stops timer
@@ -335,18 +498,27 @@ App.tsx
      │   │   ├── Header
      │   │   ├── ProgramCard
      │   │   └── ProgramManager
-     │   ├── TimerScreen
-     │   │   ├── Header
-     │   │   ├── TimerDisplay
-     │   │   ├── ProgramManager
-     │   │   ├── TimerEngine
-     │   │   └── AudioService
+     │   ├── timer/
+     │   │   ├── BaseTimerScreen (Generic Container)
+     │   │   │   ├── Header
+     │   │   │   ├── TimerDisplay
+     │   │   │   ├── ProgramManager
+     │   │   │   ├── TimerEngine
+     │   │   │   └── Adapters (via useBindings)
+     │   │   └── adapters/
+     │   │       ├── StandardFieldTimerAdapter.tsx
+     │   │       ├── StandardDuelTimerAdapter.tsx
+     │   │       └── PpcTimerAdapter.tsx (Custom Controls)
+     │   ├── ppc/
+     │   │   ├── PPCHomeScreen
+     │   │   └── PPCDetailScreen
      │   └── SettingsScreen
      │       └── Header
      ├── programs/
      │   ├── BaseProgram
      │   ├── StandardFieldProgram → BaseProgram
-     │   └── StandardDuelProgram → BaseProgram
+     │   ├── StandardDuelProgram → BaseProgram
+     │   └── PPCProgram → BaseProgram (with stages)
      ├── services/
      │   ├── ProgramManager → BaseProgram
      │   ├── TimerEngine → types
@@ -414,27 +586,33 @@ Production (Future):
           └─► Expo EAS Build → Google Play (Internal Testing) → Production
 ```
 
-## Extension Points for Phase 2
+## Extension Points for Future Development
 
-```
-Future Programs:
-  BaseProgram
-      │
-      ├─► StandardFieldProgram ✅
-      ├─► StandardDuelProgram ✅
-      ├─► SilhouetteProgram (Phase 2)
-      ├─► CustomProgram (Phase 3)
-      └─► ... (easily extensible)
+```text
+Programs (BaseProgram):
+  ├─► StandardFieldProgram ✅
+  ├─► StandardDuelProgram ✅
+  ├─► PPCProgram ✅
+  ├─► SilhouetteProgram (Future)
+  ├─► CustomProgram (Future)
+  └─► ... (easily extensible)
+
+Timer Adapters (TimerProgramAdapter):
+  ├─► standardFieldTimerAdapter ✅
+  ├─► standardDuelTimerAdapter ✅
+  ├─► ppcTimerAdapter ✅ (with custom controls)
+  ├─► SilhouetteAdapter (Future)
+  └─► ... (add new behaviors without changing BaseTimerScreen)
 
 Future Services:
-  ├─► RhythmEngine (Phase 3) - Audio rhythm patterns
-  ├─► StatisticsService (Phase 4) - Track usage
-  └─► SettingsService (Phase 2) - Persistent settings
+  ├─► RhythmEngine - Audio rhythm patterns
+  ├─► StatisticsService - Track usage
+  └─► SettingsService - Persistent settings
 
 Future Screens:
-  ├─► SettingsScreen (Phase 2) - Full implementation
-  ├─► StatisticsScreen (Phase 4)
-  └─► CustomProgramScreen (Phase 3)
+  ├─► SettingsScreen - Full implementation
+  ├─► StatisticsScreen
+  └─► CustomProgramScreen
 ```
 
 ## Technology Stack Summary
