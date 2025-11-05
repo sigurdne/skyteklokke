@@ -130,7 +130,7 @@
   "no_recording": "Ingen optagelse gemt endnu"
     },
     "timer": {
-      "manual_prompt": "Afspil kommandoerne i rækkefølge for at starte serien",
+      "manual_prompt": "Tryk kommandoerne i rækkefølge for at starte",
       "manual_reset": "Start forfra"
     },
     "stage": {

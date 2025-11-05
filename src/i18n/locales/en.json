@@ -130,7 +130,7 @@
   "no_recording": "No recording saved yet"
     },
     "timer": {
-      "manual_prompt": "Play each command in order to start the stage",
+      "manual_prompt": "Press commands in sequence to start",
       "manual_reset": "Start over"
     },
     "stage": {

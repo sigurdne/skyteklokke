@@ -130,7 +130,7 @@
   "no_recording": "Ingen inspelning sparad ännu"
     },
     "timer": {
-      "manual_prompt": "Spela upp kommandona i ordning för att starta momentet",
+      "manual_prompt": "Tryck på kommandona i ordning för att starta",
       "manual_reset": "Börja om"
     },
     "stage": {

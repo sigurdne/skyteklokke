@@ -130,7 +130,7 @@
   "no_recording": "Ingen opptak lagret"
     },
     "timer": {
-      "manual_prompt": "Spill av kommandoene i rekkefølge for å starte stage",
+      "manual_prompt": "Trykk kommandoene i rekkefølge for å starte",
       "manual_reset": "Start på nytt"
     },
     "stage": {
