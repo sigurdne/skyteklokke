@@ -437,15 +437,18 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
     const handleTimerEvent = useCallback(
       async (event: TimerEvent, helpers: TimerEventHelpers) => {
         if (event.type === 'state_change') {
+          // Always clear command text for PPC - we don't use command overlays
+          helpers.clearCurrentCommand();
+          
           const nextState = event.state || 'idle';
           if (nextState === 'idle' || nextState === 'finished') {
-            helpers.clearCurrentCommand();
             await stopPlayback();
             manualGateCompletedRef.current = false;
             setManualStep(0);
             setIsManualBusy(false);
           }
-          return false;
+          // Always handle state_change to prevent BaseTimerScreen from setting command text
+          return true;
         }
 
         if (event.type === 'countdown') {

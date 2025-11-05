@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -121,6 +121,8 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   const currentStateRef = useRef<string>('idle');
   const currentCommandRef = useRef<string>('');
   const countdownRef = useRef<number | null>(null);
+  const programIdRef = useRef<string>(programId);
+  const isActiveRef = useRef<boolean>(true);
 
   const updateCurrentState = useCallback((value: string) => {
     setCurrentState(value);
@@ -144,6 +146,15 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   const adapterBindings = adapter.useBindings({ programId, t, i18n });
   cleanupRef.current = adapterBindings.cleanup;
 
+  // Clear command text BEFORE layout when programId changes
+  // This prevents showing stale command text from previous program
+  useLayoutEffect(() => {
+    programIdRef.current = programId;
+    isActiveRef.current = true;
+    setCurrentCommandState('');
+    currentCommandRef.current = '';
+  }, [programId]);
+
   useEffect(() => {
     return () => {
       cleanupRef.current?.();
@@ -166,6 +177,11 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     migrateLegacySoundMode();
   }, []);
 
+  // Clear command text on mount to prevent showing stale text from previous program
+  useEffect(() => {
+    clearCurrentCommand();
+  }, [clearCurrentCommand]);
+
   useEffect(() => {
     return () => {
       try {
@@ -177,6 +193,9 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   }, []);
 
   useEffect(() => {
+    // Immediately clear command text when programId changes
+    setCurrentCommandState('');
+    
     const program = ProgramManager.getProgram(programId);
     if (!program) {
       navigation.goBack();
@@ -211,6 +230,9 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     });
 
     return () => {
+      // Mark component as inactive to ignore events from old program
+      isActiveRef.current = false;
+      
       unsubscribe();
       if (timerEngineRef.current) {
         try {
@@ -227,7 +249,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
       ProgramManager.clearActiveProgram();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [programId, navigation, i18n.language]);
+  }, [programId, navigation, i18n.language, clearCurrentCommand]);
 
   const eventHelpers: TimerEventHelpers = useMemo(() => ({
     programId,
@@ -266,8 +288,15 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
 
   const handleTimerEvent = useCallback(async (event: TimerEvent) => {
     try {
+      // Ignore events after programId has changed (race condition during navigation)
+      if (!isActiveRef.current) {
+        logger.warn(`[${programIdRef.current}] Ignoring timer event from stale program: ${event.type}, command: ${event.command}`);
+        return;
+      }
+
       if (event.type === 'state_change') {
         const nextState = event.state || 'idle';
+        logger.info(`[${programIdRef.current}] State change: ${nextState}, command: ${event.command}`);
         updateCurrentState(nextState);
       }
 
@@ -291,8 +320,10 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
           } catch (e) {
             translatedCommand = String(event.command);
           }
+          logger.info(`[${programIdRef.current}] Setting currentCommand from state_change: "${translatedCommand}" (command: ${event.command})`);
           updateCurrentCommand(translatedCommand);
         } else if (!event.command || event.command === 'beep' || event.command === 'continuous_beep' || isPrePlayCommand) {
+          logger.info(`[${programIdRef.current}] Clearing currentCommand from state_change (command: ${event.command})`);
           clearCurrentCommand();
         }
       }
@@ -592,18 +623,20 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
           </TouchableOpacity>
         ) : currentState === 'idle' ? (
           <View style={timerStyles.idleContainer}>
-            <Text
-              accessible
-              accessibilityRole="text"
-              style={{
-                ...typography.h2,
-                textTransform: 'uppercase',
-                textAlign: 'center',
-                color: textColor,
-              }}
-            >
-              {t('states.idle')}
-            </Text>
+            {!customStartControls && (
+              <Text
+                accessible
+                accessibilityRole="text"
+                style={{
+                  ...typography.h2,
+                  textTransform: 'uppercase',
+                  textAlign: 'center',
+                  color: textColor,
+                }}
+              >
+                {t('states.idle')}
+              </Text>
+            )}
             <View style={[timerStyles.controls]}>
               {!isRunning && settingsBindings?.showButton && (
                 <TouchableOpacity
