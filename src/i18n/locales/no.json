@@ -18,6 +18,7 @@
   "commands": {
   },
   "field": {
+    "idle": "Er skytterene klare?",
     "commands": {
       "shooters_ready": "Er skytterne klare",
       "ready_command": "KLAR!",
@@ -26,7 +27,6 @@
     }
   },
   "states": {
-    "idle": "Er skytterene klare?"
   },
   "controls": {
     "start": "Start",

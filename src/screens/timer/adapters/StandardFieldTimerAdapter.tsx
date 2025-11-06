@@ -478,7 +478,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         if (event.command && event.command !== 'beep' && event.command !== 'continuous_beep' && !isPrePlayCommand) {
           let translatedCommand = '';
           try {
-            translatedCommand = t(`commands.${event.command}`);
+            translatedCommand = t(`field.commands.${event.command}`);
           } catch (e) {
             translatedCommand = String(event.command);
           }

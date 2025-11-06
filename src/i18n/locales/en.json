@@ -18,15 +18,15 @@
   "commands": {
   },
   "field": {
+    "idle": "Are the shooters ready?",
     "commands": {
-      "shooters_ready": "Are shooters ready?",
+      "shooters_ready": "Shooters ready",
       "ready_command": "READY!",
       "fire_command": "FIRE!",
       "cease_command": "CEASE FIRE"
     }
   },
   "states": {
-    "idle": "Are shooters ready?"
   },
   "controls": {
     "start": "Start",

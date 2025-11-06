@@ -18,15 +18,15 @@
   "commands": {
   },
   "field": {
+    "idle": "Är skyttarna klara?",
     "commands": {
-      "shooters_ready": "Är skylttar klara?",
+      "shooters_ready": "Skytt klara",
       "ready_command": "KLAR!",
       "fire_command": "SKJUT!",
       "cease_command": "SLUTA SKJUTA"
     }
   },
   "states": {
-    "idle": "Är skyttar redo?"
   },
   "controls": {
     "start": "Start",

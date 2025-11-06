@@ -18,15 +18,15 @@
   "commands": {
   },
   "field": {
+    "idle": "Er skytterne klar?",
     "commands": {
-      "shooters_ready": "Er skydetterne klare?",
+      "shooters_ready": "Skytter klar",
       "ready_command": "KLAR!",
-      "fire_command": "SKYD!",
-      "cease_command": "STOP SKYDNING"
+      "fire_command": "FYRING!",
+      "cease_command": "STOP FYRING"
     }
   },
   "states": {
-    "idle": "Er skytterne klar?"
   },
   "controls": {
     "start": "Start",

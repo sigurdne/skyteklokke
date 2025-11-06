@@ -527,6 +527,14 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   const backgroundColor = uiConfig?.backgroundColor || colors.background;
   const textColor = uiConfig?.textColor || colors.text;
 
+  // Get the idle text based on program type
+  const getIdleText = useCallback(() => {
+    if (programId === 'standard-field') {
+      return t('field.idle');
+    }
+    return ''; // Empty fallback for other programs
+  }, [programId, t]);
+
   const displayContext: TimerDisplayContext = {
     currentState,
     countdown,
@@ -634,7 +642,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
                   color: textColor,
                 }}
               >
-                {t('states.idle')}
+                {getIdleText()}
               </Text>
             )}
             <View style={[timerStyles.controls]}>
@@ -672,7 +680,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
                 >
                   <TimerDisplay
                     time={elapsedTime}
-                    state={currentState ? t(`states.${currentState}`) : t('states.idle')}
+                    state={currentState ? t(`states.${currentState}`) : getIdleText()}
                     command={currentCommand}
                     countdown={countdown}
                     backgroundColor={backgroundColor}
@@ -682,7 +690,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
               ) : (
                 <TimerDisplay
                   time={elapsedTime}
-                  state={currentState ? t(`states.${currentState}`) : t('states.idle')}
+                  state={currentState ? t(`states.${currentState}`) : getIdleText()}
                   command={currentCommand}
                   countdown={countdown}
                   backgroundColor={backgroundColor}
