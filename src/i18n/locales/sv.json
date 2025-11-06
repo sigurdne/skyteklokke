@@ -18,13 +18,8 @@
   "commands": {
     "shooters_ready": "Är skyttarna klara",
     "ready_command": "KLARA!",
-    "fire_command": "ELD!",
-    "cease_command": "ELDUPPHÖR",
-    "prepare": "Ladda",
-    "fire": "Eld",
-    "cease_fire": "Stopp",
-    "start": "Start",
-    "go": "Eld",
+        "fire_command": "ELD!",
+    "cease_command": "UPPHÖR",
     "lade_hylstre": "Ladda, hölstra",
     "er_linja_klar": "Är linjen klar?",
     "linja_er_klar": "Linjen är klar"

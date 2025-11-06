@@ -20,12 +20,7 @@
     "ready_command": "READY!",
     "fire_command": "FIRE!",
     "cease_command": "CEASE FIRE",
-    "prepare": "Load",
-    "fire": "Fire",
-    "cease_fire": "Stop",
-    "start": "Start",
-    "go": "Fire",
-    "lade_hylstre": "Load and holster",
+    "lade_hylstre": "Load, holster",
     "er_linja_klar": "Is the line ready?",
     "linja_er_klar": "The line is ready"
   },

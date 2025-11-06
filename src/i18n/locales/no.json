@@ -20,11 +20,6 @@
     "ready_command": "KLAR!",
     "fire_command": "ILD!",
     "cease_command": "STAANS",
-    "prepare": "Last",
-    "fire": "Ild",
-    "cease_fire": "Stans",
-    "start": "Start",
-    "go": "Ild",
     "lade_hylstre": "Lade, hylstre",
     "er_linja_klar": "Er linja klar?",
     "linja_er_klar": "Linja er klar"
