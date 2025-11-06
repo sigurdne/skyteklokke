@@ -25,12 +25,7 @@
     "linja_er_klar": "Linja er klar"
   },
   "states": {
-    "idle": "Er skytterene klare?",
-    "prepare": "Forbered deg",
-    "prepare_warning": "Forbered deg",
-    "briefing": "Briefing",
-    "prestart": "Forbered linja",
-    "shooting": "Skyting pågår"
+    "idle": "Er skytterene klare?"
   },
   "controls": {
     "start": "Start",

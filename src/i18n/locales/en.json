@@ -25,12 +25,7 @@
     "linja_er_klar": "The line is ready"
   },
   "states": {
-    "idle": "Are shooters ready?",
-    "prepare": "Prepare yourself",
-    "prepare_warning": "Prepare yourself",
-    "briefing": "Briefing",
-    "prestart": "Prepare the line",
-    "shooting": "Shooting in progress"
+    "idle": "Are shooters ready?"
   },
   "controls": {
     "start": "Start",

@@ -25,12 +25,7 @@
     "linja_er_klar": "Linjen er klar"
   },
   "states": {
-    "idle": "Er skytterne klar?",
-    "prepare": "Forbered dig",
-    "prepare_warning": "Forbered dig",
-    "briefing": "Briefing",
-    "prestart": "Forbered linjen",
-    "shooting": "Skydning i gang"
+    "idle": "Er skytterne klar?"
   },
   "controls": {
     "start": "Start",

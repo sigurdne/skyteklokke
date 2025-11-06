@@ -25,12 +25,7 @@
     "linja_er_klar": "Linjen är klar"
   },
   "states": {
-    "idle": "Är skyttar redo?",
-    "prepare": "Förbered dig",
-    "prepare_warning": "Förbered dig",
-    "briefing": "Briefing",
-    "prestart": "Förbered linjen",
-    "shooting": "Skjutning pågår"
+    "idle": "Är skyttar redo?"
   },
   "controls": {
     "start": "Start",
