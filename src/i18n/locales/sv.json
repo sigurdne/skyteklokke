@@ -16,13 +16,17 @@
     "start_program": "Starta program"
   },
   "commands": {
-    "shooters_ready": "Är skyttarna klara",
-    "ready_command": "KLARA!",
-        "fire_command": "ELD!",
-    "cease_command": "UPPHÖR",
-    "lade_hylstre": "Ladda, hölstra",
+    "lade_hylstre": "Ladda, mata ut hylsor",
     "er_linja_klar": "Är linjen klar?",
     "linja_er_klar": "Linjen är klar"
+  },
+  "field": {
+    "commands": {
+      "shooters_ready": "Är skylttar klara?",
+      "ready_command": "KLAR!",
+      "fire_command": "SKJUT!",
+      "cease_command": "SLUTA SKJUTA"
+    }
   },
   "states": {
     "idle": "Är skyttar redo?"

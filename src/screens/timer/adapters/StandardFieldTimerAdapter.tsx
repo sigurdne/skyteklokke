@@ -504,7 +504,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         }
         // PREPARE_WARNING phase start (yellow, at 5): show "KLAR"
         else if (state === 'prepare_warning' && newCountdown === 5) {
-          helpers.setCurrentCommand(t('commands.ready_command'));
+          helpers.setCurrentCommand(t('field.commands.ready_command'));
         }
         // PREPARE_WARNING phase (yellow, countdown < 5): no text
         else if (state === 'prepare_warning' && newCountdown < 5) {
@@ -512,7 +512,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         }
         // FIRE phase start (green, at shootingDuration): show "ILD!"
         else if (state === 'fire' && newCountdown === shootingDuration) {
-          helpers.setCurrentCommand(t('commands.fire_command'));
+          helpers.setCurrentCommand(t('field.commands.fire_command'));
         }
         // FIRE phase (green, countdown < shootingDuration): no text
         else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
@@ -520,7 +520,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         }
         // FIRE_WARNING phase (yellow): show "STAANS"
         else if (state === 'fire_warning') {
-          helpers.setCurrentCommand(t('commands.cease_command'));
+          helpers.setCurrentCommand(t('field.commands.cease_command'));
         }
         // FINISHED phase (red, 0): no text
         else if (state === 'finished' && newCountdown === 0) {
@@ -601,11 +601,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       }
 
       if (event.command === 'shooters_ready') {
-        helpers.setCurrentCommand(t('commands.shooters_ready'));
+        helpers.setCurrentCommand(t('field.commands.shooters_ready'));
         const duration = await CustomAudio.playIfEnabled(programId, 'shooters_ready');
         logger.log(`Custom audio playing for shooters_ready: duration=${duration}ms`);
         if (duration === 0) {
-          const translatedCommand = t('commands.shooters_ready');
+          const translatedCommand = t('field.commands.shooters_ready');
           try {
             AudioService.speak(translatedCommand);
           } catch (error) {

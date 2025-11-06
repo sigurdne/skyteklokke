@@ -16,13 +16,17 @@
     "start_program": "Start program"
   },
   "commands": {
-    "shooters_ready": "Er skytterne klar",
-    "ready_command": "KLAR!",
-    "fire_command": "ILD!",
-    "cease_command": "STANS",
-    "lade_hylstre": "Lad, hylstre",
+    "lade_hylstre": "Læs, udskyld mundinger",
     "er_linja_klar": "Er linjen klar?",
     "linja_er_klar": "Linjen er klar"
+  },
+  "field": {
+    "commands": {
+      "shooters_ready": "Er skydetterne klare?",
+      "ready_command": "KLAR!",
+      "fire_command": "SKYD!",
+      "cease_command": "STOP SKYDNING"
+    }
   },
   "states": {
     "idle": "Er skytterne klar?"

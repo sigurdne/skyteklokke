@@ -16,13 +16,17 @@
     "start_program": "Start program"
   },
   "commands": {
-    "shooters_ready": "Are the shooters ready",
-    "ready_command": "READY!",
-    "fire_command": "FIRE!",
-    "cease_command": "CEASE FIRE",
-    "lade_hylstre": "Load, holster",
+    "lade_hylstre": "Load, eject brass",
     "er_linja_klar": "Is the line ready?",
     "linja_er_klar": "The line is ready"
+  },
+  "field": {
+    "commands": {
+      "shooters_ready": "Are shooters ready?",
+      "ready_command": "READY!",
+      "fire_command": "FIRE!",
+      "cease_command": "CEASE FIRE"
+    }
   },
   "states": {
     "idle": "Are shooters ready?"
