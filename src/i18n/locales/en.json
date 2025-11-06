@@ -16,7 +16,6 @@
     "start_program": "Start program"
   },
   "commands": {
-    "ready_check": "Are the shooters ready",
     "ready_question": "Are the shooters ready?",
     "shooters_ready": "Are the shooters ready",
     "ready_command": "READY!",
@@ -33,7 +32,6 @@
   },
   "states": {
     "idle": "Are the shooters ready?",
-    "ready_check": "Preparing shooters",
     "prepare": "Prepare",
     "prepare_warning": "Prepare",
     "fire": "Active shooting",

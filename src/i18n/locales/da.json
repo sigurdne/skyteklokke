@@ -16,7 +16,6 @@
     "start_program": "Start program"
   },
   "commands": {
-    "ready_check": "Er skytterne klar",
     "ready_question": "Er skytterne klar?",
     "shooters_ready": "Er skytterne klar",
     "ready_command": "KLAR!",
@@ -33,8 +32,7 @@
   },
   "states": {
     "idle": "Er skytterne klar?",
-    "ready_check": "Forbereder skytter",
-    "prepare": "Forbered",
+    "prepare": "Forbered dig",
     "prepare_warning": "Forbered",
     "fire": "Aktiv skydning",
     "fire_warning": "Snart færdig",

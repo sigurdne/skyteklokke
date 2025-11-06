@@ -16,7 +16,6 @@
     "start_program": "Starta program"
   },
   "commands": {
-    "ready_check": "Är skyttarna klara",
     "ready_question": "Är skyttarna klara?",
     "shooters_ready": "Är skyttarna klara",
     "ready_command": "KLAR!",
@@ -33,8 +32,7 @@
   },
   "states": {
     "idle": "Är skyttarna klara?",
-    "ready_check": "Förbereder skyttar",
-    "prepare": "Förbered",
+    "prepare": "Förbered dig",
     "prepare_warning": "Förbered",
     "fire": "Aktiv skytte",
     "fire_warning": "Snart slut",
