@@ -27,8 +27,7 @@
   "states": {
     "idle": "Er skytterne klar?",
     "prepare": "Forbered dig",
-    "prepare_warning": "Forbered",
-    "green_light": "Grønt lys",
+    "prepare_warning": "Forbered dig",
     "briefing": "Briefing",
     "prestart": "Forbered linjen",
     "shooting": "Skydning i gang"
