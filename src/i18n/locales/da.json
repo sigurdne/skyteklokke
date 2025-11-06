@@ -16,9 +16,6 @@
     "start_program": "Start program"
   },
   "commands": {
-    "lade_hylstre": "Læs, udskyld mundinger",
-    "er_linja_klar": "Er linjen klar?",
-    "linja_er_klar": "Linjen er klar"
   },
   "field": {
     "commands": {
@@ -62,6 +59,11 @@
     "license": "Licens"
   },
   "ppc": {
+    "commands": {
+      "lade_hylstre": "Læs, udskyld mundinger",
+      "er_linja_klar": "Er linjen klar?",
+      "linja_er_klar": "Linjen er klar"
+    },
     "home": {
       "subtitle": "WA1500-discipliner og stagebeskrivelser",
       "program_missing": "PPC-programmet er ikke tilgængeligt lige nu.",

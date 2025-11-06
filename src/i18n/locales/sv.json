@@ -16,9 +16,6 @@
     "start_program": "Starta program"
   },
   "commands": {
-    "lade_hylstre": "Ladda, mata ut hylsor",
-    "er_linja_klar": "Är linjen klar?",
-    "linja_er_klar": "Linjen är klar"
   },
   "field": {
     "commands": {
@@ -62,6 +59,11 @@
     "license": "Licens"
   },
   "ppc": {
+    "commands": {
+      "lade_hylstre": "Ladda, mata ut hylsor",
+      "er_linja_klar": "Är linjen klar?",
+      "linja_er_klar": "Linjen är klar"
+    },
     "home": {
       "subtitle": "WA1500-discipliner och momentbeskrivningar",
       "program_missing": "PPC-programmet är inte tillgängligt just nu.",

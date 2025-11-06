@@ -196,9 +196,9 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const commandTextMap = useMemo(
       () => ({
-        lade_hylstre: t('commands.lade_hylstre', { defaultValue: 'Lade, hylstre' }),
-        er_linja_klar: t('commands.er_linja_klar', { defaultValue: 'Er linja klar?' }),
-        linja_er_klar: t('commands.linja_er_klar', { defaultValue: 'Linja er klar' }),
+        lade_hylstre: t('ppc.commands.lade_hylstre', { defaultValue: 'Lade, hylstre' }),
+        er_linja_klar: t('ppc.commands.er_linja_klar', { defaultValue: 'Er linja klar?' }),
+        linja_er_klar: t('ppc.commands.linja_er_klar', { defaultValue: 'Linja er klar' }),
       }),
       [t],
     );

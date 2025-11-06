@@ -16,9 +16,6 @@
     "start_program": "Start program"
   },
   "commands": {
-    "lade_hylstre": "Lade, hylstre",
-    "er_linja_klar": "Er linja klar?",
-    "linja_er_klar": "Linja er klar"
   },
   "field": {
     "commands": {
@@ -62,6 +59,11 @@
     "license": "Lisens"
   },
   "ppc": {
+    "commands": {
+      "lade_hylstre": "Lade, hylstre",
+      "er_linja_klar": "Er linja klar?",
+      "linja_er_klar": "Linja er klar"
+    },
     "home": {
       "subtitle": "WA1500-disipliner og stagebeskrivelser",
       "program_missing": "PPC-programmet er ikke tilgjengelig nå.",

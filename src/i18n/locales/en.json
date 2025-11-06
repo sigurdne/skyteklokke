@@ -16,9 +16,6 @@
     "start_program": "Start program"
   },
   "commands": {
-    "lade_hylstre": "Load, eject brass",
-    "er_linja_klar": "Is the line ready?",
-    "linja_er_klar": "The line is ready"
   },
   "field": {
     "commands": {
@@ -62,6 +59,11 @@
     "license": "License"
   },
   "ppc": {
+    "commands": {
+      "lade_hylstre": "Load, eject brass",
+      "er_linja_klar": "Is the line ready?",
+      "linja_er_klar": "The line is ready"
+    },
     "home": {
       "subtitle": "WA1500 disciplines and stage briefs",
       "program_missing": "The PPC program is unavailable right now.",
