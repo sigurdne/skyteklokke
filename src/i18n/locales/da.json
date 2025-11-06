@@ -16,7 +16,6 @@
     "start_program": "Start program"
   },
   "commands": {
-    "ready_question": "Er skytterne klar?",
     "shooters_ready": "Er skytterne klar",
     "ready_command": "KLAR!",
     "fire_command": "ILD!",

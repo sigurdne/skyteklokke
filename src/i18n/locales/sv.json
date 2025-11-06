@@ -16,9 +16,8 @@
     "start_program": "Starta program"
   },
   "commands": {
-    "ready_question": "Är skyttarna klara?",
     "shooters_ready": "Är skyttarna klara",
-    "ready_command": "KLAR!",
+    "ready_command": "KLARA!",
     "fire_command": "ELD!",
     "cease_command": "ELDUPPHÖR",
     "prepare": "Ladda",
