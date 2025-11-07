@@ -11,7 +11,6 @@ import {
 
 const COMMAND_GAP_MS = 3500;
 const COUNTDOWN_INTERVAL_MS = 1000;
-const BRIEFING_SEGMENT_DELAY_MS = 4500;
 const DEFAULT_DISCIPLINE: PPCDiscipline = 'wa1500-150';
 
 const DEFAULT_STAGE_ID = getFirstStageIdForDiscipline(DEFAULT_DISCIPLINE);

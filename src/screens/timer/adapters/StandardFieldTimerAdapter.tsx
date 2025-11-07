@@ -7,7 +7,7 @@ import * as CustomAudio from '../../../services/CustomAudioService';
 import logger from '../../../utils/logger';
 import { loadNumber, loadBoolean, saveNumber, saveBoolean } from '../../../utils/asyncStorageHelpers';
 import { TimerEvent, TimingStep } from '../../../types';
-import { colors, spacing, typography } from '../../../theme';
+import { colors, spacing } from '../../../theme';
 import { timerStyles } from '../timerStyles';
 import { TimerDisplayContext, TimerEventHelpers, TimerProgramAdapter, TimerProgramBindings, TimerProgramSettingsBindings, TimerSequenceContext } from '../BaseTimerScreen';
 

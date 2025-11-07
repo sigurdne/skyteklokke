@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '../components/Header';
-import { colors, typography, spacing, screenStyles, sectionStyles, listStyles } from '../theme';
+import { colors, screenStyles, sectionStyles, listStyles } from '../theme';
 import { Language } from '../types';
 import { RootStackParamList } from '../navigation/types';
 import logger from '../utils/logger';

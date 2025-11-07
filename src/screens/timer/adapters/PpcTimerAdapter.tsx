@@ -412,7 +412,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
     );
 
     const handleCommandEvent = useCallback(
-      async (command: string, helpers: TimerEventHelpers) => {
+      async (command: string) => {
         if (!command) {
           return false;
         }
@@ -459,7 +459,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         }
 
         if (event.type === 'command' && event.command) {
-          const handled = await handleCommandEvent(event.command, helpers);
+          const handled = await handleCommandEvent(event.command);
           if (handled) {
             return true;
           }

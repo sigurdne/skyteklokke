@@ -6,7 +6,6 @@ import { colors } from '../../../theme';
 import { timerStyles } from '../timerStyles';
 import { TimerDisplayContext, TimerEventHelpers, TimerProgramAdapter, TimerProgramBindings, TimerProgramSettingsBindings } from '../BaseTimerScreen';
 import { TimerEvent } from '../../../types';
-import logger from '../../../utils/logger';
 import { loadNumber, saveNumber } from '../../../utils/asyncStorageHelpers';
 
 const DUEL_COUNTDOWN_KEY = 'duelCountdownDuration';
@@ -109,9 +108,9 @@ export const standardDuelTimerAdapter: TimerProgramAdapter = {
       return false;
     };
 
-    const showFullscreenDisplay = (context: TimerDisplayContext) => context.isRunning;
+  const showFullscreenDisplay = (context: TimerDisplayContext) => context.isRunning;
 
-    const getDisplayColor = (context: TimerDisplayContext) => {
+  const getDisplayColor = (context: TimerDisplayContext) => {
       if (context.currentState === 'countdown') return '#000000';
       if (context.currentState === 'red_light') return colors.redLight;
       if (context.currentState === 'green_light') return colors.greenLight;
@@ -119,7 +118,7 @@ export const standardDuelTimerAdapter: TimerProgramAdapter = {
       return context.backgroundColor;
     };
 
-    const renderFullscreenOverlay = (context: TimerDisplayContext) => {
+  const renderFullscreenOverlay = (_context: TimerDisplayContext) => {
       if (currentSeriesIndex === null) {
         return null;
       }

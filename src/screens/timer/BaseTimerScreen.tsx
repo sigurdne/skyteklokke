@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -426,18 +426,6 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
       }
     }
   }, [handleTimerEvent, initializeTimer, isRunning]);
-
-  const handlePause = useCallback(() => {
-    if (timerEngineRef.current && isRunning && !isPaused) {
-      timerEngineRef.current.pause();
-    }
-  }, [isPaused, isRunning]);
-
-  const handleResume = useCallback(() => {
-    if (timerEngineRef.current && isRunning && isPaused) {
-      timerEngineRef.current.resume();
-    }
-  }, [isPaused, isRunning]);
 
   const handleReset = useCallback(() => {
     if (timerEngineRef.current) {

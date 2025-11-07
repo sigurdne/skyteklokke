@@ -6,7 +6,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Header } from '../components/Header';
 import { ProgramCard } from '../components/ProgramCard';
 import { colors, spacing, typography, screenStyles, modalStyles } from '../theme';
-import ProgramManager from '../services/ProgramManager';
 import { RootStackParamList } from '../navigation/types';
 
 type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
