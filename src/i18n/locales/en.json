@@ -72,6 +72,7 @@
       "tap_to_start": "Tap to load the timer"
     },
     "labels": {
+      "shots": "{{count}} shots",
       "shots_one": "{{count}} shot",
       "shots_other": "{{count}} shots",
       "yards_one": "{{count}} yard",

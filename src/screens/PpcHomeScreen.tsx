@@ -774,7 +774,6 @@ function variantText(descriptionKey: string, shots: number, t: TFunction): strin
 function shotsText(count: number, t: TFunction): string {
   return t('ppc.labels.shots', {
     count,
-    defaultValue: count === 1 ? '{{count}} shot' : '{{count}} shots',
   });
 }
 

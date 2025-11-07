@@ -72,6 +72,7 @@
       "tap_to_start": "Trykk for å åpne timeren"
     },
     "labels": {
+      "shots": "{{count}} skudd",
       "shots_one": "{{count}} skudd",
       "shots_other": "{{count}} skudd",
       "yards_one": "{{count}} yard",

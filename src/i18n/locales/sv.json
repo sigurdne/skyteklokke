@@ -72,6 +72,7 @@
       "tap_to_start": "Tryck för att starta timern"
     },
     "labels": {
+      "shots": "{{count}} skott",
       "shots_one": "{{count}} skott",
       "shots_other": "{{count}} skott",
       "yards_one": "{{count}} yard",
