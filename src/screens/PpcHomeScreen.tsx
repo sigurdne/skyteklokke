@@ -400,6 +400,12 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
     .filter(Boolean)
     .join(', ');
 
+  // Detailed briefing text with all series information
+  const detailedBriefingText = [
+    stageSubtitleText,
+    ...stage.series.map((series) => formatSeries(series, t)),
+  ].filter(Boolean).join('\n');
+
   const commandRows = [
     {
       key: 'ppc_command_lade_hylstre',
@@ -490,7 +496,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
                     visible={visible}
                     t={t}
                     onClipChange={setBriefingClip}
-                    previewText={stageSubtitleText}
+                    previewText={detailedBriefingText}
                   />
 
                   <Text style={[styles.modalSubSectionTitle, styles.recordingsCommandsHeading]}>
@@ -753,7 +759,7 @@ function formatSeries(series: PPCStage['series'][number], t: TFunction): string 
   const prefix = repetitions > 1 ? `${repetitions}×` : '';
   const shotsLabel = shotsText(series.shots, t);
   const positionText = positionLabel(series.position, t);
-  return `${prefix}${series.shots} ${shotsLabel} – ${positionText}`;
+  return `${prefix}${shotsLabel} – ${positionText}`;
 }
 
 function formatStageTime(seconds: number, t: TFunction): string {
@@ -768,7 +774,7 @@ function variantText(descriptionKey: string, shots: number, t: TFunction): strin
 function shotsText(count: number, t: TFunction): string {
   return t('ppc.labels.shots', {
     count,
-    defaultValue: count === 1 ? 'shot' : 'shots',
+    defaultValue: count === 1 ? '{{count}} shot' : '{{count}} shots',
   });
 }
 
