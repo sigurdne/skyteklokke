@@ -15,8 +15,6 @@
     "ppc_description": "WA1500 disciplines with guided stages",
     "start_program": "Start program"
   },
-  "commands": {
-  },
   "field": {
     "idle": "Are the shooters ready?",
     "commands": {
@@ -25,8 +23,6 @@
       "fire_command": "FIRE!",
       "cease_command": "CEASE FIRE"
     }
-  },
-  "states": {
   },
   "controls": {
     "start": "Start",

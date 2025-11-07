@@ -15,8 +15,6 @@
     "ppc_description": "WA1500-discipliner med guidede serier",
     "start_program": "Start program"
   },
-  "commands": {
-  },
   "field": {
     "idle": "Er skytterne klar?",
     "commands": {
@@ -25,8 +23,6 @@
       "fire_command": "FYRING!",
       "cease_command": "STOP FYRING"
     }
-  },
-  "states": {
   },
   "controls": {
     "start": "Start",

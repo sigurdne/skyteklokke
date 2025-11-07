@@ -15,8 +15,6 @@
     "ppc_description": "WA1500-disipliner med trinnvise kommandoer",
     "start_program": "Start program"
   },
-  "commands": {
-  },
   "field": {
     "idle": "Er skytterene klare?",
     "commands": {
@@ -25,8 +23,6 @@
       "fire_command": "ILD!",
       "cease_command": "STAANS"
     }
-  },
-  "states": {
   },
   "controls": {
     "start": "Start",

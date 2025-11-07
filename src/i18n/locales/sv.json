@@ -15,8 +15,6 @@
     "ppc_description": "WA1500-discipliner med styrda moment",
     "start_program": "Starta program"
   },
-  "commands": {
-  },
   "field": {
     "idle": "Är skyttarna klara?",
     "commands": {
@@ -25,8 +23,6 @@
       "fire_command": "SKJUT!",
       "cease_command": "SLUTA SKJUTA"
     }
-  },
-  "states": {
   },
   "controls": {
     "start": "Start",
