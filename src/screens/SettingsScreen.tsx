@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '../components/Header';
 import { colors, typography, spacing } from '../theme';
 import { Language } from '../types';
+import logger from '../utils/logger';
 
 type RootStackParamList = {
   Home: undefined;
@@ -36,7 +37,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
         setSelectedLanguage(savedLanguage as Language);
       }
     } catch (error) {
-      console.error('Error loading language:', error);
+      logger.error('Error loading language:', error);
     }
   };
 
@@ -46,7 +47,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
       await i18n.changeLanguage(language);
       await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch (error) {
-      console.error('Error changing language:', error);
+      logger.error('Error changing language:', error);
     }
   };
 

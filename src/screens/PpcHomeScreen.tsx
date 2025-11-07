@@ -10,6 +10,7 @@ import { Audio } from 'expo-av';
 import { Header } from '../components/Header';
 import ProgramManager from '../services/ProgramManager';
 import AudioService from '../services/AudioService';
+import logger from '../utils/logger';
 import {
   AudioClipMeta,
   deleteClip,
@@ -107,7 +108,7 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route 
       try {
         program.updateSettings(settingsUpdate);
       } catch (error) {
-        console.warn('Failed to update PPC program settings', error);
+        logger.warn('Failed to update PPC program settings', error);
       }
 
       ProgramManager.setActiveProgram('ppc-standard');
@@ -318,7 +319,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
           setBriefingClip(briefingMeta);
         }
       } catch (error) {
-        console.warn('Failed to load stage recordings', error);
+        logger.warn('Failed to load stage recordings', error);
       }
     })();
 
@@ -341,7 +342,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
         try {
           await stageSoundRef.current.stopAsync();
         } catch (error) {
-          console.warn('Failed to stop stage clip playback', error);
+          logger.warn('Failed to stop stage clip playback', error);
         }
         stageSoundRef.current.unloadAsync().catch(() => undefined);
         stageSoundRef.current = null;
@@ -352,14 +353,14 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
       try {
         await AudioService.stop();
       } catch (error) {
-        console.warn('Failed to stop TTS before playing stage clip', error);
+        logger.warn('Failed to stop TTS before playing stage clip', error);
       }
 
       if (stageSoundRef.current) {
         try {
           await stageSoundRef.current.stopAsync();
         } catch (error) {
-          console.warn('Failed to stop existing stage clip', error);
+          logger.warn('Failed to stop existing stage clip', error);
         }
         stageSoundRef.current.unloadAsync().catch(() => undefined);
         stageSoundRef.current = null;
@@ -383,7 +384,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
         });
         await sound.playAsync();
       } catch (error) {
-        console.warn('Failed to play stage clip', error);
+        logger.warn('Failed to play stage clip', error);
         setPlayingKey((current) => (current === key ? null : current));
       }
     },
@@ -569,7 +570,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
     try {
       await AudioService.stop();
     } catch (error) {
-      console.warn('Failed to stop running audio before playback', error);
+      logger.warn('Failed to stop running audio before playback', error);
     }
 
     if (clip?.uri) {
@@ -596,7 +597,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
         });
         await sound.playAsync();
       } catch (error) {
-        console.warn('Failed to play recorded clip', error);
+        logger.warn('Failed to play recorded clip', error);
         setIsPlaying(false);
       }
       return;
@@ -610,7 +611,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
     try {
       await recordingInstance.stopAndUnloadAsync();
     } catch (error) {
-      console.warn('Failed to stop recording', error);
+      logger.warn('Failed to stop recording', error);
     }
 
     try {
@@ -622,14 +623,14 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
         setClip(meta);
       }
     } catch (error) {
-      console.warn('Failed to persist recorded audio clip', error);
+      logger.warn('Failed to persist recorded audio clip', error);
     } finally {
       setRecordingInstance(null);
       setIsRecording(false);
       try {
         await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
       } catch (error) {
-        console.warn('Failed to reset audio mode after recording', error);
+        logger.warn('Failed to reset audio mode after recording', error);
       }
     }
   }, [clipKey, recordingInstance]);
@@ -648,13 +649,13 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
       setRecordingInstance(recording);
       setIsRecording(true);
     } catch (error) {
-      console.warn('Failed to start recording', error);
+      logger.warn('Failed to start recording', error);
       setRecordingInstance(null);
       setIsRecording(false);
       try {
         await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
       } catch (resetError) {
-        console.warn('Failed to reset audio mode after failed recording start', resetError);
+        logger.warn('Failed to reset audio mode after failed recording start', resetError);
       }
     }
   }, []);
@@ -672,7 +673,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
       await deleteClip(clipKey);
       setClip(null);
     } catch (error) {
-      console.warn('Failed to delete audio clip', error);
+      logger.warn('Failed to delete audio clip', error);
     }
   }, [clipKey]);
 

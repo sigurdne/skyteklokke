@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
+import logger from '../utils/logger';
 
 export interface AudioClipMeta {
   key: string;
@@ -23,7 +24,7 @@ export async function loadClipMeta(key: string): Promise<AudioClipMeta | null> {
     const parsed = JSON.parse(stored) as AudioClipMeta;
     return parsed;
   } catch (error) {
-    console.warn('Failed to load audio clip metadata', error);
+    logger.warn('Failed to load audio clip metadata', error);
     return null;
   }
 }
@@ -69,8 +70,8 @@ export async function moveRecordingToLibrary(key: string, sourceUri: string, dur
       if (existing.exists) {
         await FileSystem.deleteAsync(targetUri, { idempotent: true });
       }
-    } catch (cleanupError) {
-      console.warn('Failed to clean up existing clip before saving', cleanupError);
+      } catch (cleanupError) {
+      logger.warn('Failed to clean up existing clip before saving', cleanupError);
     }
 
     await FileSystem.moveAsync({ from: sourceUri, to: targetUri });
@@ -85,7 +86,9 @@ export async function moveRecordingToLibrary(key: string, sourceUri: string, dur
     await saveClipMeta(meta);
     return meta;
   } catch (error) {
-    console.warn('Failed to move recorded clip, keeping source location', error);
+    logger.warn('Failed to move recorded clip, keeping source location', error);
+    // If move fails, we still have the file at recordingUri
+    // Save metadata pointing to original location
     await saveClipMeta(fallbackMeta);
     return fallbackMeta;
   }
@@ -95,10 +98,10 @@ export async function deleteClip(key: string): Promise<void> {
   const meta = await loadClipMeta(key);
   if (meta?.uri) {
     try {
-      await FileSystem.deleteAsync(meta.uri, { idempotent: true });
+      await FileSystem.deleteAsync(meta.uri);
     } catch (error) {
-      console.warn('Failed to delete audio file for clip', error);
+      logger.warn('Failed to delete audio file for clip', error);
     }
   }
-  await removeClipMeta(key);
+  await AsyncStorage.removeItem(key);
 }

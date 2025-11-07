@@ -502,7 +502,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   }, [clearCurrentCommand, handleTimerEvent, updateCurrentState, updateCountdown]);
 
   const handleBack = useCallback(() => {
-    console.log('[BaseTimerScreen] handleBack called - isRunning:', isRunning, 'programId:', programId);
+    logger.log('[BaseTimerScreen] handleBack called - isRunning:', isRunning, 'programId:', programId);
     
     if (isRunning) {
       handleReset();
@@ -668,13 +668,13 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
           <View style={{ flex: 1, justifyContent: 'space-between' }}>
             {(() => {
               const shouldWrap = !isRunning && currentState === 'finished';
-              console.log('[BaseTimerScreen] Render - isRunning:', isRunning, 'currentState:', currentState, 'shouldWrap:', shouldWrap);
+              logger.log('[BaseTimerScreen] Render - isRunning:', isRunning, 'currentState:', currentState, 'shouldWrap:', shouldWrap);
               return shouldWrap ? (
                 <TouchableOpacity 
                   style={{ flex: 1 }} 
                   activeOpacity={0.8}
                   onPress={() => {
-                    console.log('[BaseTimerScreen] TouchableOpacity pressed on finished screen');
+                    logger.log('[BaseTimerScreen] TouchableOpacity pressed on finished screen');
                     handleBack();
                   }}
                 >
