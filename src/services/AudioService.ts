@@ -5,7 +5,29 @@ import logger from '../utils/logger';
 import { Language } from '../types';
 
 /**
- * Audio Service - Handles text-to-speech for timer commands
+ * AudioService - Text-to-Speech (TTS) for Timer Commands
+ * 
+ * RESPONSIBILITIES:
+ * - Convert text commands to speech using expo-speech
+ * - Play system beep sounds for countdowns
+ * - Manage TTS language selection (no, en, sv, da)
+ * - Control volume and speech rate
+ * 
+ * USE CASES:
+ * - Speaking timer commands like "KLAR!", "ILD!", "STAANS!"
+ * - Playing countdown beeps (single or continuous)
+ * - System-wide language changes
+ * 
+ * SCOPE: Global singleton service used across all timer programs
+ * 
+ * NOT RESPONSIBLE FOR:
+ * - User-recorded audio (see CustomAudioService)
+ * - Audio file metadata (see AudioClipService)
+ * - Program-specific audio logic (handled by adapters)
+ * 
+ * RELATED SERVICES:
+ * - CustomAudioService: Handles user-recorded command audio
+ * - AudioClipService: Manages audio file storage and metadata
  */
 export class AudioService {
   private static instance: AudioService;

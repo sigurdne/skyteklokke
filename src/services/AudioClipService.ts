@@ -1,3 +1,45 @@
+/**
+ * AudioClipService
+ * 
+ * RESPONSIBILITIES:
+ * - Manage audio clip metadata (AudioClipMeta) for PPC stage recordings
+ * - Store/load/delete metadata using AsyncStorage
+ * - Handle audio file storage in expo-file-system (document directory)
+ * - Ensure clip directory exists before file operations
+ * - List all saved audio clips by prefix/category
+ * 
+ * USE CASES:
+ * - PPC stage briefing recordings (stage-specific instructions)
+ * - PPC stage title/name recordings (custom stage identification)
+ * - Any user-recorded audio associated with PPC stages
+ * 
+ * SCOPE:
+ * - PPC (Precision Pistol Competition) program only
+ * - Metadata-level management (not recording/playback logic)
+ * - Used primarily by PpcHomeScreen for stage configuration
+ * 
+ * STORAGE STRUCTURE:
+ * - AsyncStorage keys: "@audioClip:{key}" → AudioClipMeta JSON
+ * - File system: {documentDirectory}/audio-clips/{key}.m4a
+ * - Metadata includes: key, uri, createdAt, durationMs
+ * 
+ * KEY DIFFERENCE FROM CustomAudioService:
+ * - CustomAudioService: Full recording service for Field program commands (4 phases)
+ * - AudioClipService: Metadata-only service for PPC stage recordings (multiple stages)
+ * - CustomAudioService: Hardcoded phase keys (PhaseKey enum)
+ * - AudioClipService: Flexible string keys (stage IDs, briefing/title categories)
+ * 
+ * NOT RESPONSIBLE FOR:
+ * - Recording audio (handled by expo-av in UI components)
+ * - Playing audio (handled by AudioService or expo-av directly)
+ * - Field program custom audio (see CustomAudioService)
+ * 
+ * RELATED SERVICES:
+ * - Used by PpcHomeScreen for managing stage-specific recordings
+ * - Similar pattern to CustomAudioService but for different program type
+ * - Files stored separately from custom-audio directory
+ */
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import logger from '../utils/logger';

@@ -6,19 +6,48 @@ import logger from '../utils/logger';
 type Recording = Audio.Recording;
 
 /**
- * Custom Audio Service - Handles user-recorded audio per phase per program
+ * CustomAudioService - User-Recorded Command Audio (Field Program Only)
  * 
- * Storage structure:
+ * RESPONSIBILITIES:
+ * - Record custom audio clips for timer commands
+ * - Play user-recorded audio instead of TTS
+ * - Enable/disable custom audio per command phase
+ * - Manage per-program, per-phase audio files
+ * 
+ * USE CASES:
+ * - User records their own voice saying "KLAR!", "ILD!", "STAANS!"
+ * - Toggle between custom audio and TTS per command
+ * - Store recordings in app's document directory
+ * 
+ * SCOPE: Program-specific (currently only Field Program uses this)
+ * 
+ * STORAGE STRUCTURE:
  * - Files: {documentDirectory}/custom-audio/{programId}/{phaseKey}.m4a
- * - AsyncStorage: customAudio:enabled:{programId}:{phaseKey} = 'true'|'false'
+ * - Metadata: AsyncStorage with keys like 'customAudio:enabled:{programId}:{phaseKey}'
+ * - Enabled state: Per-phase toggle (true/false)
+ * 
+ * PHASES (PhaseKey):
+ * - 'shooters_ready': Initial announcement "Er skytterne klare"
+ * - 'ready_command': Prepare command "KLAR!"
+ * - 'fire_command': Fire command "ILD!"
+ * - 'cease_command': Cease fire command "STAANS!"
  * 
  * HYBRID APPROACH:
- * - Recording: Still using expo-av (deprecated but functional, expo-audio requires hooks)
- * - Playback: Using expo-audio's createAudioPlayer (new API)
+ * - Recording: expo-av (deprecated but functional, expo-audio requires hooks)
+ * - Playback: expo-av Sound (compatible with recording)
  * 
  * Note: expo-audio's recording API requires React hooks (useAudioRecorder)
- * which can't be used in a service. We'll keep expo-av for recording until
+ * which can't be used in a service. We keep expo-av for recording until
  * a non-hook recording API is available.
+ * 
+ * NOT RESPONSIBLE FOR:
+ * - TTS speech synthesis (see AudioService)
+ * - PPC program stage recordings (see AudioClipService)
+ * - System beeps (see AudioService)
+ * 
+ * RELATED SERVICES:
+ * - AudioService: Provides TTS fallback when custom audio is disabled
+ * - AudioClipService: Similar pattern but for PPC stage briefings
  */
 
 const CUSTOM_AUDIO_DIR = `${Paths.document.uri}/custom-audio/`;
