@@ -2,20 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Header } from '../components/Header';
-import { colors, typography, spacing } from '../theme';
+import { colors, typography, spacing, screenStyles, sectionStyles, textStyles } from '../theme';
+import { RootStackParamList } from '../navigation/types';
 
-type RootStackParamList = {
-  Home: undefined;
-  About: undefined;
-};
-
-type AboutScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'About'>;
-
-interface AboutScreenProps {
-  navigation: AboutScreenNavigationProp;
-}
+type AboutScreenProps = NativeStackScreenProps<RootStackParamList, 'About'>;
 
 const APP_VERSION = '0.1.0';
 
@@ -64,21 +56,9 @@ export const AboutScreen: React.FC<AboutScreenProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.primary,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.lg,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
+  ...screenStyles,
+  ...sectionStyles,
+  ...textStyles,
   appTitle: {
     ...typography.h1,
     color: colors.primary,
@@ -95,11 +75,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
     lineHeight: 24,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    color: colors.text,
-    marginBottom: spacing.md,
   },
   featureList: {
     backgroundColor: colors.surface,

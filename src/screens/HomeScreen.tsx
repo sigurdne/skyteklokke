@@ -2,18 +2,14 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Modal, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Header } from '../components/Header';
 import { ProgramCard } from '../components/ProgramCard';
-import { colors, spacing, typography } from '../theme';
+import { colors, spacing, typography, screenStyles, modalStyles } from '../theme';
 import ProgramManager from '../services/ProgramManager';
 import { RootStackParamList } from '../navigation/types';
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
-
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProp;
-}
+type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { t } = useTranslation();
@@ -87,7 +83,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           onRequestClose={handleMenuClose}
         >
           <TouchableOpacity 
-            style={styles.modalOverlay} 
+            style={styles.overlay} 
             activeOpacity={1} 
             onPress={handleMenuClose}
           >
@@ -118,41 +114,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.primary,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingVertical: spacing.lg,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
-    paddingTop: 60, // Below header
-    paddingRight: spacing.lg,
-  },
-  menuContainer: {
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    minWidth: 200,
-  },
+  ...screenStyles,
+  ...modalStyles,
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',

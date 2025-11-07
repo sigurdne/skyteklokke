@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, typography, spacing } from '../theme';
+import { colors, typography, spacing, cardStyles } from '../theme';
 import { ProgramCardProps } from '../types';
 
 export const ProgramCard: React.FC<ProgramCardProps> = ({
@@ -60,26 +60,12 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
 };
 
 const styles = StyleSheet.create({
+  ...cardStyles,
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.lg,
+    ...cardStyles.card,
     marginHorizontal: spacing.lg,
     marginVertical: spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
-  },
-  cardDisabled: {
-    opacity: 0.5,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
   },
   cardIcon: {
     fontSize: 40,
@@ -91,15 +77,6 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     marginBottom: spacing.md,
-  },
-  cardTitle: {
-    ...typography.h3,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  cardDescription: {
-    ...typography.body,
-    color: colors.textSecondary,
   },
   difficulty: {
     ...typography.caption,

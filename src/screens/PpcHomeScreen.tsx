@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -35,10 +35,7 @@ interface StageDetailState {
   stage: PPCStage;
 }
 
-interface PpcHomeScreenProps {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'PPC'>;
-  route: { params?: { selectedDiscipline?: string } };
-}
+type PpcHomeScreenProps = NativeStackScreenProps<RootStackParamList, 'PPC'>;
 
 export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route }) => {
   const { t } = useTranslation();
