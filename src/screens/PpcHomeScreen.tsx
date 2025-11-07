@@ -262,6 +262,7 @@ interface AudioControlRowProps {
   visible: boolean;
   t: TFunction;
   onClipChange?: (clip: AudioClipMeta | null) => void;
+  previewText?: string;
 }
 
 const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, onClose, onStartStage, t }) => {
@@ -432,9 +433,9 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
               <Text style={styles.modalMetaLabel}>{t('ppc.detail.time_label')}</Text>
               <Text style={styles.modalMetaValue}>{formatStageTime(stage.timeSeconds, t)}</Text>
             </View>
-            <View style={styles.modalMetaRow}>
+            <View style={styles.modalMetaRowVertical}>
               <Text style={styles.modalMetaLabel}>{t('ppc.detail.positions_label')}</Text>
-              <Text style={styles.modalMetaValue}>{positionsList}</Text>
+              <Text style={styles.modalMetaValueWrap}>{positionsList}</Text>
             </View>
           </View>
 
@@ -481,6 +482,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
                     visible={visible}
                     t={t}
                     onClipChange={setTitleClip}
+                    previewText={stageTitleText}
                   />
                   <AudioControlRow
                     label={t('ppc.detail.stage_briefing_label')}
@@ -488,6 +490,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
                     visible={visible}
                     t={t}
                     onClipChange={setBriefingClip}
+                    previewText={stageSubtitleText}
                   />
 
                   <Text style={[styles.modalSubSectionTitle, styles.recordingsCommandsHeading]}>
@@ -524,7 +527,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
   );
 };
 
-const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visible, t, onClipChange }) => {
+const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visible, t, onClipChange, previewText }) => {
   const [clip, setClip] = useState<AudioClipMeta | null>(null);
   const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -678,6 +681,9 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
     <View style={styles.audioRow}>
       <View style={styles.audioRowText}>
         <Text style={styles.audioRowLabel}>{label}</Text>
+        {previewText && (
+          <Text style={styles.audioRowPreview}>{previewText}</Text>
+        )}
         {clip ? (
           <Text style={styles.audioRowMeta}>
             {t('ppc.detail.recorded_on', { date: new Date(clip.createdAt).toLocaleDateString() })}
@@ -959,6 +965,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.xs,
   },
+  modalMetaRowVertical: {
+    flexDirection: 'column',
+    marginBottom: spacing.xs,
+  },
   modalMetaLabel: {
     ...typography.caption,
     color: colors.textSecondary,
@@ -967,6 +977,13 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.text,
     fontWeight: '600',
+  },
+  modalMetaValueWrap: {
+    ...typography.caption,
+    color: colors.text,
+    fontWeight: '600',
+    marginTop: spacing.xs,
+    flexWrap: 'wrap',
   },
   quickActionsRow: {
     flexDirection: 'row',
@@ -1029,6 +1046,12 @@ const styles = StyleSheet.create({
   audioRowLabel: {
     ...typography.body,
     color: colors.text,
+  },
+  audioRowPreview: {
+    ...typography.caption,
+    color: colors.text,
+    fontStyle: 'italic',
+    marginTop: spacing.xs,
   },
   audioRowMeta: {
     ...typography.caption,
