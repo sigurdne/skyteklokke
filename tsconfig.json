@@ -26,6 +26,7 @@
     "**/*.ts",
     "**/*.tsx"
   ],
+  "types": ["jest"],
   "exclude": [
     "node_modules"
   ]

@@ -117,7 +117,7 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
 
   const timerEngineRef = useRef<TimerEngine | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const cleanupRef = useRef<(() => void) | undefined>();
+  const cleanupRef = useRef<(() => void) | undefined>(undefined);
   const currentStateRef = useRef<string>('idle');
   const currentCommandRef = useRef<string>('');
   const countdownRef = useRef<number | null>(null);

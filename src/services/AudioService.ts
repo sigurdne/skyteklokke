@@ -35,6 +35,7 @@ export class AudioService {
   private isEnabled: boolean;
   private volume: number;
   private isWarmedUp: boolean = false;
+  private cachedHornDataUrl: string | null = null; // cache generated horn beep
   private static AUDIO_ENABLED_KEY = '@audio_enabled';
 
   private constructor() {
@@ -179,6 +180,9 @@ export class AudioService {
    * Creates a train horn effect using two frequencies
    */
   private generateHornBeep(): string {
+    if (this.cachedHornDataUrl) {
+      return this.cachedHornDataUrl;
+    }
     // Generate a WAV file data URL with a train horn sound
     const sampleRate = 44100;
     const duration = 0.3; // 300ms
@@ -233,7 +237,9 @@ export class AudioService {
       binary += String.fromCharCode(bytes[i]);
     }
     const base64 = btoa(binary);
-    return `data:audio/wav;base64,${base64}`;
+    const dataUrl = `data:audio/wav;base64,${base64}`;
+    this.cachedHornDataUrl = dataUrl;
+    return dataUrl;
   }
 
   /**

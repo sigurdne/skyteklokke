@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Audio } from 'expo-av';
+import { playUri, type PlayHandle } from '../utils/audioHelpers';
 
 import { Header } from '../components/Header';
 import ProgramManager from '../services/ProgramManager';
@@ -270,13 +271,13 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
   const [titleClip, setTitleClip] = useState<AudioClipMeta | null>(null);
   const [briefingClip, setBriefingClip] = useState<AudioClipMeta | null>(null);
   const [playingKey, setPlayingKey] = useState<'title' | 'briefing' | null>(null);
-  const stageSoundRef = useRef<Audio.Sound | null>(null);
+  const stageSoundRef = useRef<PlayHandle | null>(null);
 
   useEffect(() => {
     if (!visible) {
       AudioService.stop().catch(() => undefined);
       if (stageSoundRef.current) {
-        stageSoundRef.current.unloadAsync().catch(() => undefined);
+        stageSoundRef.current.stop().catch(() => undefined);
         stageSoundRef.current = null;
       }
       setPlayingKey(null);
@@ -337,12 +338,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
       }
 
       if (playingKey === key && stageSoundRef.current) {
-        try {
-          await stageSoundRef.current.stopAsync();
-        } catch (error) {
-          logger.warn('Failed to stop stage clip playback', error);
-        }
-        stageSoundRef.current.unloadAsync().catch(() => undefined);
+        await stageSoundRef.current.stop().catch(() => undefined);
         stageSoundRef.current = null;
         setPlayingKey(null);
         return;
@@ -355,32 +351,27 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
       }
 
       if (stageSoundRef.current) {
-        try {
-          await stageSoundRef.current.stopAsync();
-        } catch (error) {
-          logger.warn('Failed to stop existing stage clip', error);
-        }
-        stageSoundRef.current.unloadAsync().catch(() => undefined);
+        await stageSoundRef.current.stop().catch(() => undefined);
         stageSoundRef.current = null;
       }
 
       try {
-        const { sound } = await Audio.Sound.createAsync({ uri: clip.uri });
-        stageSoundRef.current = sound;
-        setPlayingKey(key);
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (!status.isLoaded) {
-            return;
-          }
-          if (status.didJustFinish || !status.isPlaying) {
+        const handle = await playUri({
+          uri: clip.uri,
+          onFinish: () => {
             setPlayingKey((current) => (current === key ? null : current));
-            sound.unloadAsync().catch(() => undefined);
-            if (stageSoundRef.current === sound) {
+            if (stageSoundRef.current === handle) {
               stageSoundRef.current = null;
             }
-          }
+          },
+          onError: () => {
+            setPlayingKey((current) => (current === key ? null : current));
+          },
         });
-        await sound.playAsync();
+        if (handle) {
+          stageSoundRef.current = handle;
+          setPlayingKey(key);
+        }
       } catch (error) {
         logger.warn('Failed to play stage clip', error);
         setPlayingKey((current) => (current === key ? null : current));
@@ -538,7 +529,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
   const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<PlayHandle | null>(null);
   const hasClip = Boolean(clip?.uri);
 
   const refreshClip = useCallback(async () => {
@@ -562,7 +553,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
         recordingInstance.stopAndUnloadAsync().catch(() => undefined);
       }
       if (soundRef.current) {
-        soundRef.current.unloadAsync().catch(() => undefined);
+        soundRef.current.stop().catch(() => undefined);
         soundRef.current = null;
       }
     };
@@ -582,26 +573,23 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
     if (clip?.uri) {
       try {
         if (soundRef.current) {
-          soundRef.current.unloadAsync().catch(() => undefined);
+          await soundRef.current.stop().catch(() => undefined);
           soundRef.current = null;
         }
-
-        const { sound } = await Audio.Sound.createAsync({ uri: clip.uri });
-        soundRef.current = sound;
-        setIsPlaying(true);
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (!status.isLoaded) {
-            return;
-          }
-          if (status.didJustFinish) {
+        const handle = await playUri({
+          uri: clip.uri,
+          onFinish: () => {
             setIsPlaying(false);
-            sound.unloadAsync().catch(() => undefined);
-            if (soundRef.current === sound) {
+            if (soundRef.current === handle) {
               soundRef.current = null;
             }
-          }
+          },
+          onError: () => setIsPlaying(false),
         });
-        await sound.playAsync();
+        if (handle) {
+          soundRef.current = handle;
+          setIsPlaying(true);
+        }
       } catch (error) {
         logger.warn('Failed to play recorded clip', error);
         setIsPlaying(false);

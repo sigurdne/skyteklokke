@@ -24,11 +24,7 @@ const COMMAND_CLIP_KEYS = {
   linja_er_klar: 'ppc_command_linja_er_klar',
 } as const;
 
-const BRIEFING_TITLE_FALLBACK_DELAY = 4500;
-const BRIEFING_OVERVIEW_FALLBACK_DELAY = 6000;
-const DURATION_PADDING_MS = 600;
-const MANUAL_COMMAND_DELAY_MS = 250;
-const COUNTDOWN_INTERVAL_MS = 1000;
+// Removed unused timing constants after refactor to UI-driven manual flow
 
 type CommandClipMap = typeof COMMAND_CLIP_KEYS;
 type CommandKey = keyof CommandClipMap;

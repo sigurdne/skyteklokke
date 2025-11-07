@@ -8,8 +8,7 @@ const INSTANT_COMMANDS = new Set([
   'preplay_ready_command',
   'preplay_fire_command',
   'preplay_cease_command',
-  'preplay_ppc_stage_title',
-  'preplay_ppc_stage_briefing',
+  // PPC preplay commands were experimented with but are currently unused; keep list minimal
 ]);
 
 /**
@@ -61,6 +60,10 @@ export class TimerEngine {
         listener(event);
         // capture diagnostic event
         this.pushDiagnostic({ timestamp: Date.now(), event, stepId: (event as any).stepId });
+        // Reset listener error counter on successful emit to avoid stale accumulation
+        if (this.listenerErrorCount > 0) {
+          this.listenerErrorCount = 0;
+        }
       } catch (err) {
         // Prevent listener errors from crashing the timer engine
         // Log so we can investigate without breaking the sequence

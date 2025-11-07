@@ -145,5 +145,6 @@ export async function deleteClip(key: string): Promise<void> {
       logger.warn('Failed to delete audio file for clip', error);
     }
   }
-  await AsyncStorage.removeItem(key);
+  // Remove stored metadata using the same storage key format
+  await removeClipMeta(key);
 }
