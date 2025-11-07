@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 
 import { colors } from '../../../theme';
@@ -8,6 +7,7 @@ import { timerStyles } from '../timerStyles';
 import { TimerDisplayContext, TimerEventHelpers, TimerProgramAdapter, TimerProgramBindings, TimerProgramSettingsBindings } from '../BaseTimerScreen';
 import { TimerEvent } from '../../../types';
 import logger from '../../../utils/logger';
+import { loadNumber, saveNumber } from '../../../utils/asyncStorageHelpers';
 
 const DUEL_COUNTDOWN_KEY = 'duelCountdownDuration';
 const DUEL_SERIES_KEY = 'duelSeries';
@@ -22,17 +22,14 @@ export const standardDuelTimerAdapter: TimerProgramAdapter = {
 
     useEffect(() => {
       const loadSettings = async () => {
-        try {
-          const savedCountdown = await AsyncStorage.getItem(DUEL_COUNTDOWN_KEY);
-          if (savedCountdown !== null) {
-            setDuelCountdownDuration(parseInt(savedCountdown, 10));
-          }
-          const savedSeries = await AsyncStorage.getItem(DUEL_SERIES_KEY);
-          if (savedSeries !== null) {
-            setDuelSeries(parseInt(savedSeries, 10));
-          }
-        } catch (error) {
-          logger.error('Failed to load duel settings:', error);
+        const countdown = await loadNumber(DUEL_COUNTDOWN_KEY);
+        if (countdown !== undefined) {
+          setDuelCountdownDuration(countdown);
+        }
+        
+        const series = await loadNumber(DUEL_SERIES_KEY);
+        if (series !== undefined) {
+          setDuelSeries(series);
         }
       };
 
@@ -41,20 +38,12 @@ export const standardDuelTimerAdapter: TimerProgramAdapter = {
 
     const updateCountdown = useCallback(async (duration: number) => {
       setDuelCountdownDuration(duration);
-      try {
-        await AsyncStorage.setItem(DUEL_COUNTDOWN_KEY, duration.toString());
-      } catch (error) {
-        logger.error('Failed to save duel countdown duration:', error);
-      }
+      await saveNumber(DUEL_COUNTDOWN_KEY, duration);
     }, []);
 
     const updateSeries = useCallback(async (series: number) => {
       setDuelSeries(series);
-      try {
-        await AsyncStorage.setItem(DUEL_SERIES_KEY, series.toString());
-      } catch (error) {
-        logger.error('Failed to save duel series:', error);
-      }
+      await saveNumber(DUEL_SERIES_KEY, series);
     }, []);
 
     const settingsBindings: TimerProgramSettingsBindings = {

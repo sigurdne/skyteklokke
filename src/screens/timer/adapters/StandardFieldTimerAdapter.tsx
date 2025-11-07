@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 
 import AudioService from '../../../services/AudioService';
 import * as CustomAudio from '../../../services/CustomAudioService';
 import logger from '../../../utils/logger';
+import { loadNumber, loadBoolean, saveNumber, saveBoolean } from '../../../utils/asyncStorageHelpers';
 import { TimerEvent, TimingStep } from '../../../types';
 import { colors, spacing, typography } from '../../../theme';
 import { timerStyles } from '../timerStyles';
@@ -33,17 +33,14 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
 
     useEffect(() => {
       const loadSettings = async () => {
-        try {
-          const savedDuration = await AsyncStorage.getItem(SHOOTING_DURATION_KEY);
-          if (savedDuration !== null) {
-            setShootingDuration(parseInt(savedDuration, 10));
-          }
-          const savedSoundMode = await AsyncStorage.getItem(SOUND_MODE_KEY);
-          if (savedSoundMode !== null) {
-            setSoundMode(savedSoundMode === 'true');
-          }
-        } catch (error) {
-          logger.error('Failed to load field settings:', error);
+        const duration = await loadNumber(SHOOTING_DURATION_KEY);
+        if (duration !== undefined) {
+          setShootingDuration(duration);
+        }
+        
+        const soundMode = await loadBoolean(SOUND_MODE_KEY);
+        if (soundMode !== undefined) {
+          setSoundMode(soundMode);
         }
       };
 
@@ -52,20 +49,12 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
 
     const updateShootingDuration = useCallback(async (duration: number) => {
       setShootingDuration(duration);
-      try {
-        await AsyncStorage.setItem(SHOOTING_DURATION_KEY, duration.toString());
-      } catch (error) {
-        logger.error('Failed to save shooting duration:', error);
-      }
+      await saveNumber(SHOOTING_DURATION_KEY, duration);
     }, []);
 
     const updateSoundMode = useCallback(async (enabled: boolean) => {
       setSoundMode(enabled);
-      try {
-        await AsyncStorage.setItem(SOUND_MODE_KEY, enabled.toString());
-      } catch (error) {
-        logger.error('Failed to save sound mode:', error);
-      }
+      await saveBoolean(SOUND_MODE_KEY, enabled);
     }, []);
 
     const loadPhaseStatuses = useCallback(async () => {
