@@ -66,28 +66,6 @@ export async function playUri(options: PlayOptions): Promise<PlayHandle | null> 
 }
 
 /** Stop & unload a sound safely (null-safe). */
-export async function stopAndUnload(soundRef: Audio.Sound | null): Promise<void> {
-  if (!soundRef) return;
-  try {
-    await soundRef.stopAsync();
-  } catch (e) {
-    // ignore
-  }
-  try {
-    await soundRef.unloadAsync();
-  } catch (e) {
-    // ignore
-  }
-}
-
-/** Guard pattern for replacing existing sound with new playback. */
-export async function replacePlayback(current: Audio.Sound | null, uri: string, opts?: Omit<PlayOptions,'uri'>): Promise<PlayHandle | null> {
-  await stopAndUnload(current);
-  return playUri({ uri, ...opts });
-}
-
 export default {
   playUri,
-  stopAndUnload,
-  replacePlayback,
 };

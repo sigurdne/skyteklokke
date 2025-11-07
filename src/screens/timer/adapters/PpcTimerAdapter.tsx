@@ -313,51 +313,6 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       };
     }, [getClipMeta, stageClipKeys.briefing, stageClipKeys.title]);
 
-    const playClipWithFallback = useCallback(
-      async (clipKey: string | null, _fallbackText: string) => {
-        logger.info(`playClipWithFallback: clipKey=${clipKey}, audioEnabled=${audioEnabled}`);
-        
-        if (!audioEnabled) {
-          return false;
-        }
-
-        await stopPlayback();
-
-        try {
-          const meta = await getClipMeta(clipKey);
-          logger.info(`playClipWithFallback: meta=${JSON.stringify(meta)}`);
-          
-          if (meta?.uri) {
-            let handleForFinish: PlayHandle | null = null;
-            const handle = await playUri({
-              uri: meta.uri,
-              onFinish: () => {
-                if (soundRef.current === handleForFinish) {
-                  soundRef.current = null;
-                }
-              },
-              onError: (error) => {
-                logger.warn('playClipWithFallback: playback error', error);
-                if (soundRef.current === handleForFinish) {
-                  soundRef.current = null;
-                }
-              },
-            });
-            if (handle) {
-              handleForFinish = handle;
-              soundRef.current = handle;
-              return true;
-            }
-          }
-        } catch (error) {
-          logger.warn('Failed to play PPC audio clip, falling back to TTS', error);
-        }
-
-        return false;
-      },
-      [audioEnabled, getClipMeta, stopPlayback],
-    );
-
     const playRecordedClip = useCallback(
       async (clipKey: string | null) => {
         logger.info(`playRecordedClip: clipKey=${clipKey}, audioEnabled=${audioEnabled}`);
@@ -423,9 +378,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           return false;
         }
 
-        // Briefing and manual commands are no longer in the sequence
-        // They are handled entirely by the UI tiles and buttons before timer starts
-
+        // Briefing and manual commands are handled in the UI prior to timer start
         return false;
       },
       [stopPlayback],
@@ -442,7 +395,6 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             await stopPlayback();
             manualGateCompletedRef.current = false;
             setManualStep(0);
-            setIsManualBusy(false);
           }
           // Always handle state_change to prevent BaseTimerScreen from setting command text
           return true;
@@ -602,7 +554,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
               if (audioEnabled && hasRecording) {
                 // Play the recording and wait for it to complete
                 try {
-                  await playClipWithFallback(clipKey, spokenText);
+                  await playRecordedClip(clipKey);
                   const waitTime = meta?.durationMs ? meta.durationMs + 200 : 3000;
                   logger.info(`handleManualPress: Waiting ${waitTime}ms for audio to complete`);
                   await new Promise(resolve => setTimeout(resolve, waitTime));
@@ -627,7 +579,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             } else {
               // For non-final commands, just play the audio normally (will be skipped if audio disabled)
               try {
-                await playClipWithFallback(clipKey, spokenText);
+                await playRecordedClip(clipKey);
               } catch (playError) {
                 logger.warn('Manual command playback error', playError);
               }
@@ -752,7 +704,6 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         isManualBusy,
         manualGateCompletedRef,
         manualStep,
-        playClipWithFallback,
         playRecordedClip,
         resetManualFlow,
         stageClipKeys.briefing,
