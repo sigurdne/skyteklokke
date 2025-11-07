@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { Audio } from 'expo-av';
 
 import ProgramManager from '../../../services/ProgramManager';
 import AudioService from '../../../services/AudioService';
 import logger from '../../../utils/logger';
+import { playUri, type PlayHandle } from '../../../utils/audioHelpers';
 import { AudioClipMeta, loadClipMeta } from '../../../services/AudioClipService';
 import { PPCProgram, PPCProgramSettings } from '../../../programs/ppc/PPCProgram';
 import { PPCStage } from '../../../programs/ppc/stages';
@@ -203,8 +203,8 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const stageClipKeys = useMemo(() => resolveStageClipKeys(stage), [stage]);
 
-    const clipCacheRef = useRef<Record<string, AudioClipMeta | null>>({});
-    const soundRef = useRef<Audio.Sound | null>(null);
+  const clipCacheRef = useRef<Record<string, AudioClipMeta | null>>({});
+  const soundRef = useRef<PlayHandle | null>(null);
     const manualGateCompletedRef = useRef<boolean>(false);
 
     const [manualStep, setManualStep] = useState<number>(0);
@@ -224,16 +224,10 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       
       if (soundRef.current) {
         try {
-          await soundRef.current.stopAsync();
+          await soundRef.current.stop();
           logger.info('stopPlayback: Sound stopped');
         } catch (error) {
           logger.warn('Failed to stop PPC audio clip cleanly', error);
-        }
-        try {
-          await soundRef.current.unloadAsync();
-          logger.info('stopPlayback: Sound unloaded');
-        } catch (error) {
-          logger.warn('Failed to unload PPC audio clip', error);
         }
         soundRef.current = null;
       }
@@ -334,22 +328,26 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           logger.info(`playClipWithFallback: meta=${JSON.stringify(meta)}`);
           
           if (meta?.uri) {
-            logger.info(`playClipWithFallback: Creating sound from uri=${meta.uri}`);
-            const { sound } = await Audio.Sound.createAsync({ uri: meta.uri });
-            soundRef.current = sound;
-            sound.setOnPlaybackStatusUpdate((status) => {
-              if (!status.isLoaded) {
-                return;
-              }
-              if (status.didJustFinish || status.positionMillis >= (status.durationMillis ?? Number.MAX_SAFE_INTEGER)) {
-                sound.unloadAsync().catch(() => undefined);
-                if (soundRef.current === sound) {
+            let handleForFinish: PlayHandle | null = null;
+            const handle = await playUri({
+              uri: meta.uri,
+              onFinish: () => {
+                if (soundRef.current === handleForFinish) {
                   soundRef.current = null;
                 }
-              }
+              },
+              onError: (error) => {
+                logger.warn('playClipWithFallback: playback error', error);
+                if (soundRef.current === handleForFinish) {
+                  soundRef.current = null;
+                }
+              },
             });
-            await sound.playAsync();
-            return true;
+            if (handle) {
+              handleForFinish = handle;
+              soundRef.current = handle;
+              return true;
+            }
           }
         } catch (error) {
           logger.warn('Failed to play PPC audio clip, falling back to TTS', error);
@@ -381,24 +379,27 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           logger.info(`playRecordedClip: meta=${JSON.stringify(meta)}`);
           
           if (meta?.uri) {
-            logger.info(`playRecordedClip: Creating sound from uri=${meta.uri}`);
-            const { sound } = await Audio.Sound.createAsync({ uri: meta.uri });
-            soundRef.current = sound;
-            sound.setOnPlaybackStatusUpdate((status) => {
-              if (!status.isLoaded) {
-                return;
-              }
-              if (status.didJustFinish || status.positionMillis >= (status.durationMillis ?? Number.MAX_SAFE_INTEGER)) {
-                sound.unloadAsync().catch(() => undefined);
-                if (soundRef.current === sound) {
+            let handleForFinish: PlayHandle | null = null;
+            const handle = await playUri({
+              uri: meta.uri,
+              onFinish: () => {
+                if (soundRef.current === handleForFinish) {
                   soundRef.current = null;
                 }
-              }
+              },
+              onError: (error) => {
+                logger.warn('playRecordedClip: playback error', error);
+                if (soundRef.current === handleForFinish) {
+                  soundRef.current = null;
+                }
+              },
             });
-            logger.info('playRecordedClip: Playing sound...');
-            await sound.playAsync();
-            logger.info('playRecordedClip: Sound playing successfully');
-            return true;
+            if (handle) {
+              handleForFinish = handle;
+              soundRef.current = handle;
+              logger.info('playRecordedClip: Sound playing successfully');
+              return true;
+            }
           } else {
             logger.warn('playRecordedClip: No URI in meta');
           }

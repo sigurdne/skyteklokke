@@ -2,6 +2,7 @@ import { Audio } from 'expo-av';
 import { Directory, File, Paths } from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '../utils/logger';
+import { playUri, type PlayHandle } from '../utils/audioHelpers';
 
 type Recording = Audio.Recording;
 
@@ -67,25 +68,19 @@ const PHASE_LABELS: Record<PhaseKey, string> = {
 
 // Global recorder and player instances
 let currentRecording: Recording | null = null;
-let playbackPlayers: Map<string, Audio.Sound> = new Map();
+let playbackPlayers: Map<string, PlayHandle> = new Map();
 const playbackDurations: Map<string, number> = new Map();
 
 async function stopSound(key: string): Promise<void> {
-  const sound = playbackPlayers.get(key);
-  if (!sound) {
+  const handle = playbackPlayers.get(key);
+  if (!handle) {
     return;
   }
 
   try {
-    await sound.stopAsync();
+    await handle.stop();
   } catch (error) {
-    // Safe to ignore; sound might already be stopped
-  }
-
-  try {
-    await sound.unloadAsync();
-  } catch (error) {
-    logger.error(`Error unloading sound ${key}:`, error);
+    logger.warn(`Error stopping sound ${key}:`, error);
   }
 
   playbackPlayers.delete(key);
@@ -350,9 +345,8 @@ export async function getRecordingDuration(programId: string, phase: PhaseKey): 
       return 0;
     }
 
-    // Load audio with expo-av to get duration
-    const { Audio } = require('expo-av');
-    const { sound } = await Audio.Sound.createAsync({ uri: path }, { shouldPlay: false });
+  // Load audio with expo-av to get duration
+  const { sound } = await Audio.Sound.createAsync({ uri: path }, { shouldPlay: false });
     const status = await sound.getStatusAsync();
     await sound.unloadAsync();
 
@@ -397,18 +391,28 @@ export async function playIfEnabled(programId: string, phase: PhaseKey): Promise
     // Note: Offset is handled in initializeTimer by adjusting step delays in the timing sequence
     // So we play immediately when called
 
-    // Create and play with expo-av
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: path },
-      { shouldPlay: true },
-      (status) => {
-        const isFinished = (status as any)?.didJustFinish;
-        if (isFinished) {
-          stopSound(key);
+    let handleForFinish: PlayHandle | null = null;
+    const handle = await playUri({
+      uri: path,
+      onFinish: () => {
+        if (playbackPlayers.get(key) === handleForFinish) {
+          playbackPlayers.delete(key);
         }
-      }
-    );
-    playbackPlayers.set(key, sound);
+      },
+      onError: (error) => {
+        logger.error('CustomAudioService.playIfEnabled playback error:', error);
+        if (playbackPlayers.get(key) === handleForFinish) {
+          playbackPlayers.delete(key);
+        }
+      },
+    });
+
+    if (!handle) {
+      return 0;
+    }
+
+    handleForFinish = handle;
+    playbackPlayers.set(key, handle);
 
     // Retrieve cached duration to avoid delaying playback; fetch asynchronously if missing
     let duration = playbackDurations.get(key) || 0;
