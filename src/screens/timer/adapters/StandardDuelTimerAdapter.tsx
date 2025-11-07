@@ -6,7 +6,7 @@ import { colors } from '../../../theme';
 import { timerStyles } from '../timerStyles';
 import { TimerDisplayContext, TimerEventHelpers, TimerProgramAdapter, TimerProgramBindings, TimerProgramSettingsBindings } from '../BaseTimerScreen';
 import { TimerEvent } from '../../../types';
-import { loadNumber, saveNumber } from '../../../utils/asyncStorageHelpers';
+import { loadSettings, saveNumber } from '../../../utils/asyncStorageHelpers';
 
 const DUEL_COUNTDOWN_KEY = 'duelCountdownDuration';
 const DUEL_SERIES_KEY = 'duelSeries';
@@ -20,19 +20,23 @@ export const standardDuelTimerAdapter: TimerProgramAdapter = {
     const [currentSeriesIndex, setCurrentSeriesIndex] = useState<number | null>(null);
 
     useEffect(() => {
-      const loadSettings = async () => {
-        const countdown = await loadNumber(DUEL_COUNTDOWN_KEY);
-        if (countdown !== undefined) {
-          setDuelCountdownDuration(countdown);
-        }
-        
-        const series = await loadNumber(DUEL_SERIES_KEY);
-        if (series !== undefined) {
-          setDuelSeries(series);
-        }
-      };
+      void (async () => {
+        const storedSettings = await loadSettings<{
+          duelCountdownDuration: number;
+          duelSeries: number;
+        }>([
+          { key: DUEL_COUNTDOWN_KEY, type: 'number', stateKey: 'duelCountdownDuration' },
+          { key: DUEL_SERIES_KEY, type: 'number', stateKey: 'duelSeries' },
+        ]);
 
-      loadSettings();
+        if (storedSettings.duelCountdownDuration !== undefined) {
+          setDuelCountdownDuration(storedSettings.duelCountdownDuration);
+        }
+
+        if (storedSettings.duelSeries !== undefined) {
+          setDuelSeries(storedSettings.duelSeries);
+        }
+      })();
     }, []);
 
     const updateCountdown = useCallback(async (duration: number) => {

@@ -190,26 +190,6 @@ export const modalStyles = StyleSheet.create({
 });
 
 /**
- * Button and icon button patterns
- * Used by: Multiple components
- */
-export const buttonStyles = StyleSheet.create({
-  iconButton: {
-    padding: spacing.sm,
-  },
-  roundButton: {
-    backgroundColor: colors.surface,
-    borderRadius: 24,
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-});
-
-/**
  * Text patterns
  * Used by: Multiple components
  */

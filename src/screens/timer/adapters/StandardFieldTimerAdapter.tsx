@@ -5,7 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import AudioService from '../../../services/AudioService';
 import * as CustomAudio from '../../../services/CustomAudioService';
 import logger from '../../../utils/logger';
-import { loadNumber, loadBoolean, saveNumber, saveBoolean } from '../../../utils/asyncStorageHelpers';
+import { loadSettings, saveNumber, saveBoolean } from '../../../utils/asyncStorageHelpers';
 import { TimerEvent, TimingStep } from '../../../types';
 import { colors, spacing } from '../../../theme';
 import { timerStyles } from '../timerStyles';
@@ -32,19 +32,23 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
     const [isRecording, setIsRecording] = useState<boolean>(false);
 
     useEffect(() => {
-      const loadSettings = async () => {
-        const duration = await loadNumber(SHOOTING_DURATION_KEY);
-        if (duration !== undefined) {
-          setShootingDuration(duration);
-        }
-        
-        const soundMode = await loadBoolean(SOUND_MODE_KEY);
-        if (soundMode !== undefined) {
-          setSoundMode(soundMode);
-        }
-      };
+      void (async () => {
+        const storedSettings = await loadSettings<{
+          shootingDuration: number;
+          soundMode: boolean;
+        }>([
+          { key: SHOOTING_DURATION_KEY, type: 'number', stateKey: 'shootingDuration' },
+          { key: SOUND_MODE_KEY, type: 'boolean', stateKey: 'soundMode' },
+        ]);
 
-      loadSettings();
+        if (storedSettings.shootingDuration !== undefined) {
+          setShootingDuration(storedSettings.shootingDuration);
+        }
+
+        if (storedSettings.soundMode !== undefined) {
+          setSoundMode(storedSettings.soundMode);
+        }
+      })();
     }, []);
 
     const updateShootingDuration = useCallback(async (duration: number) => {

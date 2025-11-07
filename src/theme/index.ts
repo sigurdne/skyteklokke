@@ -7,6 +7,5 @@ export {
   sectionStyles,
   listStyles,
   modalStyles,
-  buttonStyles,
   textStyles,
 } from './commonStyles';
