@@ -199,8 +199,6 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       [t],
     );
 
-    const lineReadyText = commandTextMap.linja_er_klar;
-
     const stageClipKeys = useMemo(() => resolveStageClipKeys(stage), [stage]);
 
   const clipCacheRef = useRef<Record<string, AudioClipMeta | null>>({});
@@ -314,7 +312,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
     }, [getClipMeta, stageClipKeys.briefing, stageClipKeys.title]);
 
     const playRecordedClip = useCallback(
-      async (clipKey: string | null) => {
+      async (clipKey: string | null, preloadedMeta?: AudioClipMeta | null) => {
         logger.info(`playRecordedClip: clipKey=${clipKey}, audioEnabled=${audioEnabled}`);
         
         if (!clipKey) {
@@ -330,7 +328,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         await stopPlayback();
 
         try {
-          const meta = await getClipMeta(clipKey);
+          const meta = preloadedMeta ?? (await getClipMeta(clipKey));
           logger.info(`playRecordedClip: meta=${JSON.stringify(meta)}`);
           
           if (meta?.uri) {
@@ -428,7 +426,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
         return false;
       },
-      [handleCommandEvent, lineReadyText, manualGateCompletedRef, stopPlayback],
+  [handleCommandEvent, manualGateCompletedRef, stopPlayback],
     );
 
     const resetManualFlow = useCallback(() => {
@@ -538,6 +536,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
           try {
             const spokenText = commandTextMap[button.command] ?? button.command;
             const clipKey = COMMAND_CLIP_KEYS[button.command];
+            const meta = audioEnabled ? await getClipMeta(clipKey) : null;
             logger.info(`handleManualPress: command=${button.command}, clipKey=${clipKey}, spokenText=${spokenText}`);
             
             const isExpectedStep = manualStep === button.stepIndex;
@@ -545,7 +544,6 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
             // For the final command (linja_er_klar), check if there's a recording and if audio is enabled
             if (isExpectedStep && isFinalCommand) {
-              const meta = await getClipMeta(clipKey);
               const hasRecording = Boolean(meta?.uri);
               
               logger.info(`handleManualPress: isFinalCommand, hasRecording=${hasRecording}, audioEnabled=${audioEnabled}, meta=${JSON.stringify(meta)}`);
@@ -554,7 +552,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
               if (audioEnabled && hasRecording) {
                 // Play the recording and wait for it to complete
                 try {
-                  await playRecordedClip(clipKey);
+                  await playRecordedClip(clipKey, meta);
                   const waitTime = meta?.durationMs ? meta.durationMs + 200 : 3000;
                   logger.info(`handleManualPress: Waiting ${waitTime}ms for audio to complete`);
                   await new Promise(resolve => setTimeout(resolve, waitTime));
@@ -579,7 +577,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
             } else {
               // For non-final commands, just play the audio normally (will be skipped if audio disabled)
               try {
-                await playRecordedClip(clipKey);
+                await playRecordedClip(clipKey, meta ?? undefined);
               } catch (playError) {
                 logger.warn('Manual command playback error', playError);
               }
