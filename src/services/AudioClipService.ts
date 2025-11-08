@@ -41,7 +41,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 import AudioService from './AudioService';
 import logger from '../utils/logger';
 import { Language } from '../types';
@@ -64,8 +64,8 @@ type StoredAudioClipMeta = {
 
 const STORAGE_PREFIX = '@audioClip:';
 const FALLBACK_LANGUAGE: Language = 'no';
-const DOCUMENT_DIRECTORY: string | null = (FileSystem as any).documentDirectory ?? null;
-const CACHE_DIRECTORY: string | null = (FileSystem as any).cacheDirectory ?? null;
+const DOCUMENT_DIRECTORY: string | null = Paths.document?.uri ?? null;
+const CACHE_DIRECTORY: string | null = Paths.cache?.uri ?? null;
 const CLIP_ROOT = DOCUMENT_DIRECTORY ?? CACHE_DIRECTORY;
 const CLIP_DIRECTORY = CLIP_ROOT ? `${CLIP_ROOT}audio-clips/` : null;
 
@@ -118,42 +118,60 @@ async function removeLegacyMeta(key: string): Promise<void> {
   }
 }
 
-async function ensureLanguageDirectory(language: Language): Promise<string> {
+async function ensureBaseDirectory(): Promise<void> {
   if (!CLIP_DIRECTORY) {
     throw new Error('FileSystem directory unavailable for audio clips');
   }
 
-  const languageDir = `${CLIP_DIRECTORY}${language}/`;
-
-  try {
-    const rootInfo = await FileSystem.getInfoAsync(CLIP_DIRECTORY);
-    if (!rootInfo.exists) {
-      await FileSystem.makeDirectoryAsync(CLIP_DIRECTORY, { intermediates: true });
-    }
-  } catch (error) {
-    logger.warn('AudioClipService: failed to ensure base clip directory', error);
-    throw error;
+  const baseDir = new Directory(CLIP_DIRECTORY);
+  if (baseDir.exists) {
+    return;
   }
 
   try {
-    const languageInfo = await FileSystem.getInfoAsync(languageDir);
-    if (!languageInfo.exists) {
-      await FileSystem.makeDirectoryAsync(languageDir, { intermediates: true });
+    await baseDir.create();
+  } catch (error: any) {
+    if (!error?.message?.includes('already exists')) {
+      logger.warn('AudioClipService: failed to create base clip directory', error);
+      throw error;
     }
-  } catch (error) {
-    logger.warn('AudioClipService: failed to ensure language clip directory', error);
-    throw error;
+  }
+}
+
+async function ensureLanguageDirectory(language: Language): Promise<string> {
+  await ensureBaseDirectory();
+
+  if (!CLIP_DIRECTORY) {
+    throw new Error('FileSystem directory unavailable for audio clips');
   }
 
-  return languageDir;
+  const languageDirPath = `${CLIP_DIRECTORY}${language}/`;
+  const languageDir = new Directory(languageDirPath);
+
+  if (languageDir.exists) {
+    return languageDirPath;
+  }
+
+  try {
+    await languageDir.create();
+  } catch (error: any) {
+    if (!error?.message?.includes('already exists')) {
+      logger.warn('AudioClipService: failed to create language clip directory', error);
+      throw error;
+    }
+  }
+
+  return languageDirPath;
 }
 
 async function removeIfExists(uri: string): Promise<void> {
+  const file = new File(uri);
+  if (!file.exists) {
+    return;
+  }
+
   try {
-    const existing = await FileSystem.getInfoAsync(uri);
-    if (existing.exists) {
-      await FileSystem.deleteAsync(uri, { idempotent: true });
-    }
+    await file.delete();
   } catch (error) {
     logger.warn('AudioClipService: failed to remove existing clip before save', error);
   }
@@ -186,10 +204,16 @@ async function migrateLegacyMeta(
     const targetUri = `${languageDir}${key}.m4a`;
 
     if (normalized.uri !== targetUri) {
-      const info = await FileSystem.getInfoAsync(normalized.uri);
-      if (info.exists) {
+      const sourceFile = new File(normalized.uri);
+      if (sourceFile.exists) {
         await removeIfExists(targetUri);
-        await FileSystem.moveAsync({ from: normalized.uri, to: targetUri });
+        const targetFile = new File(targetUri);
+        await sourceFile.copy(targetFile);
+        try {
+          await sourceFile.delete();
+        } catch (deleteError) {
+          logger.warn('AudioClipService: failed to remove legacy clip after migration', deleteError);
+        }
         finalUri = targetUri;
       }
     }
@@ -273,17 +297,31 @@ export async function moveRecordingToLibrary(
     const targetUri = `${languageDir}${key}.m4a`;
 
     await removeIfExists(targetUri);
-    await FileSystem.moveAsync({ from: sourceUri, to: targetUri });
 
-    const meta = normalizeMeta(
-      { uri: targetUri, durationMs, createdAt: Date.now(), language: resolvedLanguage },
-      key,
-      resolvedLanguage,
-      targetUri,
-    );
+    const sourceFile = new File(sourceUri);
+    if (sourceFile.exists) {
+      const targetFile = new File(targetUri);
+      await sourceFile.copy(targetFile);
+      try {
+        await sourceFile.delete();
+      } catch (deleteError) {
+        logger.warn('AudioClipService: failed to remove temporary recording after copy', deleteError);
+      }
 
-    await saveClipMeta(meta, resolvedLanguage);
-    return meta;
+      const meta = normalizeMeta(
+        { uri: targetUri, durationMs, createdAt: Date.now(), language: resolvedLanguage },
+        key,
+        resolvedLanguage,
+        targetUri,
+      );
+
+      await saveClipMeta(meta, resolvedLanguage);
+      return meta;
+    }
+
+    logger.warn('AudioClipService: source recording file missing during move, falling back to original URI');
+    await saveClipMeta(fallbackMeta, resolvedLanguage);
+    return fallbackMeta;
   } catch (error) {
     logger.warn('Failed to move recorded clip, keeping source location', error);
     await saveClipMeta(fallbackMeta, resolvedLanguage);
@@ -297,7 +335,7 @@ export async function deleteClip(key: string, language?: Language): Promise<void
 
   if (meta?.uri) {
     try {
-      await FileSystem.deleteAsync(meta.uri, { idempotent: true });
+      await removeIfExists(meta.uri);
     } catch (error) {
       logger.warn('Failed to delete audio file for clip', error);
     }
