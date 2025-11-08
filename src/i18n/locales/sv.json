@@ -18,10 +18,10 @@
   "field": {
     "idle": "Är skyttarna klara?",
     "commands": {
-      "shooters_ready": "Skytt klara",
-      "ready_command": "KLAR!",
-      "fire_command": "SKJUT!",
-      "cease_command": "SLUTA SKJUTA"
+      "shooters_ready": "Är skyttarna klara?",
+      "ready_command": "KLARA!",
+      "fire_command": "ELD!",
+      "cease_command": "ELD UPPHÖR!"
     }
   },
   "controls": {
