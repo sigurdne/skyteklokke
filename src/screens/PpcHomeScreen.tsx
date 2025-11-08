@@ -29,6 +29,22 @@ import type {
   PPCStage,
   PPCPosition,
 } from '../programs/ppc/stages';
+import { Language } from '../types';
+
+const SUPPORTED_LANGUAGES: Language[] = ['no', 'en', 'sv', 'da'];
+
+const normalizeLanguage = (value: string | undefined): Language => {
+  if (!value) {
+    return 'no';
+  }
+
+  const code = value.split('-')[0];
+  if (code === 'nb') {
+    return 'no';
+  }
+
+  return SUPPORTED_LANGUAGES.includes(code as Language) ? (code as Language) : 'no';
+};
 
 interface StageDetailState {
   disciplineId: PPCDiscipline;
@@ -39,7 +55,12 @@ interface StageDetailState {
 type PpcHomeScreenProps = NativeStackScreenProps<RootStackParamList, 'PPC'>;
 
 export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = useMemo(() => normalizeLanguage(i18n.language), [i18n.language]);
+
+  useEffect(() => {
+    AudioService.setLanguage(language);
+  }, [language]);
   const [selectedDiscipline, setSelectedDiscipline] = useState<PPCDiscipline | null>(
     (route.params?.selectedDiscipline as PPCDiscipline) || null
   );
@@ -234,6 +255,7 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route 
         onClose={() => setStageDetail(null)}
         onStartStage={handleStageStart}
         t={t}
+        language={language}
       />
     </SafeAreaView>
   );
@@ -255,6 +277,7 @@ interface StageDetailModalProps {
   onClose: () => void;
   onStartStage: (disciplineId: PPCDiscipline, stageId: string) => void;
   t: TFunction;
+  language: Language;
 }
 
 interface AudioControlRowProps {
@@ -264,9 +287,10 @@ interface AudioControlRowProps {
   t: TFunction;
   onClipChange?: (clip: AudioClipMeta | null) => void;
   previewText?: string;
+  language: Language;
 }
 
-const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, onClose, onStartStage, t }) => {
+const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, onClose, onStartStage, t, language }) => {
   const [recordingsExpanded, setRecordingsExpanded] = useState(false);
   const [titleClip, setTitleClip] = useState<AudioClipMeta | null>(null);
   const [briefingClip, setBriefingClip] = useState<AudioClipMeta | null>(null);
@@ -309,8 +333,8 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
     (async () => {
       try {
         const [titleMeta, briefingMeta] = await Promise.all([
-          loadClipMeta(titleClipKey),
-          loadClipMeta(briefingClipKey),
+          loadClipMeta(titleClipKey, language),
+          loadClipMeta(briefingClipKey, language),
         ]);
 
         if (!cancelled) {
@@ -325,7 +349,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
     return () => {
       cancelled = true;
     };
-  }, [visible, titleClipKey, briefingClipKey]);
+  }, [language, visible, titleClipKey, briefingClipKey]);
 
   const stage = detail?.stage ?? null;
   const entry = detail?.entry ?? null;
@@ -480,6 +504,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
                     t={t}
                     onClipChange={setTitleClip}
                     previewText={stageTitleText}
+                    language={language}
                   />
                   <AudioControlRow
                     label={t('ppc.detail.stage_briefing_label')}
@@ -488,6 +513,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
                     t={t}
                     onClipChange={setBriefingClip}
                     previewText={detailedBriefingText}
+                    language={language}
                   />
 
                   <Text style={[styles.modalSubSectionTitle, styles.recordingsCommandsHeading]}>
@@ -500,6 +526,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
                       clipKey={row.key}
                       visible={visible}
                       t={t}
+                      language={language}
                     />
                   ))}
                 </ScrollView>
@@ -524,7 +551,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
   );
 };
 
-const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visible, t, onClipChange, previewText }) => {
+const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visible, t, onClipChange, previewText, language }) => {
   const [clip, setClip] = useState<AudioClipMeta | null>(null);
   const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -533,9 +560,9 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
   const hasClip = Boolean(clip?.uri);
 
   const refreshClip = useCallback(async () => {
-    const stored = await loadClipMeta(clipKey);
+    const stored = await loadClipMeta(clipKey, language);
     setClip(stored);
-  }, [clipKey]);
+  }, [clipKey, language]);
 
   useEffect(() => {
     if (visible) {
@@ -613,7 +640,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
       const durationMs = 'durationMillis' in status ? status.durationMillis : undefined;
       const uri = recordingInstance.getURI();
       if (uri) {
-        const meta = await moveRecordingToLibrary(clipKey, uri, durationMs ?? undefined);
+        const meta = await moveRecordingToLibrary(clipKey, uri, durationMs ?? undefined, language);
         setClip(meta);
       }
     } catch (error) {
@@ -627,7 +654,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
         logger.warn('Failed to reset audio mode after recording', error);
       }
     }
-  }, [clipKey, recordingInstance]);
+  }, [clipKey, language, recordingInstance]);
 
   const startRecording = useCallback(async () => {
     const permission = await Audio.requestPermissionsAsync();
@@ -664,12 +691,12 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
 
   const handleDelete = useCallback(async () => {
     try {
-      await deleteClip(clipKey);
+      await deleteClip(clipKey, language);
       setClip(null);
     } catch (error) {
       logger.warn('Failed to delete audio clip', error);
     }
-  }, [clipKey]);
+  }, [clipKey, language]);
 
   return (
     <View style={styles.audioRow}>

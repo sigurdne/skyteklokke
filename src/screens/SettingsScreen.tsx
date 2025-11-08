@@ -9,6 +9,7 @@ import { colors, screenStyles, sectionStyles, listStyles } from '../theme';
 import { Language } from '../types';
 import { RootStackParamList } from '../navigation/types';
 import logger from '../utils/logger';
+import AudioService from '../services/AudioService';
 
 type SettingsScreenProps = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -36,7 +37,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
   const handleLanguageChange = async (language: Language) => {
     try {
       setSelectedLanguage(language);
-      await i18n.changeLanguage(language);
+  await i18n.changeLanguage(language);
+  AudioService.setLanguage(language);
       await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch (error) {
       logger.error('Error changing language:', error);

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import ProgramManager from '../../../services/ProgramManager';
 import AudioService from '../../../services/AudioService';
@@ -9,7 +10,7 @@ import { AudioClipMeta, loadClipMeta } from '../../../services/AudioClipService'
 import { PPCProgram, PPCProgramSettings } from '../../../programs/ppc/PPCProgram';
 import { PPCStage } from '../../../programs/ppc/stages';
 import { colors, spacing, typography } from '../../../theme';
-import { TimerEvent, TimingStep } from '../../../types';
+import { TimerEvent, TimingStep, Language } from '../../../types';
 import {
   TimerDisplayContext,
   TimerEventHelpers,
@@ -33,6 +34,21 @@ const resolveStageClipKeys = (stage: PPCStage | null) => ({
   title: stage ? `ppc_stage_${stage.id}_title` : null,
   briefing: stage ? `ppc_stage_${stage.id}_briefing` : null,
 });
+
+const SUPPORTED_LANGUAGES: Language[] = ['no', 'en', 'sv', 'da'];
+
+const normalizeLanguage = (value: string | undefined): Language => {
+  if (!value) {
+    return 'no';
+  }
+
+  const code = value.split('-')[0];
+  if (code === 'nb') {
+    return 'no';
+  }
+
+  return SUPPORTED_LANGUAGES.includes(code as Language) ? (code as Language) : 'no';
+};
 
 const startControlsStyles = StyleSheet.create({
   scrollContainer: {
@@ -166,6 +182,9 @@ const startControlsStyles = StyleSheet.create({
 export const ppcTimerAdapter: TimerProgramAdapter = {
   id: 'ppc-standard',
   useBindings: ({ programId, t }) => {
+    const { i18n } = useTranslation();
+    const language = useMemo(() => normalizeLanguage(i18n.language), [i18n.language]);
+
     const program = useMemo(
       () => ProgramManager.getProgram(programId) as PPCProgram | undefined,
       [programId],
@@ -246,7 +265,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       setHasStageTitleClip(false);
       setHasStageBriefingClip(false);
       manualGateCompletedRef.current = false;
-    }, [programId, stage?.id]);
+    }, [language, programId, stage?.id]);
 
     useEffect(() => {
       return () => {
@@ -258,13 +277,17 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       if (!clipKey) {
         return null;
       }
-      if (clipCacheRef.current[clipKey] !== undefined) {
-        return clipCacheRef.current[clipKey];
+
+      const cacheKey = `${language}:${clipKey}`;
+
+      if (clipCacheRef.current[cacheKey] !== undefined) {
+        return clipCacheRef.current[cacheKey];
       }
-      const meta = await loadClipMeta(clipKey);
-      clipCacheRef.current[clipKey] = meta;
+
+      const meta = await loadClipMeta(clipKey, language);
+      clipCacheRef.current[cacheKey] = meta;
       return meta;
-    }, []);
+    }, [language]);
 
     useEffect(() => {
       let cancelled = false;
@@ -309,7 +332,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       return () => {
         cancelled = true;
       };
-    }, [getClipMeta, stageClipKeys.briefing, stageClipKeys.title]);
+  }, [getClipMeta, language, stageClipKeys.briefing, stageClipKeys.title]);
 
     const playRecordedClip = useCallback(
       async (clipKey: string | null, preloadedMeta?: AudioClipMeta | null) => {
