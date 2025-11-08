@@ -232,7 +232,11 @@ export const PpcHomeScreen: React.FC<PpcHomeScreenProps> = ({ navigation, route 
           if (selectedDiscipline) {
             setSelectedDiscipline(null);
           } else {
-            navigation.navigate('Home');
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.navigate('Home');
+            }
           }
         }}
       />
