@@ -198,7 +198,11 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
     
     const program = ProgramManager.getProgram(programId);
     if (!program) {
-      navigation.goBack();
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate('Home');
+      }
       return;
     }
 
@@ -213,14 +217,13 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
         return;
       }
 
-      // For PPC programs, navigate to PPC screen with selected discipline
+      // For PPC programs, navigate to PPC screen with selected discipline when no back stack exists
       if (programId === 'ppc-standard') {
         const settings = (program as any).getSettings?.();
         const discipline = settings?.discipline;
-        if (discipline) {
-          // Prevent default back behavior
+        if (discipline && !navigation.canGoBack()) {
+          // Prevent default back behavior and push PPC screen so we keep correct context
           e.preventDefault();
-          // Navigate to PPC with discipline parameter
           navigation.navigate('PPC' as any, { selectedDiscipline: discipline });
           return;
         }
@@ -502,12 +505,20 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
       const settings = (program as any).getSettings?.();
       const discipline = settings?.discipline;
       if (discipline) {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+          return;
+        }
         navigation.navigate('PPC' as any, { selectedDiscipline: discipline });
         return;
       }
     }
     
-    navigation.goBack();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('Home');
+    }
   }, [handleReset, isRunning, navigation, programId]);
 
   const program = ProgramManager.getProgram(programId);
