@@ -64,6 +64,15 @@ jest.mock('expo-av', () => ({
   },
 }));
 
+jest.mock('../src/utils/logger', () => ({
+  log: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  setDebug: jest.fn(),
+  isDebug: jest.fn(() => true),
+}));
+
 describe('UserRecordingService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
