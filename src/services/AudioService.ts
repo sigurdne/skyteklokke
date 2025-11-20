@@ -21,13 +21,12 @@ import { Language } from '../types';
  * SCOPE: Global singleton service used across all timer programs
  * 
  * NOT RESPONSIBLE FOR:
- * - User-recorded audio (see CustomAudioService)
- * - Audio file metadata (see AudioClipService)
+ * - User-recorded audio (see UserRecordingService)
+ * - Audio file metadata (see UserRecordingService)
  * - Program-specific audio logic (handled by adapters)
  * 
  * RELATED SERVICES:
- * - CustomAudioService: Handles user-recorded command audio
- * - AudioClipService: Manages audio file storage and metadata
+ * - UserRecordingService: Handles user-recorded command audio and metadata
  */
 export class AudioService {
   private static instance: AudioService;

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import AudioService from '../../../services/AudioService';
-import * as CustomAudio from '../../../services/CustomAudioService';
+import UserRecordingService, { RecordingMetadata } from '../../../services/UserRecordingService';
 import logger from '../../../utils/logger';
 import { loadSettings, saveNumber, saveBoolean } from '../../../utils/asyncStorageHelpers';
 import { TimerEvent, TimingStep } from '../../../types';
@@ -11,7 +11,22 @@ import { colors, spacing } from '../../../theme';
 import { timerStyles } from '../timerStyles';
 import { TimerDisplayContext, TimerEventHelpers, TimerProgramAdapter, TimerProgramBindings, TimerProgramSettingsBindings, TimerSequenceContext } from '../BaseTimerScreen';
 
-const initialPhaseStatuses: Record<CustomAudio.PhaseKey, { enabled: boolean; hasFile: boolean; offset: number }> = {
+type PhaseKey = 
+  | 'shooters_ready'
+  | 'ready_command'
+  | 'fire_command'
+  | 'cease_command';
+
+const PHASE_LABELS: Record<PhaseKey, string> = {
+  shooters_ready: 'Er skytterne klare',
+  ready_command: 'KLAR!',
+  fire_command: 'ILD!',
+  cease_command: 'STAANS!',
+};
+
+const RECORDING_CATEGORY = 'field-command';
+
+const initialPhaseStatuses: Record<PhaseKey, { enabled: boolean; hasFile: boolean; offset: number }> = {
   shooters_ready: { enabled: false, hasFile: false, offset: 0 },
   ready_command: { enabled: false, hasFile: false, offset: 0 },
   fire_command: { enabled: false, hasFile: false, offset: 0 },
@@ -28,7 +43,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
     const [soundMode, setSoundMode] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
     const [phaseStatuses, setPhaseStatuses] = useState(initialPhaseStatuses);
-    const [recordingPhase, setRecordingPhase] = useState<CustomAudio.PhaseKey | null>(null);
+    const [recordingPhase, setRecordingPhase] = useState<PhaseKey | null>(null);
     const [isRecording, setIsRecording] = useState<boolean>(false);
 
     useEffect(() => {
@@ -61,14 +76,31 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       await saveBoolean(SOUND_MODE_KEY, enabled);
     }, []);
 
+    const getRecordingId = useCallback((phase: PhaseKey) => `${programId}_${phase}`, [programId]);
+
     const loadPhaseStatuses = useCallback(async () => {
       try {
-        const statuses = await CustomAudio.getPhaseStatuses(programId);
+        const statuses: Record<PhaseKey, { enabled: boolean; hasFile: boolean; offset: number }> = { ...initialPhaseStatuses };
+        
+        for (const phase of Object.keys(initialPhaseStatuses) as PhaseKey[]) {
+          const id = getRecordingId(phase);
+          // Try to migrate first if needed (lazy migration)
+          await UserRecordingService.migrateLegacyCustomAudio(programId, phase, 'no');
+          
+          const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+          if (meta) {
+            statuses[phase] = {
+              enabled: meta.enabled ?? false,
+              hasFile: true,
+              offset: meta.offsetMs ?? 0
+            };
+          }
+        }
         setPhaseStatuses(statuses);
       } catch (error) {
         logger.error('Failed to load phase statuses:', error);
       }
-    }, [programId]);
+    }, [programId, getRecordingId]);
 
     useEffect(() => {
       if (showSettings && soundMode) {
@@ -88,7 +120,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       close: () => {
         setShowSettings(false);
         if (isRecording) {
-          CustomAudio.cancelRecording().catch((error) => logger.error('Cancel recording failed:', error));
+          UserRecordingService.cancelRecording().catch((error) => logger.error('Cancel recording failed:', error));
           setIsRecording(false);
           setRecordingPhase(null);
         }
@@ -132,19 +164,23 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
               </Text>
 
               <ScrollView style={{ maxHeight: 300 }}>
-                {CustomAudio.getAllPhases().map((phase) => {
+                {(Object.keys(initialPhaseStatuses) as PhaseKey[]).map((phase) => {
                   const status = phaseStatuses[phase];
                   const isRecordingThis = isRecording && recordingPhase === phase;
 
                   return (
                     <View key={phase} style={timerStyles.phaseCard}>
                       <View style={timerStyles.phaseHeader}>
-                        <Text style={timerStyles.phaseLabel}>{CustomAudio.getPhaseLabel(phase)}</Text>
+                        <Text style={timerStyles.phaseLabel}>{PHASE_LABELS[phase]}</Text>
                         <TouchableOpacity
                           style={[timerStyles.smallToggle, status.enabled && timerStyles.toggleActive]}
                           onPress={async () => {
                             const newEnabled = !status.enabled;
-                            await CustomAudio.setEnabled(programId, phase, newEnabled);
+                            const id = getRecordingId(phase);
+                            const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+                            if (meta) {
+                              await UserRecordingService.saveMetadata({ ...meta, enabled: newEnabled });
+                            }
                             await loadPhaseStatuses();
                           }}
                           disabled={!status.hasFile}
@@ -160,7 +196,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                               style={[timerStyles.phaseButton, timerStyles.recordButton]}
                               onPress={async () => {
                                 try {
-                                  await CustomAudio.startRecording(programId, phase);
+                                  await UserRecordingService.startRecording();
                                   setIsRecording(true);
                                   setRecordingPhase(phase);
                                 } catch (error) {
@@ -178,7 +214,8 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                                   style={[timerStyles.phaseButton, timerStyles.playButton]}
                                   onPress={async () => {
                                     try {
-                                      await CustomAudio.playIfEnabled(programId, phase);
+                                      const id = getRecordingId(phase);
+                                      await UserRecordingService.playRecording(RECORDING_CATEGORY, id);
                                     } catch (error) {
                                       logger.error('Play error:', error);
                                     }
@@ -192,14 +229,15 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                                   onPress={() => {
                                     Alert.alert(
                                       'Slett opptak',
-                                      `Vil du slette opptaket for ${CustomAudio.getPhaseLabel(phase)}?`,
+                                      `Vil du slette opptaket for ${PHASE_LABELS[phase]}?`,
                                       [
                                         { text: 'Avbryt', style: 'cancel' },
                                         {
                                           text: 'Slett',
                                           style: 'destructive',
                                           onPress: async () => {
-                                            await CustomAudio.deleteRecording(programId, phase);
+                                            const id = getRecordingId(phase);
+                                            await UserRecordingService.deleteRecording(RECORDING_CATEGORY, id);
                                             await loadPhaseStatuses();
                                           },
                                         },
@@ -218,11 +256,27 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                               style={[timerStyles.phaseButton, timerStyles.stopButton]}
                               onPress={async () => {
                                 try {
-                                  await CustomAudio.stopRecording(programId, phase);
+                                  const { uri, durationMs } = await UserRecordingService.stopRecording();
+                                  const id = getRecordingId(phase);
+                                  const language = AudioService.getLanguage();
+                                  
+                                  const savedPath = await UserRecordingService.saveRecordingFile(uri, RECORDING_CATEGORY, id, language);
+                                  
+                                  const meta: RecordingMetadata = {
+                                    id,
+                                    category: RECORDING_CATEGORY,
+                                    language,
+                                    uri: savedPath,
+                                    durationMs,
+                                    createdAt: Date.now(),
+                                    enabled: true,
+                                    offsetMs: 0
+                                  };
+                                  
+                                  await UserRecordingService.saveMetadata(meta);
+                                  
                                   setIsRecording(false);
                                   setRecordingPhase(null);
-                                  await loadPhaseStatuses();
-                                  await CustomAudio.setEnabled(programId, phase, true);
                                   await loadPhaseStatuses();
                                 } catch (error) {
                                   logger.error('Stop recording error:', error);
@@ -236,7 +290,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                             <TouchableOpacity
                               style={[timerStyles.phaseButton, timerStyles.cancelButton]}
                               onPress={async () => {
-                                await CustomAudio.cancelRecording();
+                                await UserRecordingService.cancelRecording();
                                 setIsRecording(false);
                                 setRecordingPhase(null);
                               }}
@@ -262,7 +316,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                               style={timerStyles.offsetButton}
                               onPress={async () => {
                                 const newOffset = status.offset - 100;
-                                await CustomAudio.setOffset(programId, phase, newOffset);
+                                const id = getRecordingId(phase);
+                                const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+                                if (meta) {
+                                  await UserRecordingService.saveMetadata({ ...meta, offsetMs: newOffset });
+                                }
                                 await loadPhaseStatuses();
                               }}
                             >
@@ -272,7 +330,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                               style={timerStyles.offsetButton}
                               onPress={async () => {
                                 const newOffset = status.offset - 50;
-                                await CustomAudio.setOffset(programId, phase, newOffset);
+                                const id = getRecordingId(phase);
+                                const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+                                if (meta) {
+                                  await UserRecordingService.saveMetadata({ ...meta, offsetMs: newOffset });
+                                }
                                 await loadPhaseStatuses();
                               }}
                             >
@@ -281,7 +343,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                             <TouchableOpacity
                               style={timerStyles.offsetButton}
                               onPress={async () => {
-                                await CustomAudio.setOffset(programId, phase, 0);
+                                const id = getRecordingId(phase);
+                                const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+                                if (meta) {
+                                  await UserRecordingService.saveMetadata({ ...meta, offsetMs: 0 });
+                                }
                                 await loadPhaseStatuses();
                               }}
                             >
@@ -291,7 +357,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                               style={timerStyles.offsetButton}
                               onPress={async () => {
                                 const newOffset = status.offset + 50;
-                                await CustomAudio.setOffset(programId, phase, newOffset);
+                                const id = getRecordingId(phase);
+                                const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+                                if (meta) {
+                                  await UserRecordingService.saveMetadata({ ...meta, offsetMs: newOffset });
+                                }
                                 await loadPhaseStatuses();
                               }}
                             >
@@ -301,7 +371,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
                               style={timerStyles.offsetButton}
                               onPress={async () => {
                                 const newOffset = status.offset + 100;
-                                await CustomAudio.setOffset(programId, phase, newOffset);
+                                const id = getRecordingId(phase);
+                                const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+                                if (meta) {
+                                  await UserRecordingService.saveMetadata({ ...meta, offsetMs: newOffset });
+                                }
                                 await loadPhaseStatuses();
                               }}
                             >
@@ -336,10 +410,18 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         return;
       }
 
+      const getInfo = async (phase: PhaseKey) => {
+        const id = getRecordingId(phase);
+        const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+        return {
+          duration: meta?.durationMs ?? 0,
+          offset: meta?.offsetMs ?? 0
+        };
+      };
+
       const shootersReadyStep = sequence.find((step) => step.id === 'shooters_ready');
       if (shootersReadyStep) {
-        const duration = await CustomAudio.getRecordingDuration(programId, 'shooters_ready');
-        const offset = await CustomAudio.getOffset(programId, 'shooters_ready');
+        const { duration, offset } = await getInfo('shooters_ready');
         if (duration > 0) {
           shootersReadyStep.delay = duration + 500 + offset;
           logger.log(`Adjusted shooters_ready delay to ${shootersReadyStep.delay}ms (offset: ${offset}ms)`);
@@ -348,9 +430,9 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         }
       }
 
-      const readyCommandOffset = await CustomAudio.getOffset(programId, 'ready_command');
-      const fireCommandOffset = await CustomAudio.getOffset(programId, 'fire_command');
-      const ceaseCommandOffset = await CustomAudio.getOffset(programId, 'cease_command');
+      const { offset: readyCommandOffset } = await getInfo('ready_command');
+      const { offset: fireCommandOffset } = await getInfo('fire_command');
+      const { offset: ceaseCommandOffset } = await getInfo('cease_command');
 
       const insertPrePlayStep = (
         commandStepId: string,
@@ -526,21 +608,37 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         return false;
       }
 
+      const playIfEnabled = async (phase: PhaseKey): Promise<number> => {
+        const id = getRecordingId(phase);
+        const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+        if (meta && meta.enabled) {
+          await UserRecordingService.playRecording(RECORDING_CATEGORY, id);
+          return meta.durationMs ?? 0;
+        }
+        return 0;
+      };
+
+      const getOffset = async (phase: PhaseKey): Promise<number> => {
+         const id = getRecordingId(phase);
+         const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
+         return meta?.offsetMs ?? 0;
+      };
+
       if (event.command === 'preplay_ready_command') {
         logger.log('🎵 PRE-PLAY ready_command - starting audio early');
-        await CustomAudio.playIfEnabled(programId, 'ready_command');
+        await playIfEnabled('ready_command');
         return true;
       }
 
       if (event.command === 'preplay_fire_command') {
         logger.log('🎵 PRE-PLAY fire_command - starting audio early');
-        await CustomAudio.playIfEnabled(programId, 'fire_command');
+        await playIfEnabled('fire_command');
         return true;
       }
 
       if (event.command === 'preplay_cease_command') {
         logger.log('🎵 PRE-PLAY cease_command - starting audio early');
-        await CustomAudio.playIfEnabled(programId, 'cease_command');
+        await playIfEnabled('cease_command');
         return true;
       }
 
@@ -550,18 +648,18 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         let customDuration = 0;
 
         if (eventState === 'prepare_warning' && stepId === 'prepare_warning_5') {
-          const readyCommandOffset = await CustomAudio.getOffset(programId, 'ready_command');
+          const readyCommandOffset = await getOffset('ready_command');
           if (readyCommandOffset >= 0) {
-            customDuration = await CustomAudio.playIfEnabled(programId, 'ready_command');
+            customDuration = await playIfEnabled('ready_command');
             logger.log(`✅ Custom audio for ready_command: duration=${customDuration}ms`);
           } else {
             logger.log(`✅ Audio for ready_command already playing (started ${-readyCommandOffset}ms ago)`);
             customDuration = 1;
           }
         } else if (eventState === 'fire' && stepId === 'fire_start') {
-          const fireCommandOffset = await CustomAudio.getOffset(programId, 'fire_command');
+          const fireCommandOffset = await getOffset('fire_command');
           if (fireCommandOffset >= 0) {
-            customDuration = await CustomAudio.playIfEnabled(programId, 'fire_command');
+            customDuration = await playIfEnabled('fire_command');
             logger.log(`✅ Custom audio for fire_command: duration=${customDuration}ms`);
           } else {
             logger.log(`✅ Audio for fire_command already playing (started ${-fireCommandOffset}ms ago)`);
@@ -578,10 +676,10 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       }
 
       if (event.command === 'continuous_beep') {
-        const ceaseCommandOffset = await CustomAudio.getOffset(programId, 'cease_command');
+        const ceaseCommandOffset = await getOffset('cease_command');
         let customDuration = 0;
         if (ceaseCommandOffset >= 0) {
-          customDuration = await CustomAudio.playIfEnabled(programId, 'cease_command');
+          customDuration = await playIfEnabled('cease_command');
           logger.log(`Custom audio for cease_command: duration=${customDuration}ms`);
         } else {
           logger.log(`✅ Audio for cease_command already playing (started ${-ceaseCommandOffset}ms ago)`);
@@ -595,7 +693,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
 
       if (event.command === 'shooters_ready') {
         helpers.setCurrentCommand(t('field.commands.shooters_ready'));
-        const duration = await CustomAudio.playIfEnabled(programId, 'shooters_ready');
+        const duration = await playIfEnabled('shooters_ready');
         logger.log(`Custom audio playing for shooters_ready: duration=${duration}ms`);
         if (duration === 0) {
           const translatedCommand = t('field.commands.shooters_ready');
