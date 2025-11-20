@@ -159,6 +159,11 @@ class UserRecordingService {
     }
 
     try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== 'granted') {
+        throw new Error('Missing audio recording permissions.');
+      }
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,

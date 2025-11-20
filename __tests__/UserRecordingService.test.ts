@@ -48,8 +48,18 @@ jest.mock('../src/services/AudioService', () => ({
 jest.mock('expo-av', () => ({
   Audio: {
     setAudioModeAsync: jest.fn(),
+    requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
     Recording: {
-      createAsync: jest.fn(),
+      createAsync: jest.fn(() => Promise.resolve({
+        recording: {
+          stopAndUnloadAsync: jest.fn(),
+          getURI: jest.fn(() => 'file:///recorded.m4a'),
+          getStatusAsync: jest.fn(() => Promise.resolve({ durationMillis: 1000 })),
+        }
+      })),
+    },
+    RecordingOptionsPresets: {
+      HIGH_QUALITY: {},
     },
   },
 }));
@@ -112,6 +122,28 @@ describe('UserRecordingService', () => {
       
       const retrieved = await UserRecordingService.getMetadata('test-cat', 'test-id', 'no');
       expect(retrieved).toBeNull();
+    });
+  });
+
+  describe('startRecording', () => {
+    it('requests permissions and starts recording', async () => {
+      const { Audio } = require('expo-av');
+      
+      await UserRecordingService.startRecording();
+      
+      expect(Audio.requestPermissionsAsync).toHaveBeenCalled();
+      expect(Audio.setAudioModeAsync).toHaveBeenCalledWith({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      expect(Audio.Recording.createAsync).toHaveBeenCalled();
+    });
+
+    it('throws error if permission denied', async () => {
+      const { Audio } = require('expo-av');
+      Audio.requestPermissionsAsync.mockResolvedValueOnce({ status: 'denied' });
+      
+      await expect(UserRecordingService.startRecording()).rejects.toThrow('Missing audio recording permissions');
     });
   });
 });

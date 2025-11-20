@@ -24,7 +24,9 @@
         "backgroundColor": "#2C3E50"
       },
       "package": "com.skyteklokke.app",
-      "permissions": []
+      "permissions": [
+        "RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
