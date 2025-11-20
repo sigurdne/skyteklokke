@@ -6,7 +6,7 @@ import ProgramManager from '../../../services/ProgramManager';
 import AudioService from '../../../services/AudioService';
 import logger from '../../../utils/logger';
 import { playUri, type PlayHandle } from '../../../utils/audioHelpers';
-import { AudioClipMeta, loadClipMeta } from '../../../services/AudioClipService';
+import UserRecordingService, { RecordingMetadata } from '../../../services/UserRecordingService';
 import { PPCProgram, PPCProgramSettings } from '../../../programs/ppc/PPCProgram';
 import { PPCStage } from '../../../programs/ppc/stages';
 import { colors, spacing, typography } from '../../../theme';
@@ -220,7 +220,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
 
     const stageClipKeys = useMemo(() => resolveStageClipKeys(stage), [stage]);
 
-  const clipCacheRef = useRef<Record<string, AudioClipMeta | null>>({});
+    const clipCacheRef = useRef<Record<string, RecordingMetadata | null>>({});
   const soundRef = useRef<PlayHandle | null>(null);
     const manualGateCompletedRef = useRef<boolean>(false);
 
@@ -273,7 +273,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
       };
     }, [stopPlayback]);
 
-    const getClipMeta = useCallback(async (clipKey: string | null): Promise<AudioClipMeta | null> => {
+    const getClipMeta = useCallback(async (clipKey: string | null): Promise<RecordingMetadata | null> => {
       if (!clipKey) {
         return null;
       }
@@ -284,7 +284,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
         return clipCacheRef.current[cacheKey];
       }
 
-      const meta = await loadClipMeta(clipKey, language);
+      const meta = await UserRecordingService.getMetadata('ppc-clip', clipKey, language);
       clipCacheRef.current[cacheKey] = meta;
       return meta;
     }, [language]);
@@ -335,7 +335,7 @@ export const ppcTimerAdapter: TimerProgramAdapter = {
   }, [getClipMeta, language, stageClipKeys.briefing, stageClipKeys.title]);
 
     const playRecordedClip = useCallback(
-      async (clipKey: string | null, preloadedMeta?: AudioClipMeta | null) => {
+      async (clipKey: string | null, preloadedMeta?: RecordingMetadata | null) => {
         logger.info(`playRecordedClip: clipKey=${clipKey}, audioEnabled=${audioEnabled}`);
         
         if (!clipKey) {

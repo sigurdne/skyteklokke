@@ -5,19 +5,13 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { Audio } from 'expo-av';
 import { playUri, type PlayHandle } from '../utils/audioHelpers';
 
 import { Header } from '../components/Header';
 import ProgramManager from '../services/ProgramManager';
 import AudioService from '../services/AudioService';
 import logger from '../utils/logger';
-import {
-  AudioClipMeta,
-  deleteClip,
-  loadClipMeta,
-  moveRecordingToLibrary,
-} from '../services/AudioClipService';
+import UserRecordingService, { RecordingMetadata } from '../services/UserRecordingService';
 import { colors, spacing, typography } from '../theme';
 import { RootStackParamList } from '../navigation/types';
 import { PPCProgram, PPCProgramSettings } from '../programs/ppc/PPCProgram';
@@ -289,15 +283,15 @@ interface AudioControlRowProps {
   clipKey: string;
   visible: boolean;
   t: TFunction;
-  onClipChange?: (clip: AudioClipMeta | null) => void;
+  onClipChange?: (clip: RecordingMetadata | null) => void;
   previewText?: string;
   language: Language;
 }
 
 const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, onClose, onStartStage, t, language }) => {
   const [recordingsExpanded, setRecordingsExpanded] = useState(false);
-  const [titleClip, setTitleClip] = useState<AudioClipMeta | null>(null);
-  const [briefingClip, setBriefingClip] = useState<AudioClipMeta | null>(null);
+  const [titleClip, setTitleClip] = useState<RecordingMetadata | null>(null);
+  const [briefingClip, setBriefingClip] = useState<RecordingMetadata | null>(null);
   const [playingKey, setPlayingKey] = useState<'title' | 'briefing' | null>(null);
   const stageSoundRef = useRef<PlayHandle | null>(null);
 
@@ -337,8 +331,8 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
     (async () => {
       try {
         const [titleMeta, briefingMeta] = await Promise.all([
-          loadClipMeta(titleClipKey, language),
-          loadClipMeta(briefingClipKey, language),
+          UserRecordingService.getMetadata('ppc-clip', titleClipKey, language),
+          UserRecordingService.getMetadata('ppc-clip', briefingClipKey, language),
         ]);
 
         if (!cancelled) {
@@ -360,7 +354,7 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
   const disciplineId = detail?.disciplineId ?? null;
 
   const playStageClip = useCallback(
-    async (clip: AudioClipMeta | null, key: 'title' | 'briefing') => {
+    async (clip: RecordingMetadata | null, key: 'title' | 'briefing') => {
       if (!clip?.uri) {
         return;
       }
@@ -556,15 +550,14 @@ const StageDetailModal: React.FC<StageDetailModalProps> = ({ visible, detail, on
 };
 
 const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visible, t, onClipChange, previewText, language }) => {
-  const [clip, setClip] = useState<AudioClipMeta | null>(null);
-  const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
+  const [clip, setClip] = useState<RecordingMetadata | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const soundRef = useRef<PlayHandle | null>(null);
   const hasClip = Boolean(clip?.uri);
 
   const refreshClip = useCallback(async () => {
-    const stored = await loadClipMeta(clipKey, language);
+    const stored = await UserRecordingService.getMetadata('ppc-clip', clipKey, language);
     setClip(stored);
   }, [clipKey, language]);
 
@@ -580,15 +573,15 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
 
   useEffect(() => {
     return () => {
-      if (isRecording && recordingInstance) {
-        recordingInstance.stopAndUnloadAsync().catch(() => undefined);
+      if (isRecording) {
+        UserRecordingService.cancelRecording().catch(() => undefined);
       }
       if (soundRef.current) {
         soundRef.current.stop().catch(() => undefined);
         soundRef.current = null;
       }
     };
-  }, [isRecording, recordingInstance]);
+  }, [isRecording]);
 
   const handlePlay = useCallback(async () => {
     if (isRecording) {
@@ -607,6 +600,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
           await soundRef.current.stop().catch(() => undefined);
           soundRef.current = null;
         }
+        
         const handle = await playUri({
           uri: clip.uri,
           onFinish: () => {
@@ -630,58 +624,36 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
   }, [clip, isRecording]);
 
   const stopRecording = useCallback(async () => {
-    if (!recordingInstance) {
-      return;
-    }
     try {
-      await recordingInstance.stopAndUnloadAsync();
-    } catch (error) {
-      logger.warn('Failed to stop recording', error);
-    }
-
-    try {
-      const status = await recordingInstance.getStatusAsync();
-      const durationMs = 'durationMillis' in status ? status.durationMillis : undefined;
-      const uri = recordingInstance.getURI();
-      if (uri) {
-        const meta = await moveRecordingToLibrary(clipKey, uri, durationMs ?? undefined, language);
-        setClip(meta);
-      }
+      const { uri, durationMs } = await UserRecordingService.stopRecording();
+      const savedPath = await UserRecordingService.saveRecordingFile(uri, 'ppc-clip', clipKey, language);
+      
+      const meta: RecordingMetadata = {
+        id: clipKey,
+        category: 'ppc-clip',
+        language,
+        uri: savedPath,
+        durationMs,
+        createdAt: Date.now(),
+        enabled: true
+      };
+      
+      await UserRecordingService.saveMetadata(meta);
+      setClip(meta);
     } catch (error) {
       logger.warn('Failed to persist recorded audio clip', error);
     } finally {
-      setRecordingInstance(null);
       setIsRecording(false);
-      try {
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
-      } catch (error) {
-        logger.warn('Failed to reset audio mode after recording', error);
-      }
     }
-  }, [clipKey, language, recordingInstance]);
+  }, [clipKey, language]);
 
   const startRecording = useCallback(async () => {
-    const permission = await Audio.requestPermissionsAsync();
-    if (!permission.granted) {
-      return;
-    }
-
     try {
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-      const recording = new Audio.Recording();
-      await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-      await recording.startAsync();
-      setRecordingInstance(recording);
+      await UserRecordingService.startRecording();
       setIsRecording(true);
     } catch (error) {
       logger.warn('Failed to start recording', error);
-      setRecordingInstance(null);
       setIsRecording(false);
-      try {
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: true });
-      } catch (resetError) {
-        logger.warn('Failed to reset audio mode after failed recording start', resetError);
-      }
     }
   }, []);
 
@@ -695,7 +667,7 @@ const AudioControlRow: React.FC<AudioControlRowProps> = ({ label, clipKey, visib
 
   const handleDelete = useCallback(async () => {
     try {
-      await deleteClip(clipKey, language);
+      await UserRecordingService.deleteRecording('ppc-clip', clipKey, language);
       setClip(null);
     } catch (error) {
       logger.warn('Failed to delete audio clip', error);
