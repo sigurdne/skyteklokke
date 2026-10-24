@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import AudioService from '../../../services/AudioService';
 import UserRecordingService, { RecordingMetadata } from '../../../services/UserRecordingService';
 import logger from '../../../utils/logger';
-import { loadSettings, saveNumber, saveBoolean } from '../../../utils/asyncStorageHelpers';
+import { loadSettings, saveNumber, saveBoolean, saveString } from '../../../utils/asyncStorageHelpers';
 import { TimerEvent, TimingStep } from '../../../types';
 import { colors, spacing } from '../../../theme';
 import { timerStyles } from '../timerStyles';
@@ -35,11 +35,13 @@ const initialPhaseStatuses: Record<PhaseKey, { enabled: boolean; hasFile: boolea
 
 const SOUND_MODE_KEY = 'soundMode';
 const SHOOTING_DURATION_KEY = 'shootingDuration';
+const CUSTOM_SHOOTING_DURATION_KEY = 'customShootingDuration';
 
 export const standardFieldTimerAdapter: TimerProgramAdapter = {
   id: 'standard-field',
   useBindings: ({ programId, t }) => {
     const [shootingDuration, setShootingDuration] = useState<number>(10);
+    const [customShootingDuration, setCustomShootingDuration] = useState('');
     const [soundMode, setSoundMode] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
     const [phaseStatuses, setPhaseStatuses] = useState(initialPhaseStatuses);
@@ -51,9 +53,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         const storedSettings = await loadSettings<{
           shootingDuration: number;
           soundMode: boolean;
+          customShootingDuration: string;
         }>([
           { key: SHOOTING_DURATION_KEY, type: 'number', stateKey: 'shootingDuration' },
           { key: SOUND_MODE_KEY, type: 'boolean', stateKey: 'soundMode' },
+          { key: CUSTOM_SHOOTING_DURATION_KEY, type: 'string', stateKey: 'customShootingDuration' },
         ]);
 
         if (storedSettings.shootingDuration !== undefined) {
@@ -63,6 +67,10 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         if (storedSettings.soundMode !== undefined) {
           setSoundMode(storedSettings.soundMode);
         }
+
+        if (storedSettings.customShootingDuration !== undefined) {
+          setCustomShootingDuration(storedSettings.customShootingDuration);
+        }
       })();
     }, []);
 
@@ -70,6 +78,23 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       setShootingDuration(duration);
       await saveNumber(SHOOTING_DURATION_KEY, duration);
     }, []);
+
+    const updateCustomShootingDuration = useCallback(async (value: string) => {
+      const digitsOnly = value.replace(/\D/g, '').slice(0, 3);
+      setCustomShootingDuration(digitsOnly);
+      await saveString(CUSTOM_SHOOTING_DURATION_KEY, digitsOnly);
+    }, []);
+
+    const clearCustomShootingDuration = useCallback(async () => {
+      setCustomShootingDuration('');
+      await saveString(CUSTOM_SHOOTING_DURATION_KEY, '');
+    }, []);
+
+    const customDurationNumber = Number(customShootingDuration);
+    const hasValidCustomDuration = customShootingDuration.length > 0
+      && customDurationNumber >= 3
+      && customDurationNumber <= 300;
+    const activeShootingDuration = hasValidCustomDuration ? customDurationNumber : shootingDuration;
 
     const updateSoundMode = useCallback(async (enabled: boolean) => {
       setSoundMode(enabled);
@@ -110,7 +135,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
 
     const settingsBindings: TimerProgramSettingsBindings = {
       showButton: true,
-      buttonLabel: `⚙️ ${shootingDuration}s`,
+      buttonLabel: `⚙️ ${activeShootingDuration}s`,
       open: async () => {
         setShowSettings(true);
         if (soundMode) {
@@ -157,6 +182,30 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
               <Picker.Item key={150} label="150 sekunder" value={150} />
             </Picker>
           </View>
+
+          <Text style={timerStyles.modalSubtitle}>Egendefinert skytetid (3–300 sekunder)</Text>
+          <View style={timerStyles.customDurationRow}>
+            <TextInput
+              accessibilityLabel="Egendefinert skytetid i hele sekunder"
+              keyboardType="number-pad"
+              maxLength={3}
+              onChangeText={updateCustomShootingDuration}
+              placeholder="Sekunder"
+              placeholderTextColor={colors.textSecondary}
+              style={timerStyles.customDurationInput}
+              value={customShootingDuration}
+            />
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={clearCustomShootingDuration}
+              style={timerStyles.clearCustomDurationButton}
+            >
+              <Text style={timerStyles.clearCustomDurationButtonText}>Nullstill</Text>
+            </TouchableOpacity>
+          </View>
+          {customShootingDuration.length > 0 && !hasValidCustomDuration && (
+            <Text style={timerStyles.customDurationError}>Velg et heltall mellom 3 og 300.</Text>
+          )}
 
           {soundMode && (
             <>
@@ -401,7 +450,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
 
     const beforeTimerStart: TimerProgramBindings['beforeTimerStart'] = async (program) => {
       program.updateSettings({
-        shootingDuration,
+        shootingDuration: activeShootingDuration,
         soundMode,
         competitionMode: !soundMode,
       });
