@@ -193,10 +193,12 @@ export const timerStyles = StyleSheet.create({
   picker: {
     width: '100%',
     height: Platform.OS === 'ios' ? 180 : 50,
+    color: colors.text,
   },
   pickerItem: {
     fontSize: 20,
     height: Platform.OS === 'ios' ? 180 : 50,
+    color: colors.text,
   },
   modalButtons: {
     flexDirection: 'row',

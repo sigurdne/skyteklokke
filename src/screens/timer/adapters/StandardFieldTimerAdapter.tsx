@@ -152,6 +152,8 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
               {Array.from({ length: 11 }, (_, i) => 4 + i * 2).map((duration) => (
                 <Picker.Item key={duration} label={`${duration} sekunder`} value={duration} />
               ))}
+              <Picker.Item key={60} label="60 sekunder" value={60} />
+              <Picker.Item key={120} label="120 sekunder" value={120} />
               <Picker.Item key={150} label="150 sekunder" value={150} />
             </Picker>
           </View>
