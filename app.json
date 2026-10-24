@@ -34,7 +34,17 @@
     "plugins": [
       [
         "expo-localization"
-      ]
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ],
+      "expo-build-properties"
     ],
     "extra": {
       "eas": {
