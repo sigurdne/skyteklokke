@@ -15,6 +15,7 @@ export class StandardFieldProgram extends BaseProgram {
       supportedLanguages: ['no', 'en', 'sv', 'da'],
       defaultSettings: {
         shootingDuration: 10,    // seconds to shoot (default 10)
+        startMode: 'pistol',
         warningTime: 2,          // seconds before end warning (yellow)
         prepareTime: 10,         // countdown from 10 to 0
         prepareWarning: 5,       // yellow warning at 5 seconds remaining
@@ -37,64 +38,76 @@ export class StandardFieldProgram extends BaseProgram {
   }
 
   getCommands(): string[] {
-    return ['start', 'go'];
+    return ['start', 'go', 'ready_in_10', 'shooters_ready', 'ready_command', 'fire_command'];
   }
 
   getTimingSequence(): TimingStep[] {
     const states = this.getStates();
-  const { prepareTime, prepareWarning, shootingDuration, warningTime, soundMode } = this.settings;
-  const audioEnabled = soundMode; // Audio only in sound mode
+    const { prepareTime, prepareWarning, shootingDuration, warningTime, soundMode } = this.settings;
+    const isRifleStart = this.settings.startMode === 'rifle';
+    const audioEnabled = soundMode;
 
     const steps: TimingStep[] = [];
 
-    // Add initial announcement in sound mode ("Er skytterne klare")
-    // This replaces the 3-second blank delay with a voice command
-    // Default delay is 3s for TTS, but will be dynamically adjusted in TimerScreen
-    // based on custom audio duration if available
-    if (soundMode) {
+    if (isRifleStart) {
+      steps.push({
+        id: 'rifle_ready_in_10',
+        delay: 1000,
+        state: states.PREPARE,
+        audioEnabled,
+        countdown: 10,
+      });
+      for (let i = 9; i >= 1; i--) {
+        steps.push({
+          id: `rifle_prepare_${i}`,
+          delay: 1000,
+          state: states.PREPARE,
+          countdown: i,
+          audioEnabled: false,
+        });
+      }
+    } else if (soundMode) {
       steps.push({
         id: 'shooters_ready',
-        delay: 3000, // Default 3s (adjusted dynamically if custom audio exists)
+        delay: 3000,
         state: states.PREPARE,
         command: 'shooters_ready',
         audioEnabled: true,
       });
     }
 
-        // Phase 1: Prepare countdown (white)
-    // No beep at start - countdown starts silently after "Er skytterne klare"
-    for (let i = prepareTime; i > prepareWarning; i--) {
-      steps.push({
-        id: `prepare_${i}`,
-        delay: i === prepareTime ? 0 : 1000, // First step shown immediately, then 1s between steps
-        state: states.PREPARE,
-        countdown: i,
-        command: undefined, // No beep - countdown starts silently
-        audioEnabled: false,
-      });
+    if (!isRifleStart) {
+      for (let i = prepareTime; i > prepareWarning; i--) {
+        steps.push({
+          id: `prepare_${i}`,
+          delay: i === prepareTime ? 0 : 1000,
+          state: states.PREPARE,
+          countdown: i,
+          audioEnabled: false,
+        });
+      }
     }
 
-    // Phase 2: Countdown from 5 to 1 (YELLOW background)
-    // First step (5) has beep for phase transition
     for (let i = prepareWarning; i >= 1; i--) {
+      const startCommand = i === prepareWarning
+        ? isRifleStart ? 'ready_command' : 'beep'
+        : undefined;
       steps.push({
         id: `prepare_warning_${i}`,
         delay: 1000,
         state: states.PREPARE_WARNING,
         countdown: i,
-  command: i === prepareWarning ? 'beep' : undefined,
-  audioEnabled: i === prepareWarning ? audioEnabled : false,
+        command: startCommand,
+        audioEnabled: i === prepareWarning ? audioEnabled : false,
       });
     }
 
-    // Phase 3: Shooting starts - show duration with beep sound (not "Ild!" voice)
-    // Start at shootingDuration, will count down each second
     steps.push({
       id: 'fire_start',
       delay: 1000,
       state: states.FIRE,
       countdown: shootingDuration,
-      command: 'beep',
+      command: isRifleStart ? 'fire_command' : 'beep',
       audioEnabled,
     });
 
@@ -140,7 +153,7 @@ export class StandardFieldProgram extends BaseProgram {
   }
 
   validateSettings(settings: ProgramSettings): boolean {
-  const { shootingDuration, warningTime, prepareTime, prepareWarning, competitionMode, soundMode } = settings;
+  const { shootingDuration, warningTime, prepareTime, prepareWarning, competitionMode, soundMode, startMode } = settings;
 
     // Validate that all required settings exist and are positive numbers
     if (
@@ -159,6 +172,10 @@ export class StandardFieldProgram extends BaseProgram {
 
     // Validate soundMode is boolean if provided
     if (soundMode !== undefined && typeof soundMode !== 'boolean') {
+      return false;
+    }
+
+    if (startMode !== undefined && startMode !== 'pistol' && startMode !== 'rifle') {
       return false;
     }
 

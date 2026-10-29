@@ -59,6 +59,8 @@ export interface TimerEventHelpers {
 export interface TimerProgramSettingsBindings {
   showButton: boolean;
   buttonLabel?: string;
+  idleLabel?: string;
+  idlePrompt?: string;
   open: () => Promise<void> | void;
   close: () => void;
   isVisible: boolean;
@@ -529,10 +531,10 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
   // Get the idle text based on program type
   const getIdleText = useCallback(() => {
     if (programId === 'standard-field') {
-      return t('field.idle');
+      return adapterBindings.settings?.idlePrompt || t('field.idle');
     }
     return ''; // Empty fallback for other programs
-  }, [programId, t]);
+  }, [adapterBindings.settings?.idlePrompt, programId, t]);
 
   const displayContext: TimerDisplayContext = {
     currentState,
@@ -630,6 +632,11 @@ export const BaseTimerScreen: React.FC<BaseTimerScreenProps> = ({ navigation, ro
           </TouchableOpacity>
         ) : currentState === 'idle' ? (
           <View style={timerStyles.idleContainer}>
+            {settingsBindings?.idleLabel && (
+              <Text style={timerStyles.idleModeLabel}>
+                {settingsBindings.idleLabel}
+              </Text>
+            )}
             {!customStartControls && (
               <Text
                 accessible

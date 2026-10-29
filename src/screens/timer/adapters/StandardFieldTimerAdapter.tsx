@@ -17,6 +17,8 @@ type PhaseKey =
   | 'fire_command'
   | 'cease_command';
 
+type FieldStartMode = 'pistol' | 'rifle';
+
 const PHASE_LABELS: Record<PhaseKey, string> = {
   shooters_ready: 'Er skytterne klare',
   ready_command: 'KLAR!',
@@ -36,12 +38,14 @@ const initialPhaseStatuses: Record<PhaseKey, { enabled: boolean; hasFile: boolea
 const SOUND_MODE_KEY = 'soundMode';
 const SHOOTING_DURATION_KEY = 'shootingDuration';
 const CUSTOM_SHOOTING_DURATION_KEY = 'customShootingDuration';
+const START_MODE_KEY = 'fieldStartMode';
 
 export const standardFieldTimerAdapter: TimerProgramAdapter = {
   id: 'standard-field',
   useBindings: ({ programId, t }) => {
     const [shootingDuration, setShootingDuration] = useState<number>(10);
     const [customShootingDuration, setCustomShootingDuration] = useState('');
+    const [startMode, setStartMode] = useState<FieldStartMode>('pistol');
     const [soundMode, setSoundMode] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
     const [phaseStatuses, setPhaseStatuses] = useState(initialPhaseStatuses);
@@ -54,10 +58,12 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
           shootingDuration: number;
           soundMode: boolean;
           customShootingDuration: string;
+          startMode: string;
         }>([
           { key: SHOOTING_DURATION_KEY, type: 'number', stateKey: 'shootingDuration' },
           { key: SOUND_MODE_KEY, type: 'boolean', stateKey: 'soundMode' },
           { key: CUSTOM_SHOOTING_DURATION_KEY, type: 'string', stateKey: 'customShootingDuration' },
+          { key: START_MODE_KEY, type: 'string', stateKey: 'startMode' },
         ]);
 
         if (storedSettings.shootingDuration !== undefined) {
@@ -71,6 +77,10 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
         if (storedSettings.customShootingDuration !== undefined) {
           setCustomShootingDuration(storedSettings.customShootingDuration);
         }
+
+        if (storedSettings.startMode === 'pistol' || storedSettings.startMode === 'rifle') {
+          setStartMode(storedSettings.startMode);
+        }
       })();
     }, []);
 
@@ -83,6 +93,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       const digitsOnly = value.replace(/\D/g, '').slice(0, 3);
       setCustomShootingDuration(digitsOnly);
       await saveString(CUSTOM_SHOOTING_DURATION_KEY, digitsOnly);
+    }, []);
+
+    const updateStartMode = useCallback(async (mode: FieldStartMode) => {
+      setStartMode(mode);
+      await saveString(START_MODE_KEY, mode);
     }, []);
 
     const clearCustomShootingDuration = useCallback(async () => {
@@ -136,6 +151,8 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
     const settingsBindings: TimerProgramSettingsBindings = {
       showButton: true,
       buttonLabel: `⚙️ ${activeShootingDuration}s`,
+      idleLabel: `${t('field.start_type')}: ${t(`field.start_modes.${startMode}`)}`,
+      idlePrompt: t(startMode === 'rifle' ? 'field.commands.ready_in_10' : 'field.idle'),
       open: async () => {
         setShowSettings(true);
         if (soundMode) {
@@ -153,6 +170,26 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       isVisible: showSettings,
       renderContent: () => (
         <>
+          <Text style={timerStyles.modalSubtitle}>{t('field.start_type')}</Text>
+          <View style={timerStyles.startModeSelector}>
+            {(['pistol', 'rifle'] as const).map((mode) => {
+              const isSelected = startMode === mode;
+              return (
+                <TouchableOpacity
+                  key={mode}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: isSelected }}
+                  onPress={() => updateStartMode(mode)}
+                  style={[timerStyles.startModeOption, isSelected && timerStyles.startModeOptionSelected]}
+                >
+                  <Text style={[timerStyles.startModeOptionText, isSelected && timerStyles.startModeOptionTextSelected]}>
+                    {t(`field.start_modes.${mode}`)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
           <View style={timerStyles.settingRow}>
             <Text style={timerStyles.settingLabel}>lydmodus</Text>
             <TouchableOpacity
@@ -451,6 +488,7 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
     const beforeTimerStart: TimerProgramBindings['beforeTimerStart'] = async (program) => {
       program.updateSettings({
         shootingDuration: activeShootingDuration,
+        startMode,
         soundMode,
         competitionMode: !soundMode,
       });
@@ -601,7 +639,9 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
       if (event.type === 'state_change') {
         // Handle command display based on event.command (like main branch does)
         const isPrePlayCommand = event.command?.startsWith('preplay_');
-        if (event.command && event.command !== 'beep' && event.command !== 'continuous_beep' && !isPrePlayCommand) {
+        if (event.stepId === 'fire_start') {
+          helpers.setCurrentCommand(t('field.commands.fire_command'));
+        } else if (event.command && event.command !== 'beep' && event.command !== 'continuous_beep' && !isPrePlayCommand) {
           let translatedCommand = '';
           try {
             translatedCommand = t(`field.commands.${event.command}`);
@@ -637,11 +677,11 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
           helpers.setCurrentCommand('');
         }
         // FIRE phase start (green, at shootingDuration): show "ILD!"
-        else if (state === 'fire' && newCountdown === shootingDuration) {
+        else if (state === 'fire' && newCountdown === activeShootingDuration) {
           helpers.setCurrentCommand(t('field.commands.fire_command'));
         }
         // FIRE phase (green, countdown < shootingDuration): no text
-        else if (state === 'fire' && newCountdown < shootingDuration && newCountdown > 2) {
+        else if (state === 'fire' && newCountdown < activeShootingDuration && newCountdown > 2) {
           helpers.setCurrentCommand('');
         }
         // FIRE_WARNING phase (yellow): show "STAANS"
@@ -674,6 +714,18 @@ export const standardFieldTimerAdapter: TimerProgramAdapter = {
          const meta = await UserRecordingService.getMetadata(RECORDING_CATEGORY, id);
          return meta?.offsetMs ?? 0;
       };
+
+      if (startMode === 'rifle' && (event.command === 'ready_command' || event.command === 'fire_command')) {
+        const phase = event.command;
+        const offset = await getOffset(phase);
+        if (offset >= 0) {
+          const duration = await playIfEnabled(phase);
+          if (duration === 0) {
+            AudioService.speak(t(`field.commands.${phase}`)).catch((error) => logger.error('AudioService.speak failed', error));
+          }
+        }
+        return true;
+      }
 
       if (event.command === 'preplay_ready_command') {
         logger.log('🎵 PRE-PLAY ready_command - starting audio early');

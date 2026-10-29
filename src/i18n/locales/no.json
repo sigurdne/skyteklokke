@@ -16,9 +16,15 @@
     "start_program": "Start program"
   },
   "field": {
-    "idle": "Er skytterene klare?",
+    "idle": "Er skytterne klare?",
+    "start_type": "Starttype",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Rifle"
+    },
     "commands": {
       "shooters_ready": "Er skytterne klare",
+      "ready_in_10": "Klar om 10 sekunder frå no",
       "ready_command": "KLAR!",
       "fire_command": "ILD!",
       "cease_command": "STAANS"

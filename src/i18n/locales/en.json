@@ -17,8 +17,14 @@
   },
   "field": {
     "idle": "Are the shooters ready?",
+    "start_type": "Start type",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Rifle"
+    },
     "commands": {
       "shooters_ready": "Shooters ready",
+      "ready_in_10": "Ready in 10 seconds from now",
       "ready_command": "READY!",
       "fire_command": "FIRE!",
       "cease_command": "CEASE FIRE"

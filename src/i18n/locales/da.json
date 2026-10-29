@@ -17,8 +17,14 @@
   },
   "field": {
     "idle": "Er skytterne klar?",
+    "start_type": "Starttype",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Riffel"
+    },
     "commands": {
       "shooters_ready": "Skytter klar",
+      "ready_in_10": "Klar om 10 sekunder fra nu",
       "ready_command": "KLAR!",
       "fire_command": "FYRING!",
       "cease_command": "STOP FYRING"

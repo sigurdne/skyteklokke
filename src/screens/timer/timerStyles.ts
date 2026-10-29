@@ -29,6 +29,17 @@ export const timerStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  idleModeLabel: {
+    position: 'absolute',
+    top: spacing.xl,
+    left: 0,
+    right: 0,
+    ...typography.caption,
+    color: colors.textSecondary,
+    fontWeight: '600',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
   button: {
     backgroundColor: colors.success,
     paddingVertical: spacing.md,
@@ -156,6 +167,32 @@ export const timerStyles = StyleSheet.create({
     color: colors.secondary,
     marginBottom: spacing.lg,
     fontSize: 14,
+  },
+  startModeSelector: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  startModeOption: {
+    flex: 1,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
+  },
+  startModeOptionSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
+  },
+  startModeOptionText: {
+    ...typography.button,
+    color: colors.text,
+  },
+  startModeOptionTextSelected: {
+    color: colors.background,
   },
   toggle: {
     width: 60,

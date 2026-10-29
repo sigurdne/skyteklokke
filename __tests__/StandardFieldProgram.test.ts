@@ -13,6 +13,7 @@ describe('StandardFieldProgram', () => {
     expect(settings.shootingDuration).toBe(10);
     expect(settings.prepareTime).toBe(10);
     expect(settings.soundMode).toBe(false);
+    expect(settings.startMode).toBe('pistol');
   });
 
   it('generates correct timing sequence for default settings (visual mode)', () => {
@@ -43,6 +44,33 @@ describe('StandardFieldProgram', () => {
     expect(shootersReady).toBeDefined();
     expect(shootersReady?.command).toBe('shooters_ready');
     expect(shootersReady?.audioEnabled).toBe(true);
+  });
+
+  it('starts rifle sequence with commands at 0, 10, and 15 seconds', () => {
+    program.updateSettings({ startMode: 'rifle', soundMode: true });
+    const sequence = program.getTimingSequence();
+
+    expect(sequence[0]).toMatchObject({
+      id: 'rifle_ready_in_10',
+      delay: 1000,
+      audioEnabled: true,
+      countdown: 10,
+    });
+    expect(sequence[0]).not.toHaveProperty('command');
+
+    expect(sequence.filter(step => step.id.startsWith('rifle_prepare_')).map(step => step.countdown))
+      .toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1]);
+
+    const readyIndex = sequence.findIndex(step => step.id === 'prepare_warning_5');
+    expect(sequence[readyIndex]).toMatchObject({
+      countdown: 5,
+      command: 'ready_command',
+    });
+
+    const fireIndex = sequence.findIndex(step => step.id === 'fire_start');
+    const fireAtMs = sequence.slice(0, fireIndex).reduce((total, step) => total + step.delay, 0);
+    expect(fireAtMs).toBe(15000);
+    expect(sequence[fireIndex]?.command).toBe('fire_command');
   });
 
   it('validates settings correctly', () => {

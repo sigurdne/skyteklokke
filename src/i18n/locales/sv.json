@@ -17,8 +17,14 @@
   },
   "field": {
     "idle": "Är skyttarna klara?",
+    "start_type": "Starttyp",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Gevär"
+    },
     "commands": {
       "shooters_ready": "Är skyttarna klara?",
+      "ready_in_10": "Klar om 10 sekunder från nu",
       "ready_command": "KLARA!",
       "fire_command": "ELD!",
       "cease_command": "ELD UPPHÖR!"
