@@ -1,5 +1,5 @@
 import * as Speech from 'expo-speech';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '../utils/logger';
 import { Language } from '../types';
@@ -255,25 +255,23 @@ export class AudioService {
         // Play multiple beeps with gaps for continuous mode
         logger.log('🔊 Playing continuous horn beeps');
         for (let i = 0; i < 5; i++) {
-          const { sound } = await Audio.Sound.createAsync(
-            { uri: hornSound },
-            { shouldPlay: true, volume: this.volume }
-          );
+          const player = createAudioPlayer(hornSound);
+          player.volume = this.volume;
+          player.play();
           await new Promise(resolve => setTimeout(resolve, 400)); // 300ms beep + 100ms gap
-          await sound.unloadAsync();
+          player.remove();
         }
       } else {
         // Single beep
         logger.log('🔊 Playing single horn beep');
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: hornSound },
-          { shouldPlay: true, volume: this.volume }
-        );
+        const player = createAudioPlayer(hornSound);
+        player.volume = this.volume;
+        player.play();
         
         // Auto-cleanup after playing
         setTimeout(async () => {
           try {
-            await sound.unloadAsync();
+            player.remove();
           } catch (err) {
             // Ignore cleanup errors
           }

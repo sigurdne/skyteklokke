@@ -1,4 +1,10 @@
-import { Audio } from 'expo-av';
+import {
+  AudioModule,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  type AudioRecorder,
+} from 'expo-audio';
 import { Directory, File, Paths } from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AudioService from './AudioService';
@@ -56,7 +62,7 @@ async function ensureDirectory(path: string): Promise<void> {
 
 // Service Class
 class UserRecordingService {
-  private currentRecording: Audio.Recording | null = null;
+  private currentRecording: AudioRecorder | null = null;
   private playbackPlayers: Map<string, PlayHandle> = new Map();
 
   // --- Metadata & Storage ---
@@ -159,19 +165,22 @@ class UserRecordingService {
     }
 
     try {
-      const permission = await Audio.requestPermissionsAsync();
-      if (permission.status !== 'granted') {
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
         throw new Error('Missing audio recording permissions.');
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const recording = new AudioModule.AudioRecorder({
+        ...RecordingPresets.HIGH_QUALITY,
+        directory: 'cache',
+      });
+      await recording.prepareToRecordAsync();
+      recording.record();
       this.currentRecording = recording;
     } catch (error) {
       logger.error('Failed to start recording', error);
@@ -185,21 +194,22 @@ class UserRecordingService {
     }
 
     try {
-      await this.currentRecording.stopAndUnloadAsync();
-      const uri = this.currentRecording.getURI();
-      const status = await this.currentRecording.getStatusAsync();
-      const durationMs = status.durationMillis;
+      const recording = this.currentRecording;
+      await recording.stop();
+      const uri = recording.uri;
+      const durationMs = recording.getStatus().durationMillis;
 
       this.currentRecording = null;
+      recording.release();
 
       if (!uri) {
         throw new Error('Recording produced no URI');
       }
 
       // Reset audio mode
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
       });
 
       return { uri, durationMs };
@@ -211,12 +221,26 @@ class UserRecordingService {
 
   async cancelRecording(): Promise<void> {
     if (this.currentRecording) {
+      const recording = this.currentRecording;
+      this.currentRecording = null;
       try {
-        await this.currentRecording.stopAndUnloadAsync();
+        await recording.stop();
       } catch (e) {
         // Ignore
       }
-      this.currentRecording = null;
+      const uri = recording.uri;
+      recording.release();
+      if (uri) {
+        try {
+          const file = new File(uri);
+          if (file.exists) {
+            await file.delete();
+          }
+        } catch (error) {
+          logger.warn('Failed to delete cancelled recording', error);
+        }
+      }
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
     }
   }
 

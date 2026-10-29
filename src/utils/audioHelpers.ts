@@ -1,8 +1,8 @@
-import { Audio } from 'expo-av';
+import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
 import logger from './logger';
 
 /**
- * Lightweight reusable helpers for one-off sound playback with expo-av.
+ * Lightweight reusable helpers for one-off sound playback with expo-audio.
  * Centralizes creation + status observer + auto-unload to reduce duplication across screens.
  */
 export interface PlayOptions {
@@ -18,7 +18,7 @@ export interface PlayOptions {
 
 export interface PlayHandle {
   stop: () => Promise<void>;
-  sound: Audio.Sound;
+  player: AudioPlayer;
 }
 
 /**
@@ -30,35 +30,43 @@ export async function playUri(options: PlayOptions): Promise<PlayHandle | null> 
   if (!uri) {
     return null;
   }
+  let player: AudioPlayer | null = null;
+  let subscription: { remove: () => void } | null = null;
+  let finished = false;
+
+  const finish = (error?: unknown) => {
+    if (finished) return;
+    finished = true;
+    subscription?.remove();
+    player?.remove();
+    if (error !== undefined) {
+      onError?.(error);
+    } else {
+      onFinish?.();
+    }
+  };
+
   try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri },
-      { shouldPlay: true, volume }
-    );
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (!status.isLoaded) return;
-      if (status.didJustFinish || (!status.isPlaying && status.positionMillis > 0)) {
-        sound.unloadAsync().catch(() => undefined);
-        onFinish?.();
+    player = createAudioPlayer({ uri }, { updateInterval: 100 });
+    player.volume = volume;
+    subscription = player.addListener('playbackStatusUpdate', (status) => {
+      if (status.error) {
+        finish(status.error);
+      } else if (status.didJustFinish) {
+        finish();
       }
     });
+    player.play();
     return {
-      sound,
+      player,
       stop: async () => {
-        try {
-          await sound.stopAsync();
-        } catch (e) {
-          logger.warn('playUri.stop: stopAsync failed', e);
-        }
-        try {
-          await sound.unloadAsync();
-        } catch (e) {
-          logger.warn('playUri.stop: unloadAsync failed', e);
-        }
-        onFinish?.();
-      }
+        if (finished) return;
+        player?.pause();
+        finish();
+      },
     };
   } catch (error) {
+    player?.remove();
     logger.warn('playUri: failed to start playback', error);
     onError?.(error);
     return null;
