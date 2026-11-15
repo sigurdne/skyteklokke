@@ -11,30 +11,24 @@
     "field_description": "Standard tävling med valbar skjutning och 10s kommandotid",
     "duel_title": "Duellskytte",
     "duel_description": "Torrträning simulator med ljus",
+    "ppc_title": "PPC: Precision Pistol Competition",
+    "ppc_description": "WA1500-discipliner med styrda moment",
     "start_program": "Starta program"
   },
-  "commands": {
-    "ready_check": "Är skyttarna klara",
-    "ready_question": "Är skyttarna klara?",
-    "shooters_ready": "Är skyttarna klara",
-    "ready_command": "KLAR!",
-    "fire_command": "ELD!",
-    "cease_command": "ELDUPPHÖR",
-    "prepare": "Ladda",
-    "fire": "Eld",
-    "cease_fire": "Stopp",
-    "start": "Start"
-  },
-  "states": {
+  "field": {
     "idle": "Är skyttarna klara?",
-    "ready_check": "Förbereder skyttar",
-    "prepare": "Förbered",
-    "fire": "Aktiv skytte",
-    "cease_fire": "Skytte avslutat",
-    "finished": "Färdig",
-    "countdown": "Nedräkning",
-    "red_light": "Rött ljus",
-    "green_light": "Grönt ljus"
+    "start_type": "Starttyp",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Gevär"
+    },
+    "commands": {
+      "shooters_ready": "Är skyttarna klara?",
+      "ready_in_10": "Klar om 10 sekunder från nu",
+      "ready_command": "KLARA!",
+      "fire_command": "ELD!",
+      "cease_command": "ELD UPPHÖR!"
+    }
   },
   "controls": {
     "start": "Start",
@@ -65,5 +59,235 @@
     "feature_multilang": "Flerspråkigt stöd - Norska, engelska, svenska och danska",
     "developer": "Utvecklare",
     "license": "Licens"
+  },
+  "ppc": {
+    "commands": {
+      "lade_hylstre": "Ladda, mata ut hylsor",
+      "er_linja_klar": "Är linjen klar?",
+      "linja_er_klar": "Linjen är klar"
+    },
+    "home": {
+      "subtitle": "WA1500-discipliner och momentbeskrivningar",
+      "program_missing": "PPC-programmet är inte tillgängligt just nu.",
+      "select_discipline": "Välj en disciplin",
+      "select_stage": "Välj ett moment",
+      "back_to_disciplines": "Tillbaka till discipliner",
+      "stage_count": "{{count}} moment",
+      "stage_count_one": "{{count}} moment",
+      "stage_count_other": "{{count}} moment",
+      "tap_to_start": "Tryck för att starta timern"
+    },
+    "labels": {
+      "shots": "{{count}} skott",
+      "shots_one": "{{count}} skott",
+      "shots_other": "{{count}} skott",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yard",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Stående",
+      "standing_one_hand": "Stående (en hand)",
+      "kneeling": "Knästående",
+      "sitting": "Sittande",
+      "prone": "Liggande",
+      "barricade_left": "Barrikad vänster",
+      "barricade_right": "Barrikad höger"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Momenttitel",
+      "stage_briefing_label": "Briefingtext",
+      "section_commands": "Kommandon",
+      "command_prepare_label": "Kommando: \"Ladda, hölstra\"",
+      "command_line_ready_query_label": "Kommando: \"Är linjen klar?\"",
+      "command_line_ready_label": "Kommando: \"Linjen är klar\"",
+      "distance_label": "Avstånd",
+      "time_label": "Tidsgräns",
+      "positions_label": "Skjutställningar",
+      "start_stage": "Starta moment",
+      "close": "Stäng",
+      "play_recorded": "Spela upp inspelning",
+      "play_default": "Spela standard",
+      "record": "Spela in",
+      "stop": "Stoppa",
+      "delete": "Ta bort",
+      "recorded_on": "Inspelad {{date}}",
+  "recording": "Spelar in...",
+  "section_recordings": "Inspelningar",
+  "no_recording": "Ingen inspelning sparad ännu"
+    },
+    "timer": {
+      "manual_prompt": "Tryck på kommandona i ordning för att starta",
+      "manual_reset": "Börja om"
+    },
+    "stage": {
+      "title": {
+        "wa1500_stage_7y_standing_20s": "7 yards - Stående - 20s",
+        "wa1500_stage_15y_standing_20s": "15 yards - Stående - 20s",
+        "wa1500_stage_25y_barricade_90s": "25 yards - Barrikad - 90s",
+        "wa1500_stage_50y_full_165s": "50 yards - Full serie - 165s",
+        "wa1500_stage_25y_double_standing_35s": "25 yards - Dubbel stående - 35s",
+        "wa1500_stage_50y_sit_prone_165s": "50 yards - Sittande/Liggande - 165s",
+        "wa1500_stage_25y_fast_12s": "25 yards - Snabb - 12s",
+        "ppc48_stage_3y_onehand_8s": "3 yards - En hand - 8s",
+        "ppc48_stage_7y_standing_20s": "7 yards - Stående - 20s",
+        "ppc48_stage_15y_standing_20s": "15 yards - Stående - 20s",
+        "ppc48_stage_25y_barricade_90s": "25 yards - Barrikad - 90s"
+      },
+      "briefing": {
+        "wa1500_stage_7y_standing_20s": "6 skott stående, upprepa 2 gånger. Totalt 12 skott på 20 sekunder.",
+        "wa1500_stage_15y_standing_20s": "6 skott stående, upprepa 2 gånger. Totalt 12 skott på 20 sekunder.",
+        "wa1500_stage_25y_barricade_90s": "6 skott knästående, 6 skott barrikad vänster, 6 skott barrikad höger. Totalt 18 skott på 90 sekunder.",
+        "wa1500_stage_50y_full_165s": "6 skott sittande, 6 skott liggande, 6 skott barrikad vänster, 6 skott barrikad höger. Totalt 24 skott på 165 sekunder.",
+        "wa1500_stage_25y_double_standing_35s": "6 skott stående, upprepa 2 gånger. Totalt 12 skott på 35 sekunder.",
+        "wa1500_stage_50y_sit_prone_165s": "6 skott sittande, upprepa 2 gånger. 6 skott liggande, upprepa 2 gånger. Totalt 24 skott på 165 sekunder.",
+        "wa1500_stage_25y_fast_12s": "6 skott stående på 12 sekunder.",
+        "ppc48_stage_3y_onehand_8s": "6 skott stående med en hand på 8 sekunder.",
+        "ppc48_stage_7y_standing_20s": "12 skott stående på 20 sekunder.",
+        "ppc48_stage_15y_standing_20s": "12 skott stående på 20 sekunder.",
+        "ppc48_stage_25y_barricade_90s": "6 skott knästående, 6 skott barrikad vänster, 6 skott barrikad höger. Totalt 18 skott på 90 sekunder."
+      },
+      "variant": {
+        "ppc48_stage_3y_onehand_8s": {
+          "40shot": "5 skott (40-skotts variant)"
+        },
+        "ppc48_stage_7y_standing_20s": {
+          "40shot": "10 skott (40-skotts variant)"
+        },
+        "ppc48_stage_15y_standing_20s": {
+          "40shot": "10 skott (40-skotts variant)"
+        },
+        "ppc48_stage_25y_barricade_90s": {
+          "40shot": "15 skott (40-skotts variant)"
+        }
+      }
+    },
+    "discipline": {
+      "title": {
+        "wa1500_150": "WA1500 - 150 skott",
+        "wa1500_60": "WA1500 - 60 skott",
+        "wa1500_48": "WA1500 - 48 skott"
+      },
+      "description": {
+        "wa1500_150": "Full WA1500-disciplin med 150 skott fördelat över 5 matcher",
+        "wa1500_60": "Förkortad WA1500-disciplin med 60 skott fördelat över 4 moment",
+        "wa1500_48": "Kort WA1500-disciplin med 48 skott fördelat över 4 moment"
+      },
+      "wa1500_150": {
+        "match1": {
+          "title": "Match 1",
+          "stage1": {
+            "title": "Moment 1: 7 yards stående",
+            "description": "12 skott stående på 7 yards"
+          },
+          "stage2": {
+            "title": "Moment 2: 15 yards stående",
+            "description": "12 skott stående på 15 yards"
+          }
+        },
+        "match2": {
+          "title": "Match 2",
+          "stage1": {
+            "title": "Moment 1: 25 yards barrikad",
+            "description": "18 skott från barrikad på 25 yards"
+          }
+        },
+        "match3": {
+          "title": "Match 3",
+          "stage1": {
+            "title": "Moment 1: 50 yards full serie",
+            "description": "24 skott från olika ställningar på 50 yards"
+          }
+        },
+        "match4": {
+          "title": "Match 4",
+          "stage1": {
+            "title": "Moment 1: 25 yards dubbel stående",
+            "description": "12 skott stående på 25 yards"
+          }
+        },
+        "match5": {
+          "title": "Match 5",
+          "stage1": {
+            "title": "Moment 1: 7 yards stående",
+            "description": "12 skott stående på 7 yards"
+          },
+          "stage2": {
+            "title": "Moment 2: 25 yards barrikad",
+            "description": "18 skott från barrikad på 25 yards"
+          },
+          "stage3": {
+            "title": "Moment 3: 50 yards sittande/liggande",
+            "description": "24 skott sittande och liggande på 50 yards"
+          },
+          "stage4": {
+            "title": "Moment 4: 25 yards snabb",
+            "description": "6 skott stående på 25 yards på 12 sekunder"
+          }
+        }
+      },
+      "wa1500_60": {
+        "stage1": {
+          "title": "Moment 1",
+          "stage": {
+            "title": "7 yards stående",
+            "description": "12 skott stående på 7 yards"
+          }
+        },
+        "stage2": {
+          "title": "Moment 2",
+          "stage": {
+            "title": "25 yards barrikad",
+            "description": "18 skott från barrikad på 25 yards"
+          }
+        },
+        "stage3": {
+          "title": "Moment 3",
+          "stage": {
+            "title": "50 yards full serie",
+            "description": "24 skott från olika ställningar på 50 yards"
+          }
+        },
+        "stage4": {
+          "title": "Moment 4",
+          "stage": {
+            "title": "25 yards snabb",
+            "description": "6 skott stående på 25 yards"
+          }
+        }
+      },
+      "wa1500_48": {
+        "stage1": {
+          "title": "Moment 1",
+          "stage": {
+            "title": "3 yards en hand",
+            "description": "6 skott stående med en hand på 3 yards"
+          }
+        },
+        "stage2": {
+          "title": "Moment 2",
+          "stage": {
+            "title": "7 yards stående",
+            "description": "12 skott stående på 7 yards"
+          }
+        },
+        "stage3": {
+          "title": "Moment 3",
+          "stage": {
+            "title": "15 yards stående",
+            "description": "12 skott stående på 15 yards"
+          }
+        },
+        "stage4": {
+          "title": "Moment 4",
+          "stage": {
+            "title": "25 yards barrikad",
+            "description": "18 skott från barrikad på 25 yards"
+          }
+        }
+      }
+    }
   }
 }

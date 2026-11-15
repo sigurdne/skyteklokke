@@ -1,6 +1,7 @@
 import { BaseProgram } from '../programs/base/BaseProgram';
 import { StandardFieldProgram } from '../programs/field/StandardFieldProgram';
 import { StandardDuelProgram } from '../programs/duel/StandardDuelProgram';
+import { PPCProgram } from '../programs/ppc/PPCProgram';
 import { ProgramCategory, ProgramSettings } from '../types';
 
 /**
@@ -28,6 +29,7 @@ export class ProgramManager {
     // Register all available programs
     this.registerProgram(new StandardFieldProgram());
     this.registerProgram(new StandardDuelProgram());
+    this.registerProgram(new PPCProgram());
   }
 
   registerProgram(program: BaseProgram): void {

@@ -11,30 +11,24 @@
     "field_description": "Standard konkurrence med valgbar skytetid og 10s kommandotid",
     "duel_title": "Duelskytte",
     "duel_description": "Tørtræning simulator med lys",
+    "ppc_title": "PPC: Precision Pistol Competition",
+    "ppc_description": "WA1500-discipliner med guidede serier",
     "start_program": "Start program"
   },
-  "commands": {
-    "ready_check": "Er skytterne klar",
-    "ready_question": "Er skytterne klar?",
-    "shooters_ready": "Er skytterne klar",
-    "ready_command": "KLAR!",
-    "fire_command": "ILD!",
-    "cease_command": "STOP",
-    "prepare": "Lad",
-    "fire": "Ild",
-    "cease_fire": "Stop",
-    "start": "Start"
-  },
-  "states": {
+  "field": {
     "idle": "Er skytterne klar?",
-    "ready_check": "Forbereder skytter",
-    "prepare": "Forbered",
-    "fire": "Aktiv skydning",
-    "cease_fire": "Skydning afsluttet",
-    "finished": "Færdig",
-    "countdown": "Nedtælling",
-    "red_light": "Rødt lys",
-    "green_light": "Grønt lys"
+    "start_type": "Starttype",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Riffel"
+    },
+    "commands": {
+      "shooters_ready": "Skytter klar",
+      "ready_in_10": "Klar om 10 sekunder fra nu",
+      "ready_command": "KLAR!",
+      "fire_command": "FYRING!",
+      "cease_command": "STOP FYRING"
+    }
   },
   "controls": {
     "start": "Start",
@@ -65,5 +59,235 @@
     "feature_multilang": "Flersproget support - Norsk, engelsk, svensk og dansk",
     "developer": "Udvikler",
     "license": "Licens"
+  },
+  "ppc": {
+    "commands": {
+      "lade_hylstre": "Læs, udskyld mundinger",
+      "er_linja_klar": "Er linjen klar?",
+      "linja_er_klar": "Linjen er klar"
+    },
+    "home": {
+      "subtitle": "WA1500-discipliner og stagebeskrivelser",
+      "program_missing": "PPC-programmet er ikke tilgængeligt lige nu.",
+      "select_discipline": "Vælg en disciplin",
+      "select_stage": "Vælg en stage",
+      "back_to_disciplines": "Tilbage til discipliner",
+      "stage_count": "{{count}} stage",
+      "stage_count_one": "{{count}} stage",
+      "stage_count_other": "{{count}} stager",
+      "tap_to_start": "Tryk for at starte timeren"
+    },
+    "labels": {
+      "shots": "{{count}} skud",
+      "shots_one": "{{count}} skud",
+      "shots_other": "{{count}} skud",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yard",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Stående",
+      "standing_one_hand": "Stående (én hånd)",
+      "kneeling": "Knælende",
+      "sitting": "Siddende",
+      "prone": "Liggende",
+      "barricade_left": "Barrikade venstre",
+      "barricade_right": "Barrikade højre"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Stage-titel",
+      "stage_briefing_label": "Briefingtekst",
+      "section_commands": "Kommandoer",
+      "command_prepare_label": "Kommando: \"Lad og hylster\"",
+      "command_line_ready_query_label": "Kommando: \"Er linjen klar?\"",
+      "command_line_ready_label": "Kommando: \"Linjen er klar\"",
+      "distance_label": "Afstand",
+      "time_label": "Tidsgrænse",
+      "positions_label": "Skydestillinger",
+      "start_stage": "Start stage",
+      "close": "Luk",
+      "play_recorded": "Afspil optagelse",
+      "play_default": "Afspil standard",
+      "record": "Optag",
+      "stop": "Stop",
+      "delete": "Slet",
+      "recorded_on": "Optaget {{date}}",
+  "recording": "Optager...",
+  "section_recordings": "Optagelser",
+  "no_recording": "Ingen optagelse gemt endnu"
+    },
+    "timer": {
+      "manual_prompt": "Tryk kommandoerne i rækkefølge for at starte",
+      "manual_reset": "Start forfra"
+    },
+    "stage": {
+      "title": {
+        "wa1500_stage_7y_standing_20s": "7 yards - Stående - 20s",
+        "wa1500_stage_15y_standing_20s": "15 yards - Stående - 20s",
+        "wa1500_stage_25y_barricade_90s": "25 yards - Barrikade - 90s",
+        "wa1500_stage_50y_full_165s": "50 yards - Fuld serie - 165s",
+        "wa1500_stage_25y_double_standing_35s": "25 yards - Dobbelt stående - 35s",
+        "wa1500_stage_50y_sit_prone_165s": "50 yards - Siddende/Liggende - 165s",
+        "wa1500_stage_25y_fast_12s": "25 yards - Hurtig - 12s",
+        "ppc48_stage_3y_onehand_8s": "3 yards - Én hånd - 8s",
+        "ppc48_stage_7y_standing_20s": "7 yards - Stående - 20s",
+        "ppc48_stage_15y_standing_20s": "15 yards - Stående - 20s",
+        "ppc48_stage_25y_barricade_90s": "25 yards - Barrikade - 90s"
+      },
+      "briefing": {
+        "wa1500_stage_7y_standing_20s": "6 skud stående, gentag 2 gange. I alt 12 skud på 20 sekunder.",
+        "wa1500_stage_15y_standing_20s": "6 skud stående, gentag 2 gange. I alt 12 skud på 20 sekunder.",
+        "wa1500_stage_25y_barricade_90s": "6 skud knælende, 6 skud barrikade venstre, 6 skud barrikade højre. I alt 18 skud på 90 sekunder.",
+        "wa1500_stage_50y_full_165s": "6 skud siddende, 6 skud liggende, 6 skud barrikade venstre, 6 skud barrikade højre. I alt 24 skud på 165 sekunder.",
+        "wa1500_stage_25y_double_standing_35s": "6 skud stående, gentag 2 gange. I alt 12 skud på 35 sekunder.",
+        "wa1500_stage_50y_sit_prone_165s": "6 skud siddende, gentag 2 gange. 6 skud liggende, gentag 2 gange. I alt 24 skud på 165 sekunder.",
+        "wa1500_stage_25y_fast_12s": "6 skud stående på 12 sekunder.",
+        "ppc48_stage_3y_onehand_8s": "6 skud stående med én hånd på 8 sekunder.",
+        "ppc48_stage_7y_standing_20s": "12 skud stående på 20 sekunder.",
+        "ppc48_stage_15y_standing_20s": "12 skud stående på 20 sekunder.",
+        "ppc48_stage_25y_barricade_90s": "6 skud knælende, 6 skud barrikade venstre, 6 skud barrikade højre. I alt 18 skud på 90 sekunder."
+      },
+      "variant": {
+        "ppc48_stage_3y_onehand_8s": {
+          "40shot": "5 skud (40-skuds variant)"
+        },
+        "ppc48_stage_7y_standing_20s": {
+          "40shot": "10 skud (40-skuds variant)"
+        },
+        "ppc48_stage_15y_standing_20s": {
+          "40shot": "10 skud (40-skuds variant)"
+        },
+        "ppc48_stage_25y_barricade_90s": {
+          "40shot": "15 skud (40-skuds variant)"
+        }
+      }
+    },
+    "discipline": {
+      "title": {
+        "wa1500_150": "WA1500 - 150 skud",
+        "wa1500_60": "WA1500 - 60 skud",
+        "wa1500_48": "WA1500 - 48 skud"
+      },
+      "description": {
+        "wa1500_150": "Fuld WA1500-disciplin med 150 skud fordelt over 5 matcher",
+        "wa1500_60": "Forkortet WA1500-disciplin med 60 skud fordelt over 4 stager",
+        "wa1500_48": "Kort WA1500-disciplin med 48 skud fordelt over 4 stager"
+      },
+      "wa1500_150": {
+        "match1": {
+          "title": "Match 1",
+          "stage1": {
+            "title": "Stage 1: 7 yards stående",
+            "description": "12 skud stående på 7 yards"
+          },
+          "stage2": {
+            "title": "Stage 2: 15 yards stående",
+            "description": "12 skud stående på 15 yards"
+          }
+        },
+        "match2": {
+          "title": "Match 2",
+          "stage1": {
+            "title": "Stage 1: 25 yards barrikade",
+            "description": "18 skud fra barrikade på 25 yards"
+          }
+        },
+        "match3": {
+          "title": "Match 3",
+          "stage1": {
+            "title": "Stage 1: 50 yards fuld serie",
+            "description": "24 skud fra forskellige stillinger på 50 yards"
+          }
+        },
+        "match4": {
+          "title": "Match 4",
+          "stage1": {
+            "title": "Stage 1: 25 yards dobbelt stående",
+            "description": "12 skud stående på 25 yards"
+          }
+        },
+        "match5": {
+          "title": "Match 5",
+          "stage1": {
+            "title": "Stage 1: 7 yards stående",
+            "description": "12 skud stående på 7 yards"
+          },
+          "stage2": {
+            "title": "Stage 2: 25 yards barrikade",
+            "description": "18 skud fra barrikade på 25 yards"
+          },
+          "stage3": {
+            "title": "Stage 3: 50 yards siddende/liggende",
+            "description": "24 skud siddende og liggende på 50 yards"
+          },
+          "stage4": {
+            "title": "Stage 4: 25 yards hurtig",
+            "description": "6 skud stående på 25 yards på 12 sekunder"
+          }
+        }
+      },
+      "wa1500_60": {
+        "stage1": {
+          "title": "Stage 1",
+          "stage": {
+            "title": "7 yards stående",
+            "description": "12 skud stående på 7 yards"
+          }
+        },
+        "stage2": {
+          "title": "Stage 2",
+          "stage": {
+            "title": "25 yards barrikade",
+            "description": "18 skud fra barrikade på 25 yards"
+          }
+        },
+        "stage3": {
+          "title": "Stage 3",
+          "stage": {
+            "title": "50 yards fuld serie",
+            "description": "24 skud fra forskellige stillinger på 50 yards"
+          }
+        },
+        "stage4": {
+          "title": "Stage 4",
+          "stage": {
+            "title": "25 yards hurtig",
+            "description": "6 skud stående på 25 yards"
+          }
+        }
+      },
+      "wa1500_48": {
+        "stage1": {
+          "title": "Stage 1",
+          "stage": {
+            "title": "3 yards én hånd",
+            "description": "6 skud stående med én hånd på 3 yards"
+          }
+        },
+        "stage2": {
+          "title": "Stage 2",
+          "stage": {
+            "title": "7 yards stående",
+            "description": "12 skud stående på 7 yards"
+          }
+        },
+        "stage3": {
+          "title": "Stage 3",
+          "stage": {
+            "title": "15 yards stående",
+            "description": "12 skud stående på 15 yards"
+          }
+        },
+        "stage4": {
+          "title": "Stage 4",
+          "stage": {
+            "title": "25 yards barrikade",
+            "description": "18 skud fra barrikade på 25 yards"
+          }
+        }
+      }
+    }
   }
 }

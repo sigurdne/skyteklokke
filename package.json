@@ -16,33 +16,57 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
-    "@react-native-picker/picker": "2.11.1",
+    "@react-native-picker/picker": "2.11.4",
     "@react-navigation/native": "^7.0.0",
     "@react-navigation/native-stack": "^7.3.28",
     "@react-navigation/stack": "^7.0.0",
-    "@types/react": "~19.1.10",
-    "expo": "54.0.21",
-    "expo-audio": "~1.0.14",
-    "expo-av": "^16.0.7",
-    "expo-constants": "~18.0.10",
-    "expo-file-system": "^19.0.17",
-    "expo-keep-awake": "^15.0.7",
-    "expo-localization": "~17.0.7",
-    "expo-speech": "~14.0.7",
-    "expo-status-bar": "~3.0.8",
+    "expo": "~58.0.25",
+    "expo-asset": "~58.0.21",
+    "expo-audio": "~58.0.12",
+    "expo-build-properties": "~58.0.12",
+    "expo-constants": "~58.0.16",
+    "expo-file-system": "~58.0.13",
+    "expo-keep-awake": "~58.0.4",
+    "expo-localization": "~58.0.5",
+    "expo-speech": "~58.0.4",
+    "expo-splash-screen": "~58.0.14",
+    "expo-status-bar": "~58.0.5",
     "i18next": "^23.7.0",
-    "react": "19.1.0",
+    "react": "19.3.0",
     "react-i18next": "^13.5.0",
-    "react-native": "0.81.5",
-    "react-native-gesture-handler": "~2.28.0",
-    "react-native-safe-area-context": "~5.6.0",
-    "react-native-screens": "~4.16.0"
+    "react-native": "0.88.1",
+    "react-native-gesture-handler": "~3.3.0",
+    "react-native-safe-area-context": "~5.11.1",
+    "react-native-screens": "~4.30.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@types/react": "~18.3.0",
-    "babel-preset-expo": "^54.0.4",
-    "typescript": "^5.3.0"
+    "@babel/core": "^7.29.0",
+    "@react-native/jest-preset": "~0.88.1",
+    "@types/jest": "30.0.0",
+    "@types/react": "~19.3.0",
+    "babel-preset-expo": "~58.0.0",
+    "baseline-browser-mapping": "^2.11.34",
+    "jest": "~30.5.2",
+    "jest-expo": "~58.0.14",
+    "typescript": "~6.0.3",
+    "ws": "^8.22.0"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "**/__tests__/**/*.(test|spec).(ts|tsx|js)"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-native|@react-native|expo(nent)?|@expo(nent)?/.*|@expo/vector-icons|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|expo-modules-core)/)"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testEnvironment": "node"
   },
   "keywords": [
     "shooting",

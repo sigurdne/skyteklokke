@@ -2,22 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Header } from '../components/Header';
-import { colors, typography, spacing } from '../theme';
+import { colors, screenStyles, sectionStyles, listStyles } from '../theme';
 import { Language } from '../types';
+import { RootStackParamList } from '../navigation/types';
+import logger from '../utils/logger';
+import AudioService from '../services/AudioService';
 
-type RootStackParamList = {
-  Home: undefined;
-  Settings: undefined;
-};
-
-type SettingsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Settings'>;
-
-interface SettingsScreenProps {
-  navigation: SettingsScreenNavigationProp;
-}
+type SettingsScreenProps = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 const LANGUAGE_STORAGE_KEY = '@skyteklokke:language';
 
@@ -36,17 +30,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
         setSelectedLanguage(savedLanguage as Language);
       }
     } catch (error) {
-      console.error('Error loading language:', error);
+      logger.error('Error loading language:', error);
     }
   };
 
   const handleLanguageChange = async (language: Language) => {
     try {
       setSelectedLanguage(language);
-      await i18n.changeLanguage(language);
+  await i18n.changeLanguage(language);
+  AudioService.setLanguage(language);
       await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch (error) {
-      console.error('Error changing language:', error);
+      logger.error('Error changing language:', error);
     }
   };
 
@@ -72,15 +67,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
                 <TouchableOpacity
                   key={language.code}
                   style={[
-                    styles.languageOption,
-                    selectedLanguage === language.code && styles.languageOptionSelected,
+                    styles.listItem,
+                    selectedLanguage === language.code && styles.listItemSelected,
                   ]}
                   onPress={() => handleLanguageChange(language.code)}
                 >
                   <Text
                     style={[
-                      styles.languageText,
-                      selectedLanguage === language.code && styles.languageTextSelected,
+                      styles.listItemText,
+                      selectedLanguage === language.code && styles.listItemTextSelected,
                     ]}
                   >
                     {language.label}
@@ -99,50 +94,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) =>
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.primary,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.lg,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
+  ...screenStyles,
+  ...sectionStyles,
+  ...listStyles,
   languageList: {
     backgroundColor: colors.surface,
     borderRadius: 12,
     overflow: 'hidden',
-  },
-  languageOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background,
-  },
-  languageOptionSelected: {
-    backgroundColor: colors.primary + '20',
-  },
-  languageText: {
-    ...typography.body,
-    color: colors.text,
-  },
-  languageTextSelected: {
-    ...typography.body,
-    color: colors.primary,
-    fontWeight: '600',
   },
   checkmark: {
     fontSize: 20,

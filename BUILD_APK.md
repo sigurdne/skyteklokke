@@ -195,6 +195,13 @@ For produksjonsutgivelser må du:
 3. Aktivere `signingConfig signingConfigs.release` i release buildType
 4. Aldri dele eller sjekke inn release keystore i Git
 
+Du har to hovedalternativer for selve produksjonsbuilden:
+
+- **A: EAS Build (anbefalt)** – bruk `eas build --platform android --profile production` for å bygge signert
+   `.aab` i skyen. Mer detaljert beskrivelse finnes i `GOOGLE_PLAY_PUBLISHING.md` under Steg 4A.
+- **B: Lokal Gradle-build** – bruk `./gradlew bundleRelease` for å bygge `app-release.aab` lokalt og last opp
+   manuelt til Play Console. Dette beskrives i `GOOGLE_PLAY_PUBLISHING.md` under Steg 4B.
+
 Se [React Native dokumentasjon](https://reactnative.dev/docs/signed-apk-android) for mer informasjon.
 
 ## GitHub Release

@@ -2,15 +2,10 @@
   "expo": {
     "name": "SkyteKlokke",
     "slug": "skyteklokke",
-  "version": "0.1.0-beta.5",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#2C3E50"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -24,8 +19,9 @@
         "backgroundColor": "#2C3E50"
       },
       "package": "com.skyteklokke.app",
-  "versionCode": 5,
-      "permissions": []
+      "permissions": [
+        "RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,7 +30,33 @@
       [
         "expo-localization"
       ],
-      "expo-audio"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ],
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#2C3E50",
+          "imageWidth": 200
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "SkyteKlokke trenger mikrofontilgang for å ta opp egne lydkommandoer.",
+          "enableBackgroundPlayback": false
+        }
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {

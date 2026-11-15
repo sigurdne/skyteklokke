@@ -1,4 +1,4 @@
-export type ProgramCategory = 'field' | 'duel' | 'silhouette' | 'training';
+export type ProgramCategory = 'field' | 'duel' | 'silhouette' | 'training' | 'ppc';
 export type ProgramType = 'visual' | 'audio' | 'light' | 'visual-audio' | 'mixed';
 export type TimerState = string;
 export type Language = 'no' | 'en' | 'sv' | 'da';

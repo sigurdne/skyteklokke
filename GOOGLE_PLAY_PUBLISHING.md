@@ -2,6 +2,15 @@
 
 Denne guiden tar deg gjennom alle steg for å publisere SkyteKlokke til Google Play Store med Google Play App Signing.
 
+Det finnes to måter å bygge appen for Play Store på:
+
+- **Metode A (anbefalt)**: Bygg med **Expo Application Services (EAS)** og la EAS håndtere signering og App Bundle (
+    `.aab`).
+- **Metode B**: Bygg App Bundle lokalt med **Gradle** (`./gradlew bundleRelease`) og last opp filen manuelt.
+
+Begge metodene gir et gyldig, signert `.aab` som kan lastes opp til Google Play. I resten av dokumentet er
+EAS-varianten beskrevet først (A), deretter den manuelle Gradle-varianten (B).
+
 ## 📋 Sjekkliste før du starter
 
 - [x] Google-konto opprettet
@@ -192,21 +201,79 @@ android {
 
 ## 📦 Steg 4: Bygg App Bundle for produksjon
 
-### 4.1 Oppdater versjonsinformasjon
+### 4A: Bygg med EAS (anbefalt)
 
-Rediger `android/app/build.gradle`:
+Denne metoden bruker Expo Application Services til å bygge og signere `.aab`-filen i skyen.
+
+**Forutsetninger:**
+
+- `app.json` har korrekt versjon:
+
+    ```jsonc
+    {
+        "expo": {
+            "version": "1.0.0",
+            "extra": {
+                "eas": {
+                    "projectId": "68784b4a-d5de-49c3-87ff-4708c64e3ebe"
+                }
+            }
+        }
+    }
+    ```
+
+- Keystoren (`skyteklokke-upload.keystore`) er lastet opp til EAS for `production`-profilen via
+    `eas credentials --platform android`.
+
+#### 4A.1 Bygg Android App Bundle med EAS
+
+Kjør fra prosjektroten:
+
+```bash
+eas build --platform android --profile production
+```
+
+- Dette starter en build på EAS-serverne.
+- Når builden er ferdig, får du en lenke til `.aab`-filen, eller du kan finne den i EAS Dashboard.
+
+#### 4A.2 Send til Google Play
+
+Du kan enten:
+
+1. **Laste ned `.aab`-filen** fra EAS Dashboard og laste den opp manuelt i Play Console (Closed testing eller
+     Production), eller
+2. Bruke EAS Submit direkte:
+
+     ```bash
+     eas submit --platform android --latest
+     ```
+
+     Dette tar siste Android-build fra EAS og sender den til Google Play. Første gang må du sette opp en Google
+     Service Account for Play Store submissions, men det er en engangsjobb.
+
+### 4B: Bygg App Bundle lokalt med Gradle
+
+Dersom du ønsker å bygge lokalt (uten EAS), kan du bruke Gradle direkte. Dette var den opprinnelige metoden og er
+fortsatt gyldig.
+
+#### 4B.1 Oppdater versjonsinformasjon i Gradle
+
+Rediger `android/app/build.gradle` (merk at `applicationId` må matche pakken i Play Console):
 
 ```gradle
 defaultConfig {
-    applicationId "com.sigurdne.skyteklokke"
-    minSdkVersion 24
-    targetSdkVersion 34
-    versionCode 1          // ← Første versjon
-    versionName "1.0.0"    // ← Synlig versjonsnummer
+        applicationId "com.sigurdne.skyteklokke"
+        minSdkVersion 24
+        targetSdkVersion 34
+        versionCode 1          // ← Første versjon (øk med hver opplasting)
+        versionName "1.0.0"    // ← Synlig versjonsnummer
 }
 ```
 
-### 4.2 Bygg App Bundle (AAB)
+> 💡 Når du bruker EAS med "remote" versjonskilde for Android, vil `versionCode` i `android/app/build.gradle` i
+> praksis ignoreres av EAS. For ren lokal Gradle-build er det fortsatt `versionCode` her som gjelder.
+
+#### 4B.2 Bygg App Bundle (AAB) lokalt
 
 ```bash
 # Naviger til android-mappen
@@ -218,7 +285,7 @@ cd android
 
 **Output**: `android/app/build/outputs/bundle/release/app-release.aab`
 
-### 4.3 Verifiser bygget
+#### 4B.3 Verifiser bygget
 
 ```bash
 # Sjekk filstørrelse

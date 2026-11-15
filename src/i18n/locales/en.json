@@ -11,33 +11,24 @@
     "field_description": "Standard competition with 10s preparation time",
     "duel_title": "Duel Shooting",
     "duel_description": "Dry training simulator with lights",
+    "ppc_title": "PPC: Precision Pistol Competition",
+    "ppc_description": "WA1500 disciplines with guided stages",
     "start_program": "Start program"
   },
-  "commands": {
-    "ready_check": "Are the shooters ready",
-    "ready_question": "Are the shooters ready?",
-    "shooters_ready": "Are the shooters ready",
-    "ready_command": "READY!",
-    "fire_command": "FIRE!",
-    "cease_command": "CEASE FIRE",
-    "prepare": "Load",
-    "fire": "Fire",
-    "cease_fire": "Stop",
-    "start": "Start",
-    "go": "Fire"
-  },
-  "states": {
+  "field": {
     "idle": "Are the shooters ready?",
-    "ready_check": "Preparing shooters",
-    "prepare": "Prepare",
-    "prepare_warning": "Prepare",
-    "fire": "Active shooting",
-    "fire_warning": "Almost done",
-    "cease_fire": "Shooting completed",
-    "finished": "Finished",
-    "countdown": "Countdown",
-    "red_light": "Red light",
-    "green_light": "Green light"
+    "start_type": "Start type",
+    "start_modes": {
+      "pistol": "Pistol",
+      "rifle": "Rifle"
+    },
+    "commands": {
+      "shooters_ready": "Shooters ready",
+      "ready_in_10": "Ready in 10 seconds from now",
+      "ready_command": "READY!",
+      "fire_command": "FIRE!",
+      "cease_command": "CEASE FIRE"
+    }
   },
   "controls": {
     "start": "Start",
@@ -68,5 +59,235 @@
     "feature_multilang": "Multilingual support - Norwegian, English, Swedish and Danish",
     "developer": "Developer",
     "license": "License"
+  },
+  "ppc": {
+    "commands": {
+      "lade_hylstre": "Load, eject brass",
+      "er_linja_klar": "Is the line ready?",
+      "linja_er_klar": "The line is ready"
+    },
+    "home": {
+      "subtitle": "WA1500 disciplines and stage briefs",
+      "program_missing": "The PPC program is unavailable right now.",
+      "select_discipline": "Choose a discipline",
+      "select_stage": "Choose a stage",
+      "back_to_disciplines": "Back to disciplines",
+      "stage_count": "{{count}} stage",
+      "stage_count_one": "{{count}} stage",
+      "stage_count_other": "{{count}} stages",
+      "tap_to_start": "Tap to load the timer"
+    },
+    "labels": {
+      "shots": "{{count}} shots",
+      "shots_one": "{{count}} shot",
+      "shots_other": "{{count}} shots",
+      "yards_one": "{{count}} yard",
+      "yards_other": "{{count}} yards",
+      "time_seconds_one": "{{count}} s",
+      "time_seconds_other": "{{count}} s"
+    },
+    "positions": {
+      "standing": "Standing",
+      "standing_one_hand": "Standing (one hand)",
+      "kneeling": "Kneeling",
+      "sitting": "Sitting",
+      "prone": "Prone",
+      "barricade_left": "Barricade left",
+      "barricade_right": "Barricade right"
+    },
+    "detail": {
+      "section_briefing": "Briefing",
+      "stage_title_label": "Stage title",
+      "stage_briefing_label": "Briefing summary",
+      "section_commands": "Commands",
+      "command_prepare_label": "Command: \"Load and holster\"",
+      "command_line_ready_query_label": "Command: \"Is the line ready?\"",
+      "command_line_ready_label": "Command: \"The line is ready\"",
+      "distance_label": "Distance",
+      "time_label": "Time limit",
+      "positions_label": "Positions",
+      "start_stage": "Start stage",
+      "close": "Close",
+      "play_recorded": "Play recording",
+      "play_default": "Play default",
+      "record": "Record",
+      "stop": "Stop",
+      "delete": "Delete",
+      "recorded_on": "Recorded {{date}}",
+  "recording": "Recording...",
+  "section_recordings": "Recordings",
+  "no_recording": "No recording saved yet"
+    },
+    "timer": {
+      "manual_prompt": "Press commands in sequence to start",
+      "manual_reset": "Start over"
+    },
+    "stage": {
+      "title": {
+        "wa1500_stage_7y_standing_20s": "7 yards - Standing - 20s",
+        "wa1500_stage_15y_standing_20s": "15 yards - Standing - 20s",
+        "wa1500_stage_25y_barricade_90s": "25 yards - Barricade - 90s",
+        "wa1500_stage_50y_full_165s": "50 yards - Full series - 165s",
+        "wa1500_stage_25y_double_standing_35s": "25 yards - Double standing - 35s",
+        "wa1500_stage_50y_sit_prone_165s": "50 yards - Sitting/Prone - 165s",
+        "wa1500_stage_25y_fast_12s": "25 yards - Rapid - 12s",
+        "ppc48_stage_3y_onehand_8s": "3 yards - One hand - 8s",
+        "ppc48_stage_7y_standing_20s": "7 yards - Standing - 20s",
+        "ppc48_stage_15y_standing_20s": "15 yards - Standing - 20s",
+        "ppc48_stage_25y_barricade_90s": "25 yards - Barricade - 90s"
+      },
+      "briefing": {
+        "wa1500_stage_7y_standing_20s": "6 shots standing, repeat 2 times. Total 12 shots in 20 seconds.",
+        "wa1500_stage_15y_standing_20s": "6 shots standing, repeat 2 times. Total 12 shots in 20 seconds.",
+        "wa1500_stage_25y_barricade_90s": "6 shots kneeling, 6 shots barricade left, 6 shots barricade right. Total 18 shots in 90 seconds.",
+        "wa1500_stage_50y_full_165s": "6 shots sitting, 6 shots prone, 6 shots barricade left, 6 shots barricade right. Total 24 shots in 165 seconds.",
+        "wa1500_stage_25y_double_standing_35s": "6 shots standing, repeat 2 times. Total 12 shots in 35 seconds.",
+        "wa1500_stage_50y_sit_prone_165s": "6 shots sitting, repeat 2 times. 6 shots prone, repeat 2 times. Total 24 shots in 165 seconds.",
+        "wa1500_stage_25y_fast_12s": "6 shots standing in 12 seconds.",
+        "ppc48_stage_3y_onehand_8s": "6 shots standing one hand in 8 seconds.",
+        "ppc48_stage_7y_standing_20s": "12 shots standing in 20 seconds.",
+        "ppc48_stage_15y_standing_20s": "12 shots standing in 20 seconds.",
+        "ppc48_stage_25y_barricade_90s": "6 shots kneeling, 6 shots barricade left, 6 shots barricade right. Total 18 shots in 90 seconds."
+      },
+      "variant": {
+        "ppc48_stage_3y_onehand_8s": {
+          "40shot": "5 shots (40-shot variant)"
+        },
+        "ppc48_stage_7y_standing_20s": {
+          "40shot": "10 shots (40-shot variant)"
+        },
+        "ppc48_stage_15y_standing_20s": {
+          "40shot": "10 shots (40-shot variant)"
+        },
+        "ppc48_stage_25y_barricade_90s": {
+          "40shot": "15 shots (40-shot variant)"
+        }
+      }
+    },
+    "discipline": {
+      "title": {
+        "wa1500_150": "WA1500 - 150 rounds",
+        "wa1500_60": "WA1500 - 60 rounds",
+        "wa1500_48": "WA1500 - 48 rounds"
+      },
+      "description": {
+        "wa1500_150": "Full WA1500 discipline with 150 rounds across 5 matches",
+        "wa1500_60": "Shortened WA1500 discipline with 60 rounds across 4 stages",
+        "wa1500_48": "Short WA1500 discipline with 48 rounds across 4 stages"
+      },
+      "wa1500_150": {
+        "match1": {
+          "title": "Match 1",
+          "stage1": {
+            "title": "Stage 1: 7 yards standing",
+            "description": "12 shots standing at 7 yards"
+          },
+          "stage2": {
+            "title": "Stage 2: 15 yards standing",
+            "description": "12 shots standing at 15 yards"
+          }
+        },
+        "match2": {
+          "title": "Match 2",
+          "stage1": {
+            "title": "Stage 1: 25 yards barricade",
+            "description": "18 shots from barricade at 25 yards"
+          }
+        },
+        "match3": {
+          "title": "Match 3",
+          "stage1": {
+            "title": "Stage 1: 50 yards full series",
+            "description": "24 shots from various positions at 50 yards"
+          }
+        },
+        "match4": {
+          "title": "Match 4",
+          "stage1": {
+            "title": "Stage 1: 25 yards double standing",
+            "description": "12 shots standing at 25 yards"
+          }
+        },
+        "match5": {
+          "title": "Match 5",
+          "stage1": {
+            "title": "Stage 1: 7 yards standing",
+            "description": "12 shots standing at 7 yards"
+          },
+          "stage2": {
+            "title": "Stage 2: 25 yards barricade",
+            "description": "18 shots from barricade at 25 yards"
+          },
+          "stage3": {
+            "title": "Stage 3: 50 yards sitting/prone",
+            "description": "24 shots sitting and prone at 50 yards"
+          },
+          "stage4": {
+            "title": "Stage 4: 25 yards rapid",
+            "description": "6 shots standing at 25 yards in 12 seconds"
+          }
+        }
+      },
+      "wa1500_60": {
+        "stage1": {
+          "title": "Stage 1",
+          "stage": {
+            "title": "7 yards standing",
+            "description": "12 shots standing at 7 yards"
+          }
+        },
+        "stage2": {
+          "title": "Stage 2",
+          "stage": {
+            "title": "25 yards barricade",
+            "description": "18 shots from barricade at 25 yards"
+          }
+        },
+        "stage3": {
+          "title": "Stage 3",
+          "stage": {
+            "title": "50 yards full series",
+            "description": "24 shots from various positions at 50 yards"
+          }
+        },
+        "stage4": {
+          "title": "Stage 4",
+          "stage": {
+            "title": "25 yards rapid",
+            "description": "6 shots standing at 25 yards"
+          }
+        }
+      },
+      "wa1500_48": {
+        "stage1": {
+          "title": "Stage 1",
+          "stage": {
+            "title": "3 yards one hand",
+            "description": "6 shots standing one hand at 3 yards"
+          }
+        },
+        "stage2": {
+          "title": "Stage 2",
+          "stage": {
+            "title": "7 yards standing",
+            "description": "12 shots standing at 7 yards"
+          }
+        },
+        "stage3": {
+          "title": "Stage 3",
+          "stage": {
+            "title": "15 yards standing",
+            "description": "12 shots standing at 15 yards"
+          }
+        },
+        "stage4": {
+          "title": "Stage 4",
+          "stage": {
+            "title": "25 yards barricade",
+            "description": "18 shots from barricade at 25 yards"
+          }
+        }
+      }
+    }
   }
 }
